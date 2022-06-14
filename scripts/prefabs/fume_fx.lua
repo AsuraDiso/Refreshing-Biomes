@@ -25,8 +25,8 @@ local function MakeFX(name, bank, build, anim, data)
 			return inst
 		end
 		
-		if data and data.animqueueover_remove then
-			inst:ListenForEvent("animqueueover", inst.Remove)
+		if data and data.animover_remove then
+			inst:ListenForEvent("animover", inst.Remove)
 		end
 
 		return inst
@@ -35,5 +35,5 @@ local function MakeFX(name, bank, build, anim, data)
 	return Prefab(name, fn, assets)
 end
 
-return MakeFX("fume_fx", "fume_fx", "fume_fx", "poot", {animqueueover_remove = true}),
+return MakeFX("fume_fx", "fume_fx", "fume_fx", "poot", {animover_remove = true}),
 		MakeFX("fume_cloud", "fume_cloud", "fume_cloud_tile", "idle")

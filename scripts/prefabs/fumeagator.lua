@@ -14,7 +14,7 @@ local prefabs =
 
 
 local RETARGET_MUST_TAGS = { "character" }
-local RETARGET_CANT_TAGS = { "wall", "fumeagator", "bird", "mosquitoswarm", "INLIMBO" }
+local RETARGET_CANT_TAGS = { "wall", "fumeagator", "bird", "mosquitoswarm", "mosquitoswarm_cocoon", "INLIMBO" }
 
 local function RetargetFn(inst)
     return FindEntity(
@@ -134,7 +134,6 @@ local function fn()
 
     inst.DynamicShadow:SetSize(4.5, 2)
     inst.Transform:SetSixFaced()
-    inst.Transform:SetScale(0.9, 0.9, 0.9)
 
     inst:AddTag("animal")
     inst:AddTag("largecreature")

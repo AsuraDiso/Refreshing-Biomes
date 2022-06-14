@@ -152,6 +152,8 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
 
+	inst:AddTag("mosquitoswarm_cocoon")
+
     inst.AnimState:SetBank("lantern_fly")
     inst.AnimState:SetBuild("lantern_fly")
     inst.AnimState:PlayAnimation("cocoon_idle_loop", true)

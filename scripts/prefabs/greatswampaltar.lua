@@ -38,6 +38,10 @@ local function fn()
         return inst
     end
 
+    inst:AddComponent("trader")
+
+    inst:AddComponent("inspectable")
+
     return inst
 end
 

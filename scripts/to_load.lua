@@ -16,6 +16,7 @@ PrefabFiles = {
 	"swampdeco",
 	"swampshroom",
 	"swamplotus",
+	"greatlotus",
 	"fume_fx",
 	--"moonbloom",
 }

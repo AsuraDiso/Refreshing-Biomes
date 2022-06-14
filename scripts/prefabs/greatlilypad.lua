@@ -177,7 +177,7 @@ local function OnLoad(inst, data)
 	end
 end
 
-function MakeLilyPad(name, radius, bank, build, anim)
+function MakeLilyPad(name, radius, bank, build, anim, data)
 	local function fn()
 		local inst = CreateEntity()
 
@@ -246,7 +246,16 @@ function MakeLilyPad(name, radius, bank, build, anim)
 		inst:AddComponent("boatphysics")
 
 		inst:DoTaskInTime(0, function()
-			inst.components.boatphysics.boat_rotation_offset = math.random(0, 359)
+			if data and data.has_lotus then
+				--if math.random() <= 0.1 then
+					local x, y, z = inst.Transform:GetWorldPosition()
+					SpawnPrefab("greatlotus").Transform:SetPosition(x, y, z+1.5)
+				--end
+			end
+			inst:DoTaskInTime(0, function()
+				inst.components.boatphysics.boat_rotation_offset = math.random(0, 359)
+			end)
+			
 		end)
 		
 		inst.OnDrown = OnDrown
@@ -263,7 +272,7 @@ function MakeLilyPad(name, radius, bank, build, anim)
 end
 
 
-return MakeLilyPad("lilypad_small", 1.85, "lily_pad", "lily_pad", "small_idle"),
-	MakeLilyPad("lilypad_medium", 2.35, "lily_pad", "lily_pad", "med_idle"),
-	MakeLilyPad("lilypad_large", 4, "lily_pad", "lily_pad", "big_idle"),
+return MakeLilyPad("lilypad_small", 2.075, "lily_pad", "lily_pad", "small_idle"),
+	MakeLilyPad("lilypad_medium", 2.9, "lily_pad", "lily_pad", "med_idle"),
+	MakeLilyPad("lilypad_large", 4, "lily_pad", "lily_pad", "big_idle", {has_lotus = true}),
 	Prefab("lilypad_item_collision", lilypad_item_collision_fn)
