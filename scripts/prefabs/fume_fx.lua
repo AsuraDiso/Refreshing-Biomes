@@ -36,4 +36,4 @@ local function MakeFX(name, bank, build, anim, data)
 end
 
 return MakeFX("fume_fx", "fume_fx", "fume_fx", "poot", {animqueueover_remove = true}),
-		MakeFX("fume_cloud", "fume_cloud", "fume_cloud_tile", "idle"),
+		MakeFX("fume_cloud", "fume_cloud", "fume_cloud_tile", "idle")
