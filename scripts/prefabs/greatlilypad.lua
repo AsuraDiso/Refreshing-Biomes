@@ -167,6 +167,7 @@ end
 
 local function OnSave(inst, data)
 	data.drowned = inst.drowned
+	data.greatlotus = inst.greatlotus
 end
 
 local function OnLoad(inst, data)
@@ -174,6 +175,7 @@ local function OnLoad(inst, data)
 		if inst.drowned then
 			OnDrown(inst, true)
 		end
+		inst.greatlotus = data.greatlotus
 	end
 end
 
@@ -245,12 +247,19 @@ function MakeLilyPad(name, radius, bank, build, anim, data)
 
 		inst:AddComponent("boatphysics")
 
+		inst:AddComponent("savedrotation")
+
 		inst:DoTaskInTime(0, function()
 			if data and data.has_lotus then
-				--if math.random() <= 0.1 then
-					local x, y, z = inst.Transform:GetWorldPosition()
-					SpawnPrefab("greatlotus").Transform:SetPosition(x, y, z+1.5)
-				--end
+				if not inst.greatlotus then
+					--if math.random() <= 0.1 then
+						local x, y, z = inst.Transform:GetWorldPosition()
+						local greatlotus = SpawnPrefab("greatlotus")
+						greatlotus.Transform:SetPosition(x, y, z+1.5)
+						greatlotus.AnimState:SetMultColour(color, color, color, 1) 
+						inst.greatlotus = true
+					--end
+				end
 			end
 			inst:DoTaskInTime(0, function()
 				inst.components.boatphysics.boat_rotation_offset = math.random(0, 359)
