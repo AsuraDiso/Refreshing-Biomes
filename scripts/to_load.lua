@@ -18,6 +18,7 @@ PrefabFiles = {
 	"swamplotus",
 	"greatlotus",
 	"fume_fx",
+	"shroombrella",
 	--"moonbloom",
 }
 
