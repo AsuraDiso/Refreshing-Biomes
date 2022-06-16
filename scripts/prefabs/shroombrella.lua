@@ -44,7 +44,9 @@ local function OnWetChanged(inst, wetness)
     local level = wetness <= 33 and 1 or wetness > 33 and wetness <= 66 and 2 or 3 
     inst.AnimState:PlayAnimation("idle_"..level)
     inst.level = level
-    onequip(inst, inst.components.inventoryitem.owner)
+    if inst.components.equippable:IsEquipped() then
+        onequip(inst, inst.components.inventoryitem.owner)
+    end
 end
 
 local function fn()
