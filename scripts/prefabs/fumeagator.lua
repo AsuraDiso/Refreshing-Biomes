@@ -154,7 +154,7 @@ local function fn()
     inst:AddComponent("eater")
     
     inst:AddComponent("combat")
-    inst.components.combat.hiteffectsymbol = "beefalo_body"
+    inst.components.combat.hiteffectsymbol = "gator_body"
     inst.components.combat:SetDefaultDamage(TUNING.FUMEAGATOR_DAMAGE)
     inst.components.combat:SetRange(TUNING.FUMEAGATOR_ATTACKRANGE)
     inst.components.combat:SetAttackPeriod(TUNING.FUMEAGATOR_ATTACKPERIOD)
@@ -185,8 +185,8 @@ local function fn()
 	inst.components.amphibiouscreature:SetEnterWaterFn(EnterWaterFn)         
 	inst.components.amphibiouscreature:SetExitWaterFn(ExitWaterFn)
 
-    MakeLargeBurnableCharacter(inst, "beefalo_body")
-    MakeLargeFreezableCharacter(inst, "beefalo_body")
+    MakeLargeBurnableCharacter(inst, "gator_body")
+    MakeLargeFreezableCharacter(inst, "gator_body")
     MakeHauntablePanic(inst)
 
     inst:SetBrain(brain)

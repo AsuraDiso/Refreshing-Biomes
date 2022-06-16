@@ -88,7 +88,7 @@ local states=
 		    	for _, ent in ipairs(ents) do
 		    		if inst:IsNear(ent, ent:GetPhysicsRadius(0) + (TUNING.FUMEAGATOR_ATTACKRANGE + 0.5)) then
 		    			if ent.components.health ~= nil and not ent.components.health:IsDead() then
-		    				SpawnAt("", ent)
+                            
 		    			end
 		    		end
 		    	end
@@ -150,8 +150,6 @@ CommonStates.AddSleepStates(states,
 })
 
 CommonStates.AddSimpleState(states,"hit", "hit", {"hit", "busy"})
-
-CommonStates.AddFrozenStates(states)
 
 return StateGraph("fumeagator", states, events, "idle")
 
