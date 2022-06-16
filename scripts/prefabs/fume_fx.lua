@@ -15,7 +15,7 @@ local function MakeFX(name, bank, build, anim, data)
 
 		inst.AnimState:SetBank(bank)
 		inst.AnimState:SetBuild(build)
-		inst.AnimState:PlayAnimation(anim, true)
+		inst.AnimState:PlayAnimation(anim, data and not data.animqueueover_remove)
 
 		inst:AddTag("FX")
 

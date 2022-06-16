@@ -2,6 +2,7 @@ local brain = require "brains/koalefantbrain"
 
 local assets =
 {
+    Asset("ANIM", "anim/fumeagator_leg.zip"),
     Asset("ANIM", "anim/fumeagator_build.zip"),
     Asset("ANIM", "anim/fumeagator_basic.zip"),
     Asset("ANIM", "anim/fumeagator_actions.zip"),
@@ -142,6 +143,7 @@ local function fn()
     inst.AnimState:SetBank("gator")
     inst.AnimState:SetBuild("fumeagator_build")
     inst.AnimState:PlayAnimation("idle_loop", true)
+    inst.AnimState:OverrideSymbol("gator_leg", "fumeagator_leg", "gator_leg")
 
     inst.entity:SetPristine()
 

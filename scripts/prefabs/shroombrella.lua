@@ -1,29 +1,25 @@
 local assets =
 {
-    Asset("ANIM", "anim/umbrella.zip"),
-    Asset("ANIM", "anim/swap_umbrella.zip"),
-    Asset("ANIM", "anim/parasol.zip"),
-    Asset("ANIM", "anim/swap_parasol.zip"),
+    Asset("ANIM", "anim/swap_shroombrella.zip"),
 }
 
 local function onequip(inst, owner)
     if not owner then
         return
     end 
-    owner.AnimState:OverrideSymbol("swap_object", "swap_umbrella", "swap_umbrella_"..inst.level or 1)
+    owner.AnimState:OverrideSymbol("swap_object", "swap_shroombrella", "swap_shroombrella_lvl"..inst.level or 1)
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
 
     owner.DynamicShadow:SetSize(2.2, 1.4)
-
 end
 
 local function onunequip(inst, owner)
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
+    owner.AnimState:ClearOverrideSymbol("swap_object")
 
     owner.DynamicShadow:SetSize(1.3, 0.6)
-
 end
 
 local function onperish(inst)
@@ -60,9 +56,9 @@ local function fn()
 
     MakeInventoryPhysics(inst)
 
-    inst.AnimState:SetBank("umbrella")
-    inst.AnimState:SetBuild("umbrella")
-    inst.AnimState:PlayAnimation("idle")
+    inst.AnimState:SetBank("shroombrella")
+    inst.AnimState:SetBuild("swap_shroombrella")
+    inst.AnimState:PlayAnimation("idle_1")
 
     inst:AddTag("nopunch")
     inst:AddTag("umbrella")
@@ -105,7 +101,7 @@ local function fn()
     inst.components.inventoryitem:ChangeImageName("umbrella")
 
     inst.components.floater:SetScale({1.0, 0.4, 1.0})
-    inst.components.floater:SetBankSwapOnFloat(true, -40, {sym_build = "swap_umbrella"})
+    inst.components.floater:SetBankSwapOnFloat(true, -40, {sym_build = "swap_shroombrella"})
 
     MakeHauntableLaunch(inst)
 

@@ -1,4 +1,13 @@
+local function OnSpawn(ist)
+	
+end
+
 local function Cough(inst)
+	if inst.coughtask then
+		inst.coughtask:Cancel()
+		inst.coughtask = nil
+	end
+	
 	inst.AnimState:PlayAnimation("cough")
 	inst.AnimState:PushAnimation("idle_loop", true)
 	
@@ -8,7 +17,7 @@ local function Cough(inst)
 		end)
 	end
 	
-	inst:DoTaskInTime(30+math.random()*30, Cough)
+	inst.coughtask = inst:DoTaskInTime(30+math.random()*30, Cough)
 end
 
 local function MakeMushroom(name, bank, build, anim, canfloat) 
@@ -57,7 +66,9 @@ local function MakeMushroom(name, bank, build, anim, canfloat)
 		
 		inst:AddComponent("pickable")
 		
-		inst:DoTaskInTime(30+math.random()*30, Cough)
+		inst.coughtask = inst:DoTaskInTime(30+math.random()*30, Cough)
+		
+		inst.OnSpawn = OnSpawn
 		
 		return inst
 	end
@@ -66,4 +77,5 @@ local function MakeMushroom(name, bank, build, anim, canfloat)
 end
 
 return MakeMushroom("swamp_shroom_small", "mushroom_swamp_small", "mushroom_swamp_small", "idle_loop", true),
+		MakeMushroom("swamp_shroom_medium", "mushroom_swamp_tall", "mushroom_swamp_tall", "idle_loop", true),
 		MakeMushroom("swamp_shroom_big", "mushroom_swamp_tall", "mushroom_swamp_tall", "idle_loop", true)
