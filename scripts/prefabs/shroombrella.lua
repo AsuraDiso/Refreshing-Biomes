@@ -12,6 +12,8 @@ local function onequip(inst, owner)
     owner.AnimState:Hide("ARM_normal")
 
     owner.DynamicShadow:SetSize(2.2, 1.4)
+
+    owner.components.preserver.perish_rate_multiplier = TUNING.SHROOMBRELLA.PRESERVER[inst.level or 4]
 end
 
 local function onunequip(inst, owner)
@@ -20,6 +22,7 @@ local function onunequip(inst, owner)
     owner.AnimState:ClearOverrideSymbol("swap_object")
 
     owner.DynamicShadow:SetSize(1.3, 0.6)
+    owner.components.preserver.perish_rate_multiplier = 1
 end
 
 local function onperish(inst)
@@ -107,7 +110,7 @@ local function fn()
 
     MakeHauntableLaunch(inst)
 
-    inst:WatchWorldState("wetness", OnWetChanged)
+    inst:DoTaskInTime(0, inst:WatchWorldState("wetness", OnWetChanged))
     OnWetChanged(inst, TheWorld.state.wetness)
 
     return inst

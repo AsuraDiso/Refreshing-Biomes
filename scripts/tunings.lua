@@ -34,6 +34,15 @@ local REFRESH_TUNING = {
 	FUMEAGATOR_ATTACKRANGE = 3.5,
 	FUMEAGATOR_ATTACKPERIOD = 2.5,
 	FUMEAGATOR_FUMEPERIOD = 20,
+
+	SHROOMBRELLA = {
+		PRESERVER = {
+			0.75,
+			0.5,
+			0.25,
+			1,
+		}
+	}
 }
 
 for key, value in pairs(REFRESH_TUNING) do

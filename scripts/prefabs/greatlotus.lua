@@ -9,16 +9,20 @@ local prefabs =
 
 local function OnIsDay(inst, isday)
     if isday then
-        inst.AnimState:PushAnimation("emerge")
-        inst.AnimState:PushAnimation("idle_out",true)
-        inst.closed = false
+        inst:DoTaskInTime(math.random()*5, function(inst)
+            inst.AnimState:PushAnimation("emerge")
+            inst.AnimState:PushAnimation("idle_out",true)
+            inst.closed = false
+        end)
     else
         if inst.closed then
             inst.AnimState:PushAnimation("idle",true)
         else
-            inst.AnimState:PushAnimation("hide")
-            inst.AnimState:PushAnimation("idle",true)
-            inst.closed = true
+            inst:DoTaskInTime(math.random()*5, function(inst)
+                inst.AnimState:PushAnimation("hide")
+                inst.AnimState:PushAnimation("idle",true)
+                inst.closed = true
+            end)
         end
     end
 end
@@ -59,7 +63,15 @@ local function fn()
     end
 
     local color = math.min(1, math.random() + 0.5)
-    inst.AnimState:SetMultColour(color, color, color, 1)    
+    inst.AnimState:SetMultColour(color, color, color, 1)  
+    
+    MakeInventoryFloatable(inst, "med", 0.1, {1.3, 1.1, 1.3})
+    inst.components.floater.bob_percent = 0
+
+    local land_time = (POPULATING and math.random()*5*FRAMES) or 0
+    inst:DoTaskInTime(land_time, function(inst)
+        inst.components.floater:OnLandedServer()
+    end)
 
     inst:AddComponent("inspectable")
 

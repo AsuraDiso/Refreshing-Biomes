@@ -1,5 +1,6 @@
 local menv = env
 local AddPrefabPostInit = AddPrefabPostInit
+local AddPlayerPostInit = AddPlayerPostInit
 local AddComponentPostInit = AddComponentPostInit
 local AddClassPostInit = AddClassPostInit
 local modimport = modimport
@@ -37,3 +38,8 @@ function _G.PlayFootstep(inst, volume, ispredicted, ...)
 			ispredicted)	
 	end
 end
+
+menv.AddPlayerPostInit(function(inst)
+	inst:AddComponent("preserver") 
+	inst.components.preserver.perish_rate_multiplier = 1
+end)
