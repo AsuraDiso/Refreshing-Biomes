@@ -56,6 +56,40 @@ local function MakeDeco(name, bank, build, anim, canfloat, data)
 	return Prefab(name, fn, assets, prefabs)
 end
 
+local function spawner()
+    local inst = CreateEntity()
+
+    inst.entity:AddTransform()
+    inst.entity:AddNetwork()
+
+    inst.entity:SetPristine()
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+	inst:DoTaskInTime(0, function()
+		local deco_table = {
+			"swamp_root1",
+			"swamp_root2",
+			"swamp_bush",
+			"swamp_bushdebris",
+			"swamp_branch1",
+			"swamp_branch2", 
+			"swamp_trunk",
+			"swamp_debris1",
+			"swamp_debris2",
+			"swamp_debris3",
+			"swamp_debris4",
+			}
+		local deco = GetRandomItem(deco_table)
+		SpawnAt(deco, inst)
+		inst:Remove()
+	end)
+
+	return inst
+end
+
 return MakeDeco("swamp_root1", "roc_junk", "roc_junk", "tree1", true),
 		MakeDeco("swamp_root2", "roc_junk", "roc_junk", "tree2", true),
 		MakeDeco("swamp_bush", "roc_junk", "roc_junk", "bush"), --?
@@ -68,4 +102,5 @@ return MakeDeco("swamp_root1", "roc_junk", "roc_junk", "tree1", true),
 		MakeDeco("swamp_debris2", "roc_junk", "roc_junk", "stick02", nil, {canbepicked = true, loot = {"twigs"}, faced = "four"}),
 		MakeDeco("swamp_debris3", "roc_junk", "roc_junk", "stick03", nil, {canbepicked = true, loot = {"twigs"}, faced = "four"}),
 		MakeDeco("swamp_debris4", "roc_junk", "roc_junk", "stick04", nil, {canbepicked = true, loot = {"twigs"}, faced = "four"}),
-		MakeDeco("swamp_fern", "fern2_plant", "fern2_plant", "idle", true)
+		MakeDeco("swamp_fern", "fern2_plant", "fern2_plant", "idle", true),
+		Prefab("deco_spawner", spawner)

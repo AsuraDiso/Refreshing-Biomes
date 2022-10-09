@@ -69,7 +69,9 @@ local function Appear(inst)
 			v.components.floater:OnNoLongerLandedServer()
 		end
 	end
-	
+
+	inst.components.timer:StartTimer("drown", math.random(600, 900))
+
 	inst.drowned = false
 end
 
@@ -163,6 +165,12 @@ local function OnTimerDone(inst, data)
 			Appear(inst)
 		end
     end
+
+	if data.name == "drown" then
+		if not inst.drowned then
+			OnDrown(inst)
+		end
+    end
 end
 
 local function OnSave(inst, data)
@@ -252,19 +260,19 @@ function MakeLilyPad(name, radius, bank, build, anim, data)
 		inst:DoTaskInTime(0, function()
 			if data and data.has_lotus then
 				if not inst.greatlotus then
-					--if math.random() <= 0.1 then
+					if math.random() <= 0.1 then
 						local x, y, z = inst.Transform:GetWorldPosition()
 						local greatlotus = SpawnPrefab("greatlotus")
 						greatlotus.Transform:SetPosition(x, y, z+1.5)
 						greatlotus.AnimState:SetMultColour(color, color, color, 1) 
 						inst.greatlotus = true
-					--end
+					end
 				end
 			end
 			inst:DoTaskInTime(0, function()
 				inst.components.boatphysics.boat_rotation_offset = math.random(0, 359)
 			end)
-			
+			inst.components.timer:StartTimer("drown", math.random(300, 450))
 		end)
 		
 		inst.OnDrown = OnDrown
@@ -280,8 +288,29 @@ function MakeLilyPad(name, radius, bank, build, anim, data)
 	return Prefab(name, fn, assets)
 end
 
+local function spawner()
+    local inst = CreateEntity()
+
+    inst.entity:AddTransform()
+    inst.entity:AddNetwork()
+
+    inst.entity:SetPristine()
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+	inst:DoTaskInTime(0, function()
+		local lily_pad = math.random(1, 3)
+		SpawnAt(lily_pad == 1 and "lilypad_small" or lily_pad == 2 and "lilypad_medium" or "lilypad_large", inst)
+		inst:Remove()
+	end)
+
+	return inst
+end
 
 return MakeLilyPad("lilypad_small", 2.075, "lily_pad", "lily_pad", "small_idle"),
 	MakeLilyPad("lilypad_medium", 2.9, "lily_pad", "lily_pad", "med_idle"),
 	MakeLilyPad("lilypad_large", 4, "lily_pad", "lily_pad", "big_idle", {has_lotus = true}),
-	Prefab("lilypad_item_collision", lilypad_item_collision_fn)
+	Prefab("lilypad_item_collision", lilypad_item_collision_fn),
+	Prefab("lilypad_spawner", spawner)

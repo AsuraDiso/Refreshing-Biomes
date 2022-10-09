@@ -76,6 +76,29 @@ local function MakeMushroom(name, bank, build, anim, canfloat)
 	return Prefab(name, fn, assets, prefabs)
 end
 
+local function spawner()
+    local inst = CreateEntity()
+
+    inst.entity:AddTransform()
+    inst.entity:AddNetwork()
+
+    inst.entity:SetPristine()
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+	inst:DoTaskInTime(0, function()
+		local lily_pad = math.random(1, 3)
+		SpawnAt(lily_pad == 1 and "swamp_shroom_small" or lily_pad == 2 and "swamp_shroom_medium" or "swamp_shroom_large", inst)
+		inst:Remove()
+	end)
+
+	return inst
+end
+
 return MakeMushroom("swamp_shroom_small", "mushroom_swamp_small", "mushroom_swamp_small", "idle_loop", true),
 		MakeMushroom("swamp_shroom_medium", "mushroom_swamp_tall", "mushroom_swamp_tall", "idle_loop", true),
-		MakeMushroom("swamp_shroom_big", "mushroom_swamp_tall", "mushroom_swamp_tall", "idle_loop", true)
+		MakeMushroom("swamp_shroom_big", "mushroom_swamp_tall", "mushroom_swamp_tall", "idle_loop", true),
+		Prefab("swamp_shroom_spawner", spawner)
+

@@ -1,9 +1,9 @@
 local NotCoastal = {
-	[GROUND.SWAMP_FLOOD] = true,
+	[WORLD_TILES.SWAMP_FLOOD] = true,
 }
 
 local function IsNotMarshFloodTile(tile)
-	return tile ~= GROUND.SWAMP_FLOOD
+	return tile ~= WORLD_TILES.SWAMP_FLOOD
 end
 
 local function IsSurroundedByMarsh(x, y, radius)
@@ -42,7 +42,7 @@ end
 
 local function IsFlooded(x, y, z)
 	local actual_tile = TheWorld.Map:GetTile(x, z)
-	if actual_tile == GROUND.SWAMP then
+	if actual_tile == WORLD_TILES.SWAMP then
 		return true
 	end
 	return false
@@ -106,5 +106,5 @@ local function SpawnWaveFlood(inst, x, y, z)
 end
 
 return function(self)
-    self.shimmer[GROUND.SWAMP_FLOOD] = {per_sec = 80, spawn_rate = 0, checkfn = checkground, spawnfn = SpawnWaveFlood}
+    self.shimmer[WORLD_TILES.SWAMP_FLOOD] = {per_sec = 80, spawn_rate = 0, checkfn = checkground, spawnfn = SpawnWaveFlood}
 end

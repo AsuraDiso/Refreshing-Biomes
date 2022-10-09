@@ -11,13 +11,14 @@ local AddStategraphActionHandler = AddStategraphActionHandler
 local AddComponentAction = AddComponentAction
 
 GLOBAL.UpvalueHacker = require("tools/upvaluehacker")
+
+GLOBAL.TileGroupManager:SetIsOceanTileGroup(WORLD_TILES.SWAMP_FLOOD)
+
 GLOBAL.FAKEOCEANTILES = {
-	[GROUND.SWAMP_FLOOD] = true,
+	[WORLD_TILES.SWAMP_FLOOD] = true,
 }
 
-GLOBAL.FAKEOCEAN_CAN_DEPLOY =
-{
-	["dug_grass"] = true,
+GLOBAL.FAKEOCEAN_CAN_DEPLOY = {
 }
 
 GLOBAL.setfenv(1, GLOBAL)

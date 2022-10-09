@@ -219,4 +219,4 @@ local function fn()
 end
 
 
-return Prefab("greateswamptree", fn, assets, prefabs)
+return Prefab("greatswamptree", fn, assets, prefabs)
