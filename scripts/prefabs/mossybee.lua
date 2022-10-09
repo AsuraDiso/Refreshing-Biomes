@@ -266,7 +266,7 @@ local function fn()
     inst.EnableBuzz = EnableBuzz
     inst.OnEntitySleep = OnEntitySleep
     inst.OnEntityWake = OnEntityWake
-    inst.OnLoadPostPass = OnLoadPostPass
+    --inst.OnLoadPostPass = OnLoadPostPass
 
     inst._focustarget = nil
     inst.FocusTarget = FocusTarget

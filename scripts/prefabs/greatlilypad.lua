@@ -195,7 +195,7 @@ function MakeLilyPad(name, radius, bank, build, anim, data)
 		inst.entity:AddAnimState()
 		inst.entity:AddSoundEmitter()
 		inst.entity:AddMiniMapEntity()
-		inst.MiniMapEntity:SetIcon("boat.png")
+		--inst.MiniMapEntity:SetIcon("boat.png")
 		inst.entity:AddNetwork()
 
 		inst:AddTag("ignorewalkableplatforms")
