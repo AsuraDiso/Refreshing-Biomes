@@ -1,4 +1,7 @@
 local function EnterWaterFn(inst)
+	if TheWorld.Map:GetTileAtPoint(inst.Transform:GetWorldPosition()) ~= WORLD_TILES.SWAMP_FLOOD then
+		return
+	end
 	if inst:HasTag("playerghost") then
 		inst.AnimState:SetBank("ghost")
 		return
