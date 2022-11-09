@@ -19,6 +19,7 @@ PrefabFiles = {
 	"greatlotus",
 	"fume_fx",
 	"shroombrella",
+	"shroombrella_fx",
 	"fakeplayer",
 	"swampmist",
 

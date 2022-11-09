@@ -7,6 +7,15 @@ local function onequip(inst, owner)
     if not owner then
         return
     end 
+
+    if not inst.fx then
+        inst.fx = SpawnPrefab("shroombrella_fx")
+        inst.fx.entity:SetParent(owner.entity)
+        inst.fx.entity:AddFollower()
+        inst.fx.Follower:FollowSymbol(owner.GUID, "swap_object", -40, -230, 0)
+    else
+        inst.fx.level = inst.level * 3
+    end
     owner.AnimState:OverrideSymbol("swap_object", "swap_shroombrella", "swap_shroombrella_lvl"..inst.level or 1)
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
@@ -17,6 +26,11 @@ local function onequip(inst, owner)
 end
 
 local function onunequip(inst, owner)
+    if inst.fx then
+        inst.fx:Remove()
+        inst.fx = nil
+    end
+
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
     owner.AnimState:ClearOverrideSymbol("swap_object")

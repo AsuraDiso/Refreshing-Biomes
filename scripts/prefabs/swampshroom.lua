@@ -90,7 +90,7 @@ local function spawner()
 
 	inst:DoTaskInTime(0, function()
 		local shroom = math.random(1, 3)
-		SpawnAt(shroom == 1 and "swamp_shroom_small" or shroom == 2 and "swamp_shroom_medium" or "swamp_shroom_large", inst)
+		SpawnAt(shroom == 1 and "swamp_shroom_small" or shroom == 2 and "swamp_shroom_medium" or "swamp_shroom_big", inst)
 		inst:Remove()
 	end)
 
