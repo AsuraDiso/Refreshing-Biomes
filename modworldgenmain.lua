@@ -1,5 +1,6 @@
 local _G = GLOBAL
 _G.UpvalueHacker = require("tools/upvaluehacker")
+local Story = require("map/storygen")
 local rawget = _G.rawget
 local rawset = _G.rawset
 
@@ -259,7 +260,7 @@ if firstTimeLoading then
 
 	function ServerCreationScreen:OnDestroy()
 		GAME_MODES.survival.level_type = LEVELTYPE.SURVIVAL
-		Story.LinkRegions = _LinkRegions
+		--Story.LinkRegions = _LinkRegions
 		levels.GetDefaultLevelData = _GetDefaultLevelData
 		levels.GetDataForID = _GetDataForID
 		levels.GetNameForID = _GetNameForID
