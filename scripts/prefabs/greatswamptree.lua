@@ -162,7 +162,7 @@ local function fn()
 
     inst:AddTag("shadecanopy")
 
-    inst.MiniMapEntity:SetIcon("oceantree_pillar.png")
+    inst.MiniMapEntity:SetIcon("greatswamptree.tex")
 
     inst.AnimState:SetBank("oceantree_pillar")
     inst.AnimState:SetBuild("oceantree_pillar_build1")
@@ -215,6 +215,11 @@ local function fn()
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
 
+    inst:DoTaskInTime(0, function()
+        local p = SpawnAt("swampmist", inst)
+        p.particles_per_tick = 20 * 2
+        p:PostInit()
+    end)
     return inst
 end
 

@@ -1,7 +1,3 @@
---------------------------------------------------------------------------
---[[ SwampBrain class definition ]]
---------------------------------------------------------------------------
-
 local SwampBrain = Class(function(self, inst)
     self.inst = inst
     
@@ -12,6 +8,8 @@ local SwampBrain = Class(function(self, inst)
         destroytree = -0.01,
     }
 
+    self.fog = nil
+    self.tree = TheSim:FindFirstEntityWithTag("greattree")
 end)
 
 function SwampBrain:Event(target, mood)

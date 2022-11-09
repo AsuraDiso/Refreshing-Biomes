@@ -53,3 +53,10 @@ local SWARMATTACH = AddAction("SWARMATTACH", "Attach", function(act)
 end)
 SWARMATTACH.mindistance = 1
 
+function _G.wwaw()
+	local _snowfx = SpawnPrefab("swampmist")
+	_snowfx.entity:SetParent(ThePlayer.entity)
+	_snowfx.particles_per_tick = 20 * 2
+	_snowfx:PostInit()
+
+end

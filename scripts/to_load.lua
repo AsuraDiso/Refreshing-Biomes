@@ -19,6 +19,8 @@ PrefabFiles = {
 	"greatlotus",
 	"fume_fx",
 	"shroombrella",
+	"fakeplayer",
+	"swampmist",
 
 	"newland",
 	"newland_network",
@@ -26,4 +28,12 @@ PrefabFiles = {
 }
 
 Assets = {
+	Asset("ATLAS","images/greatswamptreeshade.xml"),
+	Asset("MINIMAP_IMAGE", "images/greatswamptreeshade.tex"),
+
+	Asset("ATLAS","images/greatswamptree.xml"),
+	Asset("MINIMAP_IMAGE", "images/greatswamptree.tex"),
 }
+
+AddMinimapAtlas("images/greatswamptreeshade.xml")
+AddMinimapAtlas("images/greatswamptree.xml")

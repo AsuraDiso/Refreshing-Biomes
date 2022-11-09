@@ -494,6 +494,31 @@ local function common_postinit(inst)
         inst.Map:AlwaysDrawWaves(false)
         inst.Map:DoOceanRender(true)
     end
+
+	inst:DoTaskInTime(0, function(inst)
+		if inst.topology then
+			for i, node in ipairs(inst.topology.nodes) do
+				if table.contains(node.tags, "SwampMist") then
+					if node.area_emitter == nil then
+						if node.area == nil then
+							node.area = 1
+						end
+
+						--[[if not TheNet:IsDedicated() then
+							local mist = SpawnPrefab("swampmist")
+							mist.Transform:SetPosition(node.cent[1], 0, node.cent[2])
+							mist.components.emitter.area_emitter = CreateAreaEmitter(node.poly, node.cent)
+
+							local ext = ResetextentsForPoly(node.poly)
+							mist.entity:SetAABB(ext.radius, 2)
+							mist.components.emitter.density_factor = math.ceil(node.area / 4) / 31
+							mist.components.emitter:Emit()
+						end]]
+					end
+				end
+			end
+		end
+    end)
 end
 
 local function master_postinit(inst)
