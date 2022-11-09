@@ -540,6 +540,8 @@ local function master_postinit(inst)
 	inst:AddComponent("flotsamgenerator")
 	inst:AddComponent("messagebottlemanager")
 
+    inst:AddComponent("swampbrain")
+
     if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
         inst:AddComponent("gingerbreadhunter")
     end
