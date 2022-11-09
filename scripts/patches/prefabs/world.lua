@@ -96,6 +96,17 @@ return function(inst)
 			return _CanDeployAtPoint(self, pt, inst, mouseover, ...)
 		end
 
+		local _CanDeployBoatAtPointInWater = map.CanDeployBoatAtPointInWater
+
+		map.CanDeployBoatAtPointInWater = function(self, pt, inst, mouseover, data)
+			local tile = self:GetTileAtPoint(pt.x, pt.y, pt.z)
+			if FAKEOCEANTILES[tile] then
+				return false
+			end
+
+			return _CanDeployBoatAtPointInWater(self, pt, inst, mouseover, data)
+		end
+
 		local _CanDeployRecipeAtPoint = map.CanDeployRecipeAtPoint
 		map.CanDeployRecipeAtPoint = function(self, pt, recipe, rot, ...)
 			if self:IsOceanAtPoint(pt.x, pt.y, pt.z, false) and FAKEOCEAN_CAN_DEPLOY[recipe.name] then

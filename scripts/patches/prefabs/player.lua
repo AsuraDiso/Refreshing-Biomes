@@ -140,5 +140,8 @@ return function(inst)
 	inst.components.amphibiouscreature:SetEnterWaterFn(EnterWaterFn)         
 	inst.components.amphibiouscreature:SetExitWaterFn(ExitWaterFn)
 
+	inst:AddComponent("preserver") 
+	inst.components.preserver.perish_rate_multiplier = 1
+
 	inst:ListenForEvent("death", ExitWaterFn)
 end

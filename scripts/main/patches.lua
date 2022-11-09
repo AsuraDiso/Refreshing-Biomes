@@ -69,12 +69,12 @@ for _, file in ipairs(PATCHES.WIDGETS) do
 	AddClassPostConstruct("widgets/"..file, fn)
 end
 
-local _IsOceanTile = IsOceanTile
+--[[local _IsOceanTile = IsOceanTile
 function IsOceanTile(tile)
-	return FAKEOCEANTILES[tile] or _IsOceanTile
+	return FAKEOCEANTILES[tile] or _IsOceanTile(tile)
 end
 
 local _IsLandTile = IsLandTile
 function IsLandTile(tile)
-	return not FAKEOCEANTILES[tile] or _IsLandTile
-end
+	return not FAKEOCEANTILES[tile] or _IsLandTile(tile)
+end]]

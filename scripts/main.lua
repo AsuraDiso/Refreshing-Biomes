@@ -39,7 +39,3 @@ function _G.PlayFootstep(inst, volume, ispredicted, ...)
 	end
 end
 
-menv.AddPlayerPostInit(function(inst)
-	inst:AddComponent("preserver") 
-	inst.components.preserver.perish_rate_multiplier = 1
-end)
