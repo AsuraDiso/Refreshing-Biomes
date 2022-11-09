@@ -17,6 +17,7 @@ local PATCHES =
 		"amphibiouscreature",
 		"wavemanager",
 		"colourcube",
+		"drownable",
 	},
 	
 	PREFABS = {

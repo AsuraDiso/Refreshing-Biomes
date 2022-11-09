@@ -48,7 +48,7 @@ return function(inst)
 				--z direction
 				for j = -r, r, 4 do
 					totalTiles = totalTiles + 1
-					if TheWorld.Map:GetTileAtPoint(x + i, y, z + j) == GROUND.SWAMP_FLOOD then
+					if TheWorld.Map:GetTileAtPoint(x + i, y, z + j) == WORLD_TILES.SWAMP_FLOOD then
 						numWaterTiles = numWaterTiles + 1
 					end
 				end
@@ -124,7 +124,7 @@ return function(inst)
 		--local _CanTerraformAtPoint = map.CanTerraformAtPoint
 		--map.CanTerraformAtPoint = function(self, x, y, z, ...)
 		--	local tile = self:GetTileAtPoint(x, y, z)
-		--	if tile == GROUND.DINOICE then
+		--	if tile == WORLD_TILES.DINOICE then
 		--		return false
 		--	end
 

@@ -19,6 +19,9 @@ PrefabFiles = {
 	"greatlotus",
 	"fume_fx",
 	"shroombrella",
+
+	"newland",
+	"newland_network",
 	--"moonbloom",
 }
 
