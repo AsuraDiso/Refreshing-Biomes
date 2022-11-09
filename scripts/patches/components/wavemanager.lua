@@ -6,14 +6,14 @@ local function IsNotMarshFloodTile(tile)
 	return tile ~= WORLD_TILES.SWAMP_FLOOD
 end
 
-local function IsSurroundedByMarsh(x, y, radius)
+local function IsSurroundedByMarsh(x, y, z, radius)
 	for i = -radius, radius, 1 do
-		if not IsNotMarshFloodTile(TheWorld.Map:GetTile(x - radius, y + i)) or not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + radius, y + i)) then
+		if not IsNotMarshFloodTile(TheWorld.Map:GetTile(x - radius, z + i)) or not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + radius, z + i)) then
 			return true
 		end
 	end
 	for i = -(radius - 1), radius - 1, 1 do
-		if not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + i, y - radius)) or not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + i, y + radius)) then
+		if not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + i, z - radius)) or not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + i, z + radius)) then
 			return true
 		end
 	end
@@ -38,14 +38,6 @@ local function checkground(inst, map, x, y, z, ground)
 		return false
 	end
 	return map:IsValidTileAtPoint( x, y, z )
-end
-
-local function IsFlooded(x, y, z)
-	local actual_tile = TheWorld.Map:GetTile(x, z)
-	if actual_tile == WORLD_TILES.SWAMP then
-		return true
-	end
-	return false
 end
 
 local function GetWaveBearing(ex, ey, ez, lines)
