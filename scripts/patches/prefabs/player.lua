@@ -81,6 +81,10 @@ local function ExitWaterFn(inst)
 		inst.AnimState:SetBank("ghost")
 		return
 	end
+	
+	if not inst._waterdelta then
+		return
+	end
 
 	local isriding = inst.components.rider and inst.components.rider:IsRiding()
 

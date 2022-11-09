@@ -18,9 +18,11 @@ function SwampBrain:Event(target, mood)
     if target then
         if mood == "positive" then
             if math.random() > .95 then
+                
             end
         elseif mood == "negative" then
             if math.random() > .5 then
+                
             end
         end
     end

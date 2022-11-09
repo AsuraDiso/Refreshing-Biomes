@@ -18,6 +18,7 @@ local PATCHES =
 		"wavemanager",
 		"colourcube",
 		"drownable",
+		"autoterraformer",
 	},
 	
 	PREFABS = {
