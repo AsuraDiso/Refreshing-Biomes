@@ -62,6 +62,24 @@ AddTile(
 )
 
 AddTile(
+	"SWAMP_ICE",
+	"LAND",
+	{ground_name = "Swamp_Ice"},
+	{
+		name = "deciduous",
+		noise_texture = "levels/textures/Ground_noise_swamp_ice.tex",
+		runsound = "dontstarve/movement/run_ice",
+		walksound = "dontstarve/movement/run_ice",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_ice",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/Ground_noise_swamp_ice.tex",
+	}
+)
+
+AddTile(
     "SWAMP",
     "LAND",
     {ground_name = "Swamp"},
@@ -89,3 +107,4 @@ TileGroupManager:AddValidTile(TileGroups.Legacy_FakeWaterTiles, WORLD_TILES.SWAM
 
 ChangeTileRenderOrder(WORLD_TILES.SWAMP_FLOOD, WORLD_TILES.CARPET, false)
 ChangeTileRenderOrder(WORLD_TILES.SWAMP, WORLD_TILES.ROAD, false)
+ChangeTileRenderOrder(WORLD_TILES.SWAMP_ICE, WORLD_TILES.CARPET, false)
