@@ -1,8 +1,6 @@
 require "brains/swamprootbrain"
 require "stategraphs/SGswamproot"
 
-local trace = function() end
-
 local SWAMPROOT_HEALTH = 250
 local SWAMPROOT_DAMAGE = 15
 local SWAMPROOT_SPEED = 4
@@ -66,7 +64,7 @@ local function SetLevel(inst, level)
 end
 
 local function Calm(inst, level)
-	inst:Remove()
+	inst:GoToState("escape")
 end
 
 local function fn(Sim)
