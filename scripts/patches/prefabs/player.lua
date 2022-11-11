@@ -78,9 +78,7 @@ local function EnterWaterFn(inst)
 	inst.fakeplayer.Transform:SetPosition(0,-.4,0)
 	inst.fakeplayer.AnimState:SetFloatParams(-.15, 1.0, 0)
 
-	inst._waterdelta = inst:DoPeriodicTask(1, function()
-		--inst.components.moisture:DoDelta(1)
-	end)
+	inst._inwater = true
 end
 
 local function ExitWaterFn(inst)
@@ -89,7 +87,7 @@ local function ExitWaterFn(inst)
 		return
 	end
 	
-	if not inst._waterdelta then
+	if not inst._inwater then
 		return
 	end
 
@@ -138,9 +136,8 @@ local function ExitWaterFn(inst)
 		inst._waketask = nil
 	end
 
-	if inst._waterdelta then
-		inst._waterdelta:Cancel()
-		inst._waterdelta = nil
+	if inst._inwater then
+		inst._inwater = nil
 	end
 end
 

@@ -3,7 +3,7 @@ local easing = require("easing")
 return function(self)
 	local _GetMoistureRate = self.GetMoistureRate
 	function self:GetMoistureRate()
-        if self.inst._waketask then
+        if self.inst._inwater then
             local waterproofmult =
             (   self.inst.components.sheltered ~= nil and
                 self.inst.components.sheltered.sheltered and
@@ -20,9 +20,11 @@ return function(self)
             if waterproofmult >= 1 then
                 return 0
             end
-            local rate = easing.inSine(TheWorld.state.precipitationrate, self.minMoistureRate, self.maxMoistureRate, 1)
-            return rate * (1 - waterproofmult)
+            local rate1 = easing.inSine(0.75, self.minMoistureRate, self.maxMoistureRate, 1)
+            local rate2 = easing.inSine(TheWorld.state.precipitationrate, self.minMoistureRate, self.maxMoistureRate, 1)
+            return (rate1+rate2) * (1 - waterproofmult)
+        else
+		    return _GetMoistureRate(self)
         end
-		return _GetMoistureRate(self)
 	end
 end

@@ -27,7 +27,7 @@ local function OnDrown(inst, onload)
 	local c = .075
 	
 	local x, y, z = inst.Transform:GetWorldPosition()
-	local ents = TheSim:FindEntities(x,y,z, inst.radius, {"_inventoryitem"})
+	local ents = TheSim:FindEntities(x,y,z, inst.radius)
 	
 	inst.AnimState:SetMultColour(c,c,c,c)
 	inst.AnimState:Hide("ripples")
@@ -53,7 +53,7 @@ end
 
 local function Appear(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
-	local ents = TheSim:FindEntities(x,y,z, inst.radius, {"_inventoryitem"})
+	local ents = TheSim:FindEntities(x,y,z, inst.radius)
 	
 	inst.AnimState:SetMultColour(1,1,1,1)
 	inst.AnimState:Show("ripples")
@@ -254,7 +254,6 @@ function MakeLilyPad(name, radius, bank, build, anim, data)
 		inst.components.hull:SetRadius(radius)
 
 		inst:AddComponent("boatphysics")
-
 		inst:AddComponent("savedrotation")
 
 		inst:DoTaskInTime(0, function()
