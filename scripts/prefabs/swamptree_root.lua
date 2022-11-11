@@ -29,7 +29,6 @@ SetSharedLootTable( 'swamproot',
     {'plantmeat',   1.0}, 
 })
 
-local WAKE_TO_FOLLOW_DISTANCE = 8
 local SHARE_TARGET_DIST = 30
 
 local NO_TAGS = {"FX", "NOCLICK","DECOR","INLIMBO"}
@@ -57,6 +56,17 @@ end
 
 local function SanityAura(inst, observer)
     return -TUNING.SANITYAURA_SMALL
+end
+
+local function SetLevel(inst, level)
+	inst.level = level
+	inst.Transform:SetScale(level, level, level)
+	inst.components.health:SetMaxHealth(SWAMPROOT_HEALTH*level)
+	inst.components.combat:SetDefaultDamage(SWAMPROOT_DAMAGE*level)
+end
+
+local function Calm(inst, level)
+	inst:Remove()
 end
 
 local function fn(Sim)
@@ -94,6 +104,8 @@ local function fn(Sim)
 		return inst
 	end	
 	
+	inst.level = 1
+
 	inst:AddComponent("knownlocations")
 
 	inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
@@ -124,6 +136,9 @@ local function fn(Sim)
 
 	inst:ListenForEvent("attacked", OnAttacked)
 	inst:ListenForEvent("onattackother", OnAttackOther)
+
+	inst.SetLevel = SetLevel
+	inst.Calm = Calm
 
 	return inst
 end

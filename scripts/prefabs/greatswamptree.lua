@@ -215,11 +215,6 @@ local function fn()
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
 
-    inst:DoTaskInTime(0, function()
-        local p = SpawnAt("swampmist", inst)
-        p.particles_per_tick = 20 * 2
-        p:PostInit()
-    end)
     return inst
 end
 

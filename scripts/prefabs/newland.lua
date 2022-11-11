@@ -497,31 +497,48 @@ local function common_postinit(inst)
 
 	inst:DoTaskInTime(0, function(inst)
 		if inst.topology then
-			for i, node in ipairs(inst.topology.nodes) do
-				if table.contains(node.tags, "SwampMist") then
-					if node.area_emitter == nil then
-						if node.area == nil then
-							node.area = 1
-						end
+            for i, node in ipairs(inst.topology.nodes) do
+                if string.lower(inst.topology.ids[i]):find("swamp") then
 
-						--[[if not TheNet:IsDedicated() then
-							local mist = SpawnPrefab("swampmist")
-							mist.Transform:SetPosition(node.cent[1], 0, node.cent[2])
-							mist.components.emitter.area_emitter = CreateAreaEmitter(node.poly, node.cent)
-
-							local ext = ResetextentsForPoly(node.poly)
-							mist.entity:SetAABB(ext.radius, 2)
-							mist.components.emitter.density_factor = math.ceil(node.area / 4) / 31
-							mist.components.emitter:Emit()
-						end]]
-					end
-				end
-			end
+                    if not TheNet:IsDedicated() then
+                        local mist = SpawnPrefab("swampmist")
+                        mist.Transform:SetPosition(node.x, 0, node.y)
+                        mist.particles_per_tick = 20 * 2
+                        mist:PostInit()
+                    end
+                end
+            end
 		end
     end)
 end
 
+local function tile_physics_init(inst)
+    inst.Map:AddTileCollisionSet(
+        COLLISION.LAND_OCEAN_LIMITS,
+        TileGroups.LandTiles, false,
+        TileGroups.LandTiles, true,
+        0.25, 64
+    )
+
+    inst.Map:AddTileCollisionSet( --Asura: Ещё стоит доделать
+        COLLISION.LAND_OCEAN_LIMITS,
+        TileGroups.FakeWaterTiles, true,
+        TileGroups.Legacy_FakeWaterTiles, true,
+        0.25, 64
+    )
+
+    inst.Map:AddTileCollisionSet(
+        COLLISION.GROUND,
+        TileGroups.ImpassableTiles, true,
+        TileGroups.ImpassableTiles, false,
+        0.25, 128
+    )
+    return
+end
+
 local function master_postinit(inst)
+	inst.tile_physics_init = tile_physics_init
+
     --Spawners
     inst:AddComponent("birdspawner")
     inst:AddComponent("butterflyspawner")

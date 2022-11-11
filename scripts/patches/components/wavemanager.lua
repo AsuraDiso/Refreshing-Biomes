@@ -2,18 +2,18 @@ local NotCoastal = {
 	[WORLD_TILES.SWAMP_FLOOD] = true,
 }
 
-local function IsNotMarshFloodTile(tile)
+local function IsNotSwampFloodTile(tile)
 	return tile ~= WORLD_TILES.SWAMP_FLOOD
 end
 
-local function IsSurroundedByMarsh(x, y, z, radius)
+local function IsSurroundedBySwamp(x, y, z, radius)
 	for i = -radius, radius, 1 do
-		if not IsNotMarshFloodTile(TheWorld.Map:GetTile(x - radius, z + i)) or not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + radius, z + i)) then
+		if not IsNotSwampFloodTile(TheWorld.Map:GetTile(x - radius, z + i)) or not IsNotSwampFloodTile(TheWorld.Map:GetTile(x + radius, z + i)) then
 			return true
 		end
 	end
 	for i = -(radius - 1), radius - 1, 1 do
-		if not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + i, z - radius)) or not IsNotMarshFloodTile(TheWorld.Map:GetTile(x + i, z + radius)) then
+		if not IsNotSwampFloodTile(TheWorld.Map:GetTile(x + i, z - radius)) or not IsNotSwampFloodTile(TheWorld.Map:GetTile(x + i, z + radius)) then
 			return true
 		end
 	end
@@ -57,7 +57,7 @@ local function GetWaveBearing(ex, ey, ez, lines)
 	local xtotal, ztotal, n = 0, 0, 0
 	for i = 1, #offs, 1 do
 		local ground = map:GetTile( x + offs[i][1], y + offs[i][2] )
-		if IsNotMarshFloodTile(ground) then
+		if IsNotSwampFloodTile(ground) then
 			xtotal = xtotal + ((x + offs[i][1] - halfw) * TILE_SCALE)
 			ztotal = ztotal + ((y + offs[i][2] - halfh) * TILE_SCALE)
 			n = n + 1
@@ -74,16 +74,16 @@ local function GetWaveBearing(ex, ey, ez, lines)
 end
 
 local function SpawnWaveFlood(inst, x, y, z)
-	local is_surrounded_by_marsh = IsSurroundedByMarsh(x, y, z, 4.5)
+	local is_surrounded_by_swamp = IsSurroundedBySwamp(x, y, z, 4.5)
 	local wave = SpawnPrefab( "wave_shimmer_flood" )
 	wave.Transform:SetPosition( x, y, z )
 	wave.AnimState:SetAddColour(1,1,1,1)
 
-	if is_surrounded_by_marsh then
+	if is_surrounded_by_swamp then
 		local wave = SpawnPrefab( "wave_shimmer" )
 		wave.Transform:SetPosition( x, y, z )
 	else
-		local is_nearby_ground = not IsSurroundedByMarsh(x, y, z, 3.5)
+		local is_nearby_ground = not IsSurroundedBySwamp(x, y, z, 3.5)
 		if is_nearby_ground then
 			local bearing = GetWaveBearing(x, y, z)
 			if bearing then

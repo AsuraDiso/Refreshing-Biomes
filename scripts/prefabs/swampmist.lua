@@ -1,7 +1,12 @@
+local levels = 10
+
 local TEXTURE = "levels/textures/ds_fog1.tex"--ashfog
 local SHADER = "shaders/vfx_particle.ksh"
 
-local COLOUR_ENVELOPE_NAME = "swampmistcolourenvelope"
+local COLOUR_ENVELOPE_NAME = {}
+for i = 1, levels do
+    COLOUR_ENVELOPE_NAME[i] ="swampmistcolourenvelope"..i
+end
 local SCALE_ENVELOPE_NAME = "swampmistscaleenvelope"
 
 local assets =
@@ -9,6 +14,7 @@ local assets =
     Asset("IMAGE", TEXTURE),
     Asset("SHADER", SHADER),
 }
+
 
 --------------------------------------------------------------------------
 local function CreateSphereEmitter2( radius )
@@ -27,16 +33,19 @@ local function CreateSphereEmitter2( radius )
 		return radius * x, 0, radius * z
 	end
 end
+
 local function InitEnvelope()
-    EnvelopeManager:AddColourEnvelope(
-        COLOUR_ENVELOPE_NAME,
-        {
-            { 0,    { 0.31, 0.36, 0.20, 0 } },
-            { .1,  { 0.31, 0.36, 0.20, .3 } },
-            { .75, { 0.31, 0.36, 0.20, .3 } },
-            { 1,    { 0.31, 0.36, 0.20, 0 } },
-        }
-    )
+    for i = 1, levels do
+        EnvelopeManager:AddColourEnvelope(
+            COLOUR_ENVELOPE_NAME[i],
+            {
+                { 0,    { 0.31, 0.36, 0.20, 0 } },
+                { .1,  { 0.31, 0.36, 0.20, i*0.35 } },
+                { .75, { 0.31, 0.36, 0.20, i*0.35 } },
+                { 1,    { 0.31, 0.36, 0.20, 0 } },
+            }
+        )
+    end
 
     local max_scale = 10
     EnvelopeManager:AddVector2Envelope(
@@ -70,6 +79,8 @@ local function fn()
     if InitEnvelope ~= nil then
         InitEnvelope()
     end
+    
+    inst.level = 1
 
     local effect = inst.entity:AddVFXEffect()
     effect:InitEmitters(1)
@@ -79,14 +90,11 @@ local function fn()
     local rng = math.random
     local tick_time = TheSim:GetTickTime()
 
-    local desired_particles_per_second = 0--300
-    inst.particles_per_tick = desired_particles_per_second * tick_time
+    inst.particles_per_tick = 20 * tick_time
 
     inst.num_particles_to_emit = inst.particles_per_tick
 
     local emitter_shape = CreateSphereEmitter2(TUNING.SHADE_CANOPY_RANGE*2.5)
-
-    local particle_mult = 1
 
     local function emit_fn()
         local lifetime = MIN_LIFETIME + (MAX_LIFETIME - MIN_LIFETIME) * UnitRand()
@@ -109,20 +117,19 @@ local function fn()
             effect:SetScaleEnvelope(0, SCALE_ENVELOPE_NAME)
             effect:SetMaxNumParticles(0, 700)
             effect:SetMaxLifetime(0, MAX_LIFETIME)
-            effect:SetColourEnvelope(0, COLOUR_ENVELOPE_NAME)
+            effect:SetColourEnvelope(0, COLOUR_ENVELOPE_NAME[inst.level])
             effect:SetSortOrder(0, 3)
             effect:SetSpawnVectors(0,
                 -1, 0, 1,
                 1, 0, 1
             )
-            --effect:SetRadius(0, EMITTER_RADIUS)
         end
 
         while inst.num_particles_to_emit > 1 do
             emit_fn()
             inst.num_particles_to_emit = inst.num_particles_to_emit - 1
         end
-        inst.num_particles_to_emit = inst.num_particles_to_emit + inst.particles_per_tick * particle_mult
+        inst.num_particles_to_emit = inst.num_particles_to_emit + inst.particles_per_tick 
     end
 
     EmitterManager:AddEmitter(inst, nil, update_fn)
@@ -136,6 +143,13 @@ local function fn()
             effect:FastForward(0, dt)
         end
     end
+
+    inst:ListenForEvent("changeswampmood", 
+        function(src, data) 
+            inst.level = data.level
+            effect:SetColourEnvelope(0, COLOUR_ENVELOPE_NAME[inst.level])
+        end,
+    TheWorld)
 
     return inst
 end

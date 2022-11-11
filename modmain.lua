@@ -12,8 +12,6 @@ local AddComponentAction = AddComponentAction
 
 GLOBAL.UpvalueHacker = require("tools/upvaluehacker")
 
-GLOBAL.TileGroupManager:SetIsOceanTileGroup(WORLD_TILES.SWAMP_FLOOD)
-
 GLOBAL.FAKEOCEANTILES = {
 	[WORLD_TILES.SWAMP_FLOOD] = true,
 }

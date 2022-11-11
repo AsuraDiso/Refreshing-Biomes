@@ -9,6 +9,7 @@ local events=
 	EventHandler("attacked", function(inst) if not inst.components.health:IsDead() and not inst.sg:HasStateTag("attack") and not inst.sg:HasStateTag("busy") then inst.sg:GoToState("hit") end end),
 	EventHandler("death", function(inst) inst.sg:GoToState("death") end),
 	EventHandler("doattack", function(inst, data) if not inst.components.health:IsDead() and (inst.sg:HasStateTag("hit") or not inst.sg:HasStateTag("busy")) then inst.sg:GoToState("attack_pre", data.target) end end),
+    EventHandler("losttarget", function(inst) inst.sg:GoToState("escape") end),
 	CommonHandlers.OnSleep(),
 	CommonHandlers.OnLocomote(true,false),
 	CommonHandlers.OnFreeze(),
@@ -106,10 +107,21 @@ local states=
 			end
 		end,
 
-	timeline=
+	    timeline=
 		{
 			TimeEvent(9*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/enemy/venus_flytrap/4/breath_out") end),
 			TimeEvent(35*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/enemy/venus_flytrap/4/breath_in") end),
+		},
+
+        events=
+		{
+			EventHandler("animover", function(inst) 
+                if not inst.components.combat.target then
+                    inst.sg:GoToState("idle") 
+                else
+                    inst.sg:GoToState("escape")
+                end
+            end),
 		},
 	},
 
@@ -233,7 +245,41 @@ local states=
 			EventHandler("animover", function(inst) inst.sg:GoToState("idle") end ),
 		},
 	},
-	
+
+	State{
+		name = "emerge",
+		tags = {"busy"},
+
+		onenter = function(inst)
+            inst.AnimState:PlayAnimation("ground_pre")
+            inst.AnimState:PushAnimation("atk_pre", false)
+			inst.Physics:Stop()
+			RemovePhysicsColliders(inst)            
+		end,
+
+		events=
+		{
+			EventHandler("animqueueover", function(inst) inst.sg:GoToState("attack_post") end ),
+		},
+	},
+
+	State{
+		name = "escape",
+		tags = {"busy"},
+
+		onenter = function(inst)
+			inst.AnimState:PlayAnimation("atk_idle")
+            inst.AnimState:PushAnimation("atk_pst", false)
+			inst.Physics:Stop()
+			RemovePhysicsColliders(inst)            
+		end,
+
+		events=
+		{
+			EventHandler("animqueueover", function(inst) inst:Remove() end ),
+		},
+	},
+
 	State{
 		name = "death",
 		tags = {"busy"},
@@ -254,4 +300,4 @@ local states=
 CommonStates.AddFrozenStates(states)
 
 
-return StateGraph("mean_flytrap", states, events, "taunt", actionhandlers)
+return StateGraph("swamproot", states, events, "emerge", actionhandlers)

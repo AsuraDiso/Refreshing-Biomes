@@ -23,6 +23,28 @@ end
 local menv = env
 GLOBAL.setfenv(1, GLOBAL)
 
+local function GetNextAvaliableCollisionMask()
+    local mask = 0
+    for k, v in pairs(COLLISION) do
+        mask = bit.bor(mask, v)
+    end
+    local i = 1
+    while i <= 0x7FFF do
+        if bit.band(mask, i) == 0 then
+            print("Collision Mask: ", i, " Found!")
+            return i
+        end
+        i = i * 2
+    end
+    print("ERROR: Ran out of available collision mask's")
+    return 0
+end
+
+COLLISION.FAKE_WATER = GetNextAvaliableCollisionMask()
+COLLISION.GROUND = COLLISION.GROUND + COLLISION.FAKE_WATER
+COLLISION.WORLD = COLLISION.WORLD + COLLISION.FAKE_WATER
+
+
 if firstTimeLoading then
 	local NEW_LOCKS_AND_KEYS = {
 		"SWAMPFOREST",
