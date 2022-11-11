@@ -79,7 +79,7 @@ local function EnterWaterFn(inst)
 	inst.fakeplayer.AnimState:SetFloatParams(-.15, 1.0, 0)
 
 	inst._waterdelta = inst:DoPeriodicTask(1, function()
-		inst.components.moisture:DoDelta(1)
+		--inst.components.moisture:DoDelta(1)
 	end)
 end
 

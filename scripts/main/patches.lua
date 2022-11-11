@@ -19,6 +19,7 @@ local PATCHES =
 		"colourcube",
 		"drownable",
 		"autoterraformer",
+		"moisture",
 	},
 	
 	PREFABS = {
