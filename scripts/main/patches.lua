@@ -20,6 +20,7 @@ local PATCHES =
 		"drownable",
 		"autoterraformer",
 		"moisture",
+		"workable",
 	},
 	
 	PREFABS = {

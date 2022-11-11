@@ -492,8 +492,33 @@ local function tile_physics_init(inst)
     return
 end
 
+local function tile_physics_init(inst)
+    inst.Map:AddTileCollisionSet(
+        COLLISION.LAND_OCEAN_LIMITS,
+        TileGroups.LandTiles, false,
+        TileGroups.LandTiles, true,
+        0.25, 64
+    )
+
+    inst.Map:AddTileCollisionSet( --Asura: Ещё стоит доделать
+        COLLISION.LAND_OCEAN_LIMITS,
+        TileGroups.FakeWaterTiles, true,
+        TileGroups.Legacy_FakeWaterTiles, true,
+        0.25, 64
+    )
+
+    inst.Map:AddTileCollisionSet(
+        COLLISION.GROUND,
+        TileGroups.ImpassableTiles, true,
+        TileGroups.ImpassableTiles, false,
+        0.25, 128
+    )
+    return
+end
+
 local function common_postinit(inst)
-    inst.tile_physics_init = tile_physics_init
+	inst.tile_physics_init = tile_physics_init
+
     --Add waves
     inst.entity:AddWaveComponent()
     inst.WaveComponent:SetWaveParams(13.5, 2.5, -7.5)    			-- wave texture u repeat, forward distance between waves
@@ -538,7 +563,6 @@ local function common_postinit(inst)
 end
 
 local function master_postinit(inst)
-
     --Spawners
     inst:AddComponent("birdspawner")
     inst:AddComponent("butterflyspawner")

@@ -18,7 +18,8 @@ local function fn()
     inst.AnimState:SetBank("lavaarena_heal_salve_fx")
     inst.AnimState:SetBuild("lavaarena_heal_salve_fx")
     inst.AnimState:PlayAnimation("pre")
-    inst.AnimState:PushAnimation("loop", true)
+    inst.AnimState:PushAnimation("loop")
+    inst.AnimState:PushAnimation("pst", false)
     inst.AnimState:SetMultColour(.5, .5, .5, 1)
 
     inst.entity:SetPristine()
@@ -27,6 +28,7 @@ local function fn()
         return inst
     end
 
+    inst:ListenForEvent("animqueueover", inst.Remove)
     return inst
 end
 
