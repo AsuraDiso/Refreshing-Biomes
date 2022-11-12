@@ -54,6 +54,9 @@ AddTile(
 		walksound = "turnoftides/common/together/water/swim/walk_water_med",
 		snowsound = "turnoftides/common/together/water/swim/walk_water_med",
 		mudsound = "turnoftides/common/together/water/swim/walk_water_med",
+		--cannotbedug = true,
+        --flooring = true,
+        hard = true,
 	},
 	{
 		name = "map_edge",

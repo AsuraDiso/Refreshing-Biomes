@@ -1,6 +1,10 @@
 local assets =
 {
 	Asset("ANIM", "anim/lily_pad.zip"),
+	Asset("ANIM", "anim/seaweed_seed.zip"),
+
+	Asset("IMAGE", "images/inventoryimages/seaweed_seed.tex"),
+    Asset("ATLAS", "images/inventoryimages/seaweed_seed.xml"),
 }
 
 local prefabs = {}
@@ -308,8 +312,74 @@ local function spawner()
 	return inst
 end
 
+local function OnDeploy(inst, pt, deployer)
+	local pad = SpawnPrefab("lilypad_small")
+	if pad then
+		pad.Physics:SetCollides(false)
+		pad.Physics:Teleport(pt.x, 0, pt.z)
+		pad.Physics:SetCollides(true)
+	end
+end
+
+function CLIENT_CanDeployBoat(inst, pt, mouseover, deployer, rotation)
+    return TheWorld.Map:CanDeployBoatAtPointInWater(pt, inst, mouseover,
+    {
+        boat_radius = 2.075,
+        boat_extra_spacing = 0.2,
+        min_distance_from_land = 0,
+    })
+end
+
+
+local function seed()
+	local inst = CreateEntity()
+	
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
+	inst.entity:AddSoundEmitter()
+	inst.entity:AddPhysics()
+    inst.entity:AddNetwork()
+
+    
+    inst.AnimState:SetBank("seaweed_seed")
+    inst.AnimState:SetBuild("seaweed_seed")
+    inst.AnimState:PlayAnimation("idle")
+
+	inst._custom_candeploy_fn = CLIENT_CanDeployBoat
+
+    MakeInventoryFloatable(inst, "small", nil, 1)
+	MakeInventoryPhysics(inst)
+
+	inst:AddTag("lilypad")
+
+    inst.entity:SetPristine()
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+
+    inst:AddComponent("inspectable")
+    inst:AddComponent("inventoryitem")
+    inst.components.inventoryitem.atlasname = "images/inventoryimages/seaweed_seed.xml"
+	inst.components.inventoryitem.imagename = "seaweed_seed"
+
+    inst:AddComponent("stackable")
+    inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
+    
+
+    inst:AddComponent("deployable")
+    inst.components.deployable.ondeploy = OnDeploy
+	inst.components.deployable:SetDeploySpacing(DEPLOYSPACING.LARGE)
+    inst.components.deployable:SetDeployMode(DEPLOYMODE.CUSTOM)
+
+	return inst
+end
+
 return MakeLilyPad("lilypad_small", 2.075, "lily_pad", "lily_pad", "small_idle"),
 	MakeLilyPad("lilypad_medium", 2.9, "lily_pad", "lily_pad", "med_idle"),
 	MakeLilyPad("lilypad_large", 4, "lily_pad", "lily_pad", "big_idle", {has_lotus = true}),
 	Prefab("lilypad_item_collision", lilypad_item_collision_fn),
-	Prefab("lilypad_spawner", spawner)
+	Prefab("lilypad_spawner", spawner),
+	Prefab("lilypad_seed", seed, assets),
+	MakePlacer("lilypad_seed_placer", "lily_pad", "lily_pad", "small_idle", true, false, false)

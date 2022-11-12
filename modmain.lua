@@ -17,6 +17,7 @@ GLOBAL.FAKEOCEANTILES = {
 }
 
 GLOBAL.FAKEOCEAN_CAN_DEPLOY = {
+	"lilypad_seed",
 }
 
 GLOBAL.setfenv(1, GLOBAL)

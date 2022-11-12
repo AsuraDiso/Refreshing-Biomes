@@ -64,7 +64,7 @@ local function SetLevel(inst, level)
 end
 
 local function Calm(inst, level)
-	inst:GoToState("escape")
+	inst.sg:GoToState("escape")
 end
 
 local function fn(Sim)

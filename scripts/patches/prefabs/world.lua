@@ -100,7 +100,8 @@ return function(inst)
 
 		map.CanDeployBoatAtPointInWater = function(self, pt, inst, mouseover, data)
 			local tile = self:GetTileAtPoint(pt.x, pt.y, pt.z)
-			if FAKEOCEANTILES[tile] then
+			print(inst:HasTag("lilypad"))
+			if (inst:HasTag("boatbuilder") and FAKEOCEANTILES[tile]) or (inst:HasTag("lilypad") and not FAKEOCEANTILES[tile]) then
 				return false
 			end
 
@@ -116,6 +117,7 @@ return function(inst)
 
 			return _CanDeployRecipeAtPoint(self, pt, recipe, rot, ...)
 		end
+
 		local _GetPlatformAtPoint = map.GetPlatformAtPoint
 		map.GetPlatformAtPoint = function(self, pos_x, pos_y, pos_z, extra_radius)
 			if pos_z == nil then
@@ -132,15 +134,25 @@ return function(inst)
 		end
 
 
-		--local _CanTerraformAtPoint = map.CanTerraformAtPoint
-		--map.CanTerraformAtPoint = function(self, x, y, z, ...)
-		--	local tile = self:GetTileAtPoint(x, y, z)
-		--	if tile == WORLD_TILES.DINOICE then
-		--		return false
-		--	end
+		--[[local _CanTerraformAtPoint = map.CanTerraformAtPoint
+		map.CanTerraformAtPoint = function(self, x, y, z, ...)
+			local tile = self:GetTileAtPoint(x, y, z)
+			if tile == WORLD_TILES.SWAMP_FLOOD then
+				return false
+			end
 
-		--	return _CanTerraformAtPoint(self, x, y, z, ...)
-		--end
+			return _CanTerraformAtPoint(self, x, y, z, ...)
+		end
+		
+		local _CanPlowAtPoint = map.CanPlowAtPoint
+		map.CanPlowAtPoint = function(self, x, y, z, ...)
+			local tile = self:GetTileAtPoint(x, y, z)
+			if tile == WORLD_TILES.SWAMP_FLOOD then
+				return false
+			end
+
+			return _CanPlowAtPoint(self, x, y, z, ...)
+		end]]
 	end
 
     if not inst.ismastersim then
