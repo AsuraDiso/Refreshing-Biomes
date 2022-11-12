@@ -12,6 +12,28 @@ local SwampBrain = Class(function(self, inst)
     self.tree = TheSim:FindFirstEntityWithTag("greattree")
 end)
 
+function SwampBrain:Heal(target)
+    local workable = target and target.components.workable
+    if workable then
+        self.inst:DoPeriodicTask(1, function()
+            if workable.workmax > workable.workleft then
+                workable.workleft = workable.workleft + 1
+            end
+        end)
+
+        local spawned = {}
+        local x, y, z = target.Transform:GetWorldPosition()
+        local radius = 2
+        local n = math.random(2, 3)
+        for i = 1, n do
+            local a = i / n * 2 * PI
+            local pos = Vector3(x + math.cos(a) * radius, 0, z + math.sin(a) * radius)
+            local pref = SpawnAt("greattreehealfx", pos)
+            table.insert(spawned, pref)
+        end
+    end
+end
+
 function SwampBrain:Event(target, mood)
     if target then
         if math.random() > .5 then
