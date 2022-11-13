@@ -22,6 +22,7 @@ PrefabFiles = {
 	"shroombrella_fx",
 	"fakeplayer",
 	"swampmist",
+	"swamptrees",
 
 	"newland",
 	"newland_network",

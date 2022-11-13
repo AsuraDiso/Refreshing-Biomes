@@ -2,11 +2,6 @@
 local TileGroupManager = GLOBAL.TileGroupManager
 local TileGroups = GLOBAL.TileGroups
 
-TileGroups.Legacy_FakeWaterTiles = TileGroupManager:AddTileGroup()
-TileGroups.FakeWaterTiles = TileGroupManager:AddTileGroup(TileGroups.LandTiles) 
-
-TileGroupManager:SetIsOceanTileGroup(TileGroups.FakeWaterTiles)
-
 local LAVA_OCEAN_COLOR = 
 { 
     primary_color =         { 255, 30, 0,  255 },
@@ -102,9 +97,13 @@ AddTile(
     "NOISE"
 )
 
-TileGroupManager:AddInvalidTile(TileGroups.FakeWaterTiles, WORLD_TILES.SWAMP_FLOOD) 
-TileGroupManager:AddValidTile(TileGroups.Legacy_FakeWaterTiles, WORLD_TILES.SWAMP_FLOOD)
-
-ChangeTileRenderOrder(WORLD_TILES.SWAMP_FLOOD, WORLD_TILES.CARPET, false)
-ChangeTileRenderOrder(WORLD_TILES.SWAMP, WORLD_TILES.ROAD, false)
+ChangeTileRenderOrder(WORLD_TILES.SWAMP_FLOOD, WORLD_TILES.ROAD, false)
 ChangeTileRenderOrder(WORLD_TILES.SWAMP_ICE, WORLD_TILES.CARPET, false)
+
+TileGroups.OceanAndFakeWater = TileGroupManager:AddTileGroup(TileGroups.OceanTiles)
+TileGroupManager:AddValidTile(TileGroups.OceanAndFakeWater, WORLD_TILES.SWAMP_FLOOD)
+
+TileGroups.LandAndNotFakeWater = TileGroupManager:AddTileGroup(TileGroups.LandTiles)
+TileGroupManager:AddInvalidTile(TileGroups.LandAndNotFakeWater, WORLD_TILES.SWAMP_FLOOD)
+
+TileGroupManager:SetIsOceanTileGroup(TileGroups.OceanAndFakeWater)
