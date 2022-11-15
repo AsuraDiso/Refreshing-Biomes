@@ -100,7 +100,6 @@ return function(inst)
 
 		map.CanDeployBoatAtPointInWater = function(self, pt, inst, mouseover, data)
 			local tile = self:GetTileAtPoint(pt.x, pt.y, pt.z)
-			print(inst:HasTag("lilypad"))
 			if (inst:HasTag("boatbuilder") and FAKEOCEANTILES[tile]) or (inst:HasTag("lilypad") and not FAKEOCEANTILES[tile]) then
 				return false
 			end

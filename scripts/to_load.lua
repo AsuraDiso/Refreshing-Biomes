@@ -22,9 +22,12 @@ PrefabFiles = {
 	"shroombrella_fx",
 	"fakeplayer",
 	"swampmist",
+	"greatswamp_house",
 
 	"newland",
 	"newland_network",
+
+	"newland_veggies",
 	--"moonbloom",
 }
 

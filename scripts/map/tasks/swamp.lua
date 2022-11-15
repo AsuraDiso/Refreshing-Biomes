@@ -6,6 +6,7 @@ AddTask("NewLand_Swamp", {
     room_choices = {
         ["GreatSwampTree"] = 1,
         ["GreatSwamp"] = function() return math.random(1, 5) end,
+        ["OldVillage"] = 1,
     },
 
     background_room = "GreatSwamp", 

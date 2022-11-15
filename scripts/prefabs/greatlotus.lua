@@ -36,6 +36,10 @@ local function OnDigFinished(inst)
     for i=1, math.random(2, 4) do
         LaunchAt(SpawnPrefab("seeds"), inst, nil, 1, 2, 0.5, math.random(0, 359))
     end
+    if math.random() > 0.75 then
+        LaunchAt(SpawnPrefab("lilypad_seed"), inst, nil, 1, 2, 0.5, math.random(0, 359))
+    end
+
     inst.AnimState:PlayAnimation("death")
     inst:DoTaskInTime(1, function() ErodeAway(inst) end)
 end

@@ -73,9 +73,9 @@ local function EnterWaterFn(inst)
     inst.AnimState:SetFloatParams(0.3, 1.0, 0)
     inst.AnimState:SetDeltaTimeMultiplier(0.75)
 
-	inst.fakeplayer = inst:SpawnChild("fakeplayer")
-	inst.fakeplayer:AttachToPlayer(inst)
-	inst.fakeplayer.Transform:SetPosition(0,-.4,0)
+	inst.fakeplayer = inst:SpawnChild("fakeplayer") 
+	inst.fakeplayer:AttachToPlayer(inst) 
+	inst.fakeplayer.Transform:SetPosition(0,-.4,0) 
 	inst.fakeplayer.AnimState:SetFloatParams(-.15, 1.0, 0)
 
 	inst._inwater = true

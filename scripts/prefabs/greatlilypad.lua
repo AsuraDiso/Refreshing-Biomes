@@ -32,6 +32,15 @@ local function OnDrown(inst, onload)
 	
 	local x, y, z = inst.Transform:GetWorldPosition()
 	local ents = TheSim:FindEntities(x,y,z, inst.radius)
+
+	for k, v in ipairs(ents) do
+		if v.prefab == "houndfish" then
+			return false
+		end
+		if v and v.components.floater then
+			v.components.floater:OnLandedServer()
+		end
+	end
 	
 	inst.AnimState:SetMultColour(c,c,c,c)
 	inst.AnimState:Hide("ripples")
@@ -42,12 +51,6 @@ local function OnDrown(inst, onload)
 	if not onload then
 		SpawnAttackWaves(inst:GetPosition(), nil, inst.radius - .25, 6, nil, 2.5, nil, 0.15)
 		SpawnAttackWaves(inst:GetPosition(), nil, inst.radius - .5, 6, nil, 2.5, nil, 0.15)
-	end
-	
-	for k, v in ipairs(ents) do
-		if v and v.components.floater then
-			v.components.floater:OnLandedServer()
-		end
 	end
 	
 	inst.components.timer:StartTimer("undrown", math.random(120, 300))
