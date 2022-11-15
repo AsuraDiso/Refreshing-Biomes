@@ -23,6 +23,7 @@ PrefabFiles = {
 	"fakeplayer",
 	"swampmist",
 	"greatswamp_house",
+	"swamptrees",
 
 	"newland",
 	"newland_network",
