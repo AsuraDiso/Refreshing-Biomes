@@ -1,46 +1,76 @@
+local beecommon = require "brains/beecommon"
+
 local assets =
 {
-    Asset("ANIM", "anim/bee_guard.zip"),
-    Asset("ANIM", "anim/bee_guard_build.zip"),
-    Asset("ANIM", "anim/bee_guard_puffy_build.zip"),
 }
 
 local prefabs =
 {
-    "bee_poof_big",
-    "bee_poof_small",
-    "stinger",
+
 }
 
---------------------------------------------------------------------------
-
-local brain = require("brains/beeguardbrain")
-
---------------------------------------------------------------------------
-
-local normalsounds =
+local workersounds =
 {
-    attack = "dontstarve/bee/killerbee_attack",
-    --attack = "dontstarve/creatures/together/bee_queen/beeguard/attack",
+    takeoff = "dontstarve/bee/bee_takeoff",
+    attack = "dontstarve/bee/bee_attack",
     buzz = "dontstarve/bee/bee_fly_LP",
-    hit = "dontstarve/creatures/together/bee_queen/beeguard/hurt",
-    death = "dontstarve/creatures/together/bee_queen/beeguard/death",
+    hit = "dontstarve/bee/bee_hurt",
+    death = "dontstarve/bee/bee_death",
 }
 
-local poofysounds =
-{
-    attack = "dontstarve/bee/killerbee_attack",
-    --attack = "dontstarve/creatures/together/bee_queen/beeguard/attack",
-    buzz = "dontstarve/bee/killerbee_fly_LP",
-    hit = "dontstarve/creatures/together/bee_queen/beeguard/hurt",
-    death = "dontstarve/creatures/together/bee_queen/beeguard/death",
-}
+
+local function bonus_damage_via_allergy(inst, target, damage, weapon)
+    return (target:HasTag("allergictobees") and TUNING.BEE_ALLERGY_EXTRADAMAGE) or 0
+end
+
+--[[local function OnWorked(inst, worker)
+    inst:PushEvent("detachchild")
+    if worker.components.inventory ~= nil then
+        inst.SoundEmitter:KillAllSounds()
+
+        worker.components.inventory:GiveItem(inst, nil, inst:GetPosition())
+    end
+end
+
+local function OnDropped(inst)
+    if inst.buzzing and not (inst:IsAsleep() or inst.SoundEmitter:PlayingSound("buzz")) then
+        inst.SoundEmitter:PlaySound(inst.sounds.buzz, "buzz")
+    end
+    inst.sg:GoToState("catchbreath")
+    if inst.components.workable ~= nil then
+        inst.components.workable:SetWorkLeft(1)
+    end
+    if inst.brain ~= nil then
+        inst.brain:Start()
+    end
+    if inst.sg ~= nil then
+        inst.sg:Start()
+    end
+    if inst.components.stackable ~= nil and inst.components.stackable:IsStack() then
+        local x, y, z = inst.Transform:GetWorldPosition()
+        while inst.components.stackable:IsStack() do
+            local item = inst.components.stackable:Get()
+            if item ~= nil then
+                if item.components.inventoryitem ~= nil then
+                    item.components.inventoryitem:OnDropped()
+                end
+                item.Physics:Teleport(x, y, z)
+            end
+        end
+    end
+end
+
+local function OnPickedUp(inst)
+    inst.sg:GoToState("idle")
+    inst.SoundEmitter:KillSound("buzz")
+    inst.SoundEmitter:KillAllSounds()
+end]]
 
 local function EnableBuzz(inst, enable)
     if enable then
         if not inst.buzzing then
             inst.buzzing = true
-            if not inst:IsAsleep() then
+            if not (inst.components.inventoryitem:IsHeld() or inst:IsAsleep() or inst.SoundEmitter:PlayingSound("buzz")) then
                 inst.SoundEmitter:PlaySound(inst.sounds.buzz, "buzz")
             end
         end
@@ -50,128 +80,41 @@ local function EnableBuzz(inst, enable)
     end
 end
 
-local function OnEntityWake(inst)
-    if inst._sleeptask ~= nil then
-        inst._sleeptask:Cancel()
-        inst._sleeptask = nil
-    end
-
-    if inst.buzzing then
+local function OnWake(inst)
+    if inst.buzzing and not (inst.components.inventoryitem:IsHeld() or inst.SoundEmitter:PlayingSound("buzz")) then
         inst.SoundEmitter:PlaySound(inst.sounds.buzz, "buzz")
     end
 end
 
-local function OnEntitySleep(inst)
-    if inst._sleeptask ~= nil then
-        inst._sleeptask:Cancel()
-    end
-    inst._sleeptask = not inst.components.health:IsDead() and inst:DoTaskInTime(10, inst.Remove) or nil
-
+local function OnSleep(inst)
     inst.SoundEmitter:KillSound("buzz")
 end
 
---------------------------------------------------------------------------
+local RETARGET_MUST_TAGS = { "_combat", "_health" }
+local RETARGET_CANT_TAGS = { "insect", "INLIMBO", "plantkin" }
+local RETARGET_ONEOF_TAGS = { "character", "animal", "monster" }
 
-local function CheckFocusTarget(inst)
-    if inst._focustarget ~= nil and (
-            not inst._focustarget:IsValid() or
-            (inst._focustarget.components.health ~= nil and inst._focustarget.components.health:IsDead()) or
-            inst._focustarget:HasTag("playerghost")
-        ) then
-        inst._focustarget = nil
-        inst:RemoveTag("notaunt")
+--[[local function SpringBeeRetarget(inst)
+    return TheWorld.state.isspring and
+        FindEntity(inst, 4,
+            function(guy)
+                return inst.components.combat:CanTarget(guy)
+            end,
+			RETARGET_MUST_TAGS,
+			RETARGET_CANT_TAGS,
+			RETARGET_ONEOF_TAGS)
+        or nil
+end]]
+
+--[[local function OnIsSpring(inst, isspring)
+    if isspring then
+        inst.AnimState:SetBuild("bee_angry_build")
+        inst.components.inventoryitem:ChangeImageName("killerbee")
+    else
+        inst.AnimState:SetBuild("bee_build")
+        inst.components.inventoryitem:ChangeImageName()
     end
-    return inst._focustarget
-end
-
-local function RetargetFn(inst)
-    local focustarget = CheckFocusTarget(inst)
-    if focustarget ~= nil then
-        return focustarget, not inst.components.combat:TargetIs(focustarget)
-    end
-    local player, distsq = inst:GetNearestPlayer()
-    return distsq ~= nil and distsq < 225 and player or nil
-end
-
-local function KeepTargetFn(inst, target)
-    local focustarget = CheckFocusTarget(inst)
-    return (focustarget ~= nil and
-            inst.components.combat:TargetIs(focustarget))
-        or (inst.components.combat:CanTarget(target) and
-            inst:IsNear(target, 40))
-end
-
-local function bonus_damage_via_allergy(inst, target, damage, weapon)
-    return (target:HasTag("allergictobees") and TUNING.BEE_ALLERGY_EXTRADAMAGE) or 0
-end
-
-local function CanShareTarget(dude)
-    return dude:HasTag("bee") and not (dude:IsInLimbo() or dude.components.health:IsDead() or dude:HasTag("epic"))
-end
-
-local function OnAttacked(inst, data)
-    inst.components.combat:SetTarget(CheckFocusTarget(inst) or data.attacker)
-    inst.components.combat:ShareTarget(data.attacker, 20, CanShareTarget, 6)
-end
-
-local function OnAttackOther(inst, data)
-    if data.target ~= nil and data.target.components.inventory ~= nil then
-        for k, eslot in pairs(EQUIPSLOTS) do
-            local equip = data.target.components.inventory:GetEquippedItem(eslot)
-            if equip ~= nil and equip.components.armor ~= nil and equip.components.armor.tags ~= nil then
-                for i, tag in ipairs(equip.components.armor.tags) do
-                    if tag == "bee" then
-                        inst.components.combat:SetPlayerStunlock(PLAYERSTUNLOCK.OFTEN)
-                        return
-                    end
-                end
-            end
-        end
-    end
-    inst.components.combat:SetPlayerStunlock(PLAYERSTUNLOCK.ALWAYS)
-end
-
---------------------------------------------------------------------------
-
-local function ShouldSleep(inst)
-    return false
-end
-
-local function ShouldWake(inst)
-    return true
-end
-
-local function FocusTarget(inst, target)
-    inst._focustarget = target
-    inst:AddTag("notaunt")
-
-    if target ~= nil then
-        if inst.components.locomotor.walkspeed ~= TUNING.BEEGUARD_DASH_SPEED then
-            inst.AnimState:SetBuild("bee_guard_puffy_build")
-            inst.components.locomotor.walkspeed = TUNING.BEEGUARD_DASH_SPEED
-            inst.components.combat:SetDefaultDamage(TUNING.BEEGUARD_PUFFY_DAMAGE)
-            inst.components.combat:SetAttackPeriod(TUNING.BEEGUARD_PUFFY_ATTACK_PERIOD)
-            inst.sounds = poofysounds
-            if inst.SoundEmitter:PlayingSound("buzz") then
-                inst.SoundEmitter:KillSound("buzz")
-                inst.SoundEmitter:PlaySound(inst.sounds.buzz, "buzz")
-            end
-            SpawnPrefab("bee_poof_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
-        end
-        inst.components.combat:SetTarget(target)
-    elseif inst.components.locomotor.walkspeed ~= TUNING.BEEGUARD_SPEED then
-        inst.AnimState:SetBuild("bee_guard_build")
-        inst.components.locomotor.walkspeed = TUNING.BEEGUARD_SPEED
-        inst.components.combat:SetDefaultDamage(TUNING.BEEGUARD_PUFFY_DAMAGE)
-        inst.components.combat:SetAttackPeriod(TUNING.BEEGUARD_PUFFY_ATTACK_PERIOD)
-        inst.sounds = normalsounds
-        if inst.SoundEmitter:PlayingSound("buzz") then
-            inst.SoundEmitter:KillSound("buzz")
-            inst.SoundEmitter:PlaySound(inst.sounds.buzz, "buzz")
-        end
-        SpawnPrefab("bee_poof_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-    end
-end
+end]]
 
 local function fn()
     local inst = CreateEntity()
@@ -194,6 +137,8 @@ local function fn()
     inst.AnimState:SetBuild("bee_guard_build")
     inst.AnimState:PlayAnimation("idle", true)
 
+    inst:AddTag("worker")
+    inst:AddTag("pollinator")
     inst:AddTag("insect")
     inst:AddTag("bee")
     inst:AddTag("monster")
@@ -210,66 +155,79 @@ local function fn()
         return inst
     end
 
-    inst.recentlycharged = {}
-
-    inst:AddComponent("inspectable")
-
-    inst:AddComponent("lootdropper")
-    inst.components.lootdropper:AddChanceLoot("stinger", 0.01)
-
-    inst:AddComponent("sleeper")
-    inst.components.sleeper:SetResistance(4)
-    inst.components.sleeper:SetSleepTest(ShouldSleep)
-    inst.components.sleeper:SetWakeTest(ShouldWake)
-    inst.components.sleeper.diminishingreturns = true
-
     inst:AddComponent("locomotor")
     inst.components.locomotor:EnableGroundSpeedMultiplier(false)
     inst.components.locomotor:SetTriggersCreep(false)
     inst.components.locomotor.walkspeed = TUNING.BEEGUARD_SPEED
+    inst.components.locomotor.runspeed = TUNING.BEEGUARD_DASH_SPEED
     inst.components.locomotor.pathcaps = { allowocean = true }
 
+    inst:SetStateGraph("SGmossybee")
+
+    inst:AddComponent("stackable")
+    inst:AddComponent("inventoryitem")
+    inst.components.inventoryitem.nobounce = true
+    -- inst.components.inventoryitem:SetOnDroppedFn(OnDropped) Done in MakeFeedableSmallLivestock
+    -- inst.components.inventoryitem:SetOnPutInInventoryFn(OnPickedUp)
+    inst.components.inventoryitem.canbepickedup = false
+    inst.components.inventoryitem.canbepickedupalive = true
+    inst.components.inventoryitem.pushlandedevents = false
+
+    ---------------------
+
+    inst:AddComponent("lootdropper")
+    inst.components.lootdropper:AddRandomLoot("honey", 1)
+    inst.components.lootdropper:AddRandomLoot("stinger", 5)
+    inst.components.lootdropper.numrandomloot = 1
+
+    ------------------
+    --[[inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.NET)
+    inst.components.workable:SetWorkLeft(1)
+    inst.components.workable:SetOnFinishCallback(OnWorked)]]
+
+    MakeSmallBurnableCharacter(inst, "mane")
+    MakeSmallFreezableCharacter(inst, "mane")
+
+
     inst:AddComponent("health")
-    inst.components.health:SetMaxHealth(TUNING.BEEGUARD_HEALTH)
 
     inst:AddComponent("combat")
     inst.components.combat:SetDefaultDamage(TUNING.BEEGUARD_DAMAGE)
     inst.components.combat:SetAttackPeriod(TUNING.BEEGUARD_ATTACK_PERIOD)
-    inst.components.combat.playerdamagepercent = .5
     inst.components.combat:SetRange(TUNING.BEEGUARD_ATTACK_RANGE)
-    inst.components.combat:SetRetargetFunction(2, RetargetFn)
-    inst.components.combat:SetKeepTargetFunction(KeepTargetFn)
-    inst.components.combat.battlecryenabled = false
-    inst.components.combat.hiteffectsymbol = "mane"
+    --inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
+    inst.components.combat.hiteffectsymbol = "body"
+    inst.components.combat:SetPlayerStunlock(PLAYERSTUNLOCK.RARELY)
     inst.components.combat.bonusdamagefn = bonus_damage_via_allergy
 
-    inst:AddComponent("entitytracker")
+    inst:AddComponent("sleeper")
+    inst.components.sleeper.watchlight = true
+
     inst:AddComponent("knownlocations")
 
-    MakeSmallBurnableCharacter(inst, "mane")
-    MakeSmallFreezableCharacter(inst, "mane")
-    inst.components.freezable:SetResistance(2)
-    inst.components.freezable.diminishingreturns = true
+    inst:AddComponent("inspectable")
 
-    inst:SetStateGraph("SGbeeguard")
-    inst:SetBrain(brain)
+    inst:AddComponent("pollinator")
 
-    MakeHauntablePanic(inst)
+    inst:ListenForEvent("attacked", beecommon.OnAttacked)
+    --inst:ListenForEvent("worked", beecommon.OnWorked)
 
-    inst.hit_recovery = 1
+    --[[inst:WatchWorldState("isspring", OnIsSpring)
+    if TheWorld.state.isspring then
+        OnIsSpring(inst, true)
+    end]]
 
-    inst:ListenForEvent("attacked", OnAttacked)
-    inst:ListenForEvent("onattackother", OnAttackOther)
+    --MakeFeedableSmallLivestock(inst, TUNING.TOTAL_DAY_TIME*2, OnPickedUp, OnDropped)
+    
+    local workerbrain = require("brains/beebrain")
+    inst:SetBrain(workerbrain)
 
+    inst.sounds = workersounds
     inst.buzzing = true
-    inst.sounds = normalsounds
     inst.EnableBuzz = EnableBuzz
-    inst.OnEntitySleep = OnEntitySleep
-    inst.OnEntityWake = OnEntityWake
-    --inst.OnLoadPostPass = OnLoadPostPass
-
-    inst._focustarget = nil
-    inst.FocusTarget = FocusTarget
+    inst.OnEntityWake = OnWake
+    inst.OnEntitySleep = OnSleep
 
     return inst
 end
