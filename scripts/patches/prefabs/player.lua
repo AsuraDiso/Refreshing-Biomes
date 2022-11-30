@@ -20,8 +20,9 @@ local function EnterWaterFn(inst)
 	end
 
 	SpawnAt("splash_green", inst)
-
-	inst.components.locomotor:SetExternalSpeedMultiplier(inst, "waterspeed", 0.5)
+	if not inst:HasTag("swampdef") then
+		inst.components.locomotor:SetExternalSpeedMultiplier(inst, "waterspeed", 0.5)
+	end
 
 	inst.AnimState:SetMultColour(0,0,0,0)
 

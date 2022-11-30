@@ -1,4 +1,4 @@
-local brain = require "brains/koalefantbrain"
+local brain = require "brains/fumeagatorbrain"
 
 local assets =
 {
@@ -13,9 +13,9 @@ local prefabs =
 
 }
 
-
 local RETARGET_MUST_TAGS = { "character" }
-local RETARGET_CANT_TAGS = { "wall", "fumeagator", "bird", "mosquitoswarm", "mosquitoswarm_cocoon", "INLIMBO" }
+local RETARGET_CANT_TAGS = { "wall", "fumeagator", "bird", "INLIMBO", "animal", "greatswamp", "swampdef" }
+local FUME_CANT_TAGS = { "wall", "fumeagator", "bird", "INLIMBO", "animal", "greatswamp"}
 
 local function RetargetFn(inst)
     return FindEntity(
@@ -41,6 +41,39 @@ local function OnAttacked(inst, data)
     inst.components.combat:SetTarget(data.attacker)
 end
 
+local function Fume(inst)
+    inst.components.timer:StartTimer("fume_cd", TUNING.FUMEAGATOR_FUMEPERIOD) 
+    local x, y, z = inst.Transform:GetWorldPosition()
+    local ents = TheSim:FindEntities(x, y, z, TUNING.FUMEAGATOR_ATTACKRANGE *5, nil, FUME_CANT_TAGS, RETARGET_MUST_TAGS)
+    for _, ent in ipairs(ents) do
+        if inst:IsNear(ent, ent:GetPhysicsRadius(0) + (TUNING.FUMEAGATOR_ATTACKRANGE*5 + 0.5)) then
+            if ent.components.health ~= nil and not ent.components.health:IsDead() then
+                local fume = SpawnPrefab("fume_cloud")
+                local x,y,z = ent.Transform:GetWorldPosition()
+                fume.Transform:SetPosition(x, y, z)
+                fume.Explode(fume)
+                break
+            end
+        end
+    end
+end
+
+for k, v in pairs(Ents) do 
+    if v.prefab == "powcake" then 
+        v:DoPeriodicTask(0.1, function() 
+            local x, y, z = v.Transform:GetWorldPosition() 
+            local ents = TheSim:FindEntities(x, y, z, 8, nil, {"INLIMBO"}, { "character" }) 
+            v:RemoveComponent("inventoryitem")
+            if #ents > 0 then 
+                for i, ent in pairs(AllPlayers) do 
+                    local x1, y1, z1 = ent.Transform:GetWorldPosition() 
+                    v.Physics:SetMotorVelOverride(-(x-x1), -4, -(z-z1))
+                end 
+            end 
+        end)
+    end 
+end 
+
 local function EnterWaterFn(inst)
     local size = "med"
     local scale = 1.85
@@ -49,6 +82,8 @@ local function EnterWaterFn(inst)
 	SpawnAt("splash_green", inst)
 
 	--inst.components.locomotor:SetExternalSpeedMultiplier(inst, "waterspeed", 0.5)
+    inst.AnimState:HideSymbol("gator_leg", "fumeagator_leg", "gator_leg")
+    --inst.AnimState:HideSymbol("gator_tail")
 	
 	inst._waketask = inst:DoPeriodicTask(0.75, function()
 		local running
@@ -98,6 +133,8 @@ local function ExitWaterFn(inst)
 	SpawnAt("splash_green", inst)
 
 	--inst.components.locomotor:RemoveExternalSpeedMultiplier(inst, "waterspeed")
+    inst.AnimState:ShowSymbol("gator_leg", "fumeagator_leg", "gator_leg")
+    --inst.AnimState:ShowSymbol("gator_tail")
 
 	if inst.DynamicShadow then
 		inst.DynamicShadow:Enable(true)
@@ -177,17 +214,27 @@ local function fn()
 
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
     inst.components.locomotor.walkspeed = 1.5
+    inst.components.locomotor:SetAllowPlatformHopping(true)
     inst.components.locomotor.runspeed = 7
+    inst.components.locomotor.pathcaps = { allowocean = true }
+    
+    inst:AddComponent("embarker")
+    inst.components.embarker.embark_speed = inst.components.locomotor.runspeed
+    inst.components.embarker.antic = true
+
     
 
     inst:AddComponent("amphibiouscreature")
     inst.components.amphibiouscreature:SetBanks("gator", "gator")
 	inst.components.amphibiouscreature:SetEnterWaterFn(EnterWaterFn)         
 	inst.components.amphibiouscreature:SetExitWaterFn(ExitWaterFn)
+   
 
     MakeLargeBurnableCharacter(inst, "gator_body")
     MakeLargeFreezableCharacter(inst, "gator_body")
     MakeHauntablePanic(inst)
+
+    inst.Fume = Fume 
 
     inst:SetBrain(brain)
     inst:SetStateGraph("SGfumeagator")

@@ -20,7 +20,7 @@ return function(self)
             if waterproofmult >= 1 then
                 return 0
             end
-            local rate1 = easing.inSine(0.75, self.minMoistureRate, self.maxMoistureRate, 1)
+            local rate1 = self.inst:HasTag("swampdef") and 0 or easing.inSine(0.75, self.minMoistureRate, self.maxMoistureRate, 1)
             local rate2 = easing.inSine(TheWorld.state.precipitationrate, self.minMoistureRate, self.maxMoistureRate, 1)
             return (rate1+rate2) * (1 - waterproofmult)
         else

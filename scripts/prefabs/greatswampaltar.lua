@@ -5,19 +5,13 @@ local assets =
 
 local prefabs =
 {
+    "",
 }
---[[
-Idle
-grow 
-grow_pst 
-Idle2 
-rustle 
-picked
-grow
-grow_pst 
-rustle 
-picked 
-]]
+
+local function OnGetgiftFromPlayer(inst, giver, item)
+    inst.AnimState:OverrideSymbol("swap_grown", GetInventoryItemAtlas(item.prefab..".tex"), item.prefab..".tex")
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -28,7 +22,7 @@ local function fn()
 
 	inst.AnimState:SetBank("hydroponic_slow_farmplot")	
 	inst.AnimState:SetBuild("hydroponic_slow_farmplot")
-    inst.AnimState:PlayAnimation("Idle",true)
+    inst.AnimState:PlayAnimation("Idle2",true)
 
 	inst.Transform:SetFourFaced()
 
@@ -39,6 +33,9 @@ local function fn()
     end
 
     inst:AddComponent("trader")
+    --inst.components.trader:SetAcceptTest(ShouldAcceptgift)
+    inst.components.trader.onaccept = OnGetgiftFromPlayer
+    --inst.components.trader.onrefuse = OnRefusegift
 
     inst:AddComponent("inspectable")
 

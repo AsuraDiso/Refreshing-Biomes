@@ -24,6 +24,8 @@ PrefabFiles = {
 	"swampmist",
 	"greatswamp_house",
 	"swamptrees",
+	"fumeagator_armor", 
+	"fumeagatorskin", 
 
 	"newland",
 	"newland_network",

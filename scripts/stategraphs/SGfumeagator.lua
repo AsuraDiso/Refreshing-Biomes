@@ -1,13 +1,11 @@
 require("stategraphs/commonstates")
 
-local FUME_MUST_TAGS = { "character" }
-local FUME_CANT_TAGS = { "wall", "fumeagator", "bird", "mosquitoswarm", "INLIMBO" }
-
 local events=
 {
     CommonHandlers.OnStep(),
     CommonHandlers.OnLocomote(true,true),
     CommonHandlers.OnSleep(),
+    CommonHandlers.OnHop(),
     CommonHandlers.OnFreeze(),
 
     EventHandler("doattack", function(inst)
@@ -72,26 +70,16 @@ local states=
             end
             inst.SoundEmitter:PlaySound("dontstarve/creatures/koalefant/angry")
             inst.components.combat:StartAttack()
+            inst.components.health:DoDelta(inst.components.health.maxhealth*0.02)
             inst.AnimState:PlayAnimation("poot")
             SpawnAt("fume_fx", inst)
         end,
-
 
         timeline =
 		{
 		    TimeEvent(0*FRAMES, function(inst) end),
 		    TimeEvent(20*FRAMES, function(inst)
-                inst.components.timer:StopTimer("fume_cd")
-                inst.components.timer:StartTimer("fume_cd", TUNING.FUMEAGATOR_FUMEPERIOD) 
-		    	local x, y, z = inst.Transform:GetWorldPosition()
-		    	local ents = TheSim:FindEntities(x, y, z, TUNING.FUMEAGATOR_ATTACKRANGE + 6, nil, FUME_CANT_TAGS, FUME_MUST_TAGS)
-		    	for _, ent in ipairs(ents) do
-		    		if inst:IsNear(ent, ent:GetPhysicsRadius(0) + (TUNING.FUMEAGATOR_ATTACKRANGE + 0.5)) then
-		    			if ent.components.health ~= nil and not ent.components.health:IsDead() then
-                            
-		    			end
-		    		end
-		    	end
+                inst:Fume()
 		    end),
 		},
 
@@ -147,6 +135,41 @@ CommonStates.AddSleepStates(states,
         TimeEvent(0 * FRAMES, function(inst)  end),
     },
     endtimeline = {},
+})
+
+CommonStates.AddAmphibiousCreatureHopStates(states,
+{ -- config
+	swimming_clear_collision_frame = 9 * FRAMES,
+},
+{ -- anims
+    pre = "run_pre",
+    loop = "run_loop",
+    pst = "run_pst",
+    antic = "run_pst",
+
+},
+{ -- timeline
+	hop_pre =
+	{
+		TimeEvent(0, function(inst)
+			if inst:HasTag("swimming") then
+				SpawnPrefab("splash_green").Transform:SetPosition(inst.Transform:GetWorldPosition())
+			end
+		end),
+	},
+	hop_pst = {
+		TimeEvent(4 * FRAMES, function(inst)
+			if inst:HasTag("swimming") then
+				inst.components.locomotor:Stop()
+				SpawnPrefab("splash_green").Transform:SetPosition(inst.Transform:GetWorldPosition())
+			end
+		end),
+		TimeEvent(6 * FRAMES, function(inst)
+			if not inst:HasTag("swimming") then
+                inst.components.locomotor:StopMoving()
+			end
+		end),
+	}
 })
 
 CommonStates.AddSimpleState(states,"hit", "hit", {"hit", "busy"})

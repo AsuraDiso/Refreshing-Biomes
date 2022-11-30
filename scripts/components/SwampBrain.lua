@@ -3,10 +3,15 @@ local SwampBrain = Class(function(self, inst)
     
     self.mood = 0
 
-    self.mood_table = {
-        planttree = 0.005,
-        destroytree = -0.01,
-    }
+    self.mood_table = { 
+        destroytree = -0.01, 
+
+        planttree = 0.005, 
+        
+        large = 0.075, 
+        med = 0.05, 
+        small = 0.025, 
+    } 
 
     self.roots = {}
     self.tree = TheSim:FindFirstEntityWithTag("greattree")

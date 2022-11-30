@@ -65,8 +65,8 @@ local function fn()
     local color = math.min(1, math.random() + 0.5)
     inst.AnimState:SetMultColour(color, color, color, 1)  
     
-    MakeInventoryFloatable(inst, "med", 0.45, {2, 1.1, 2})
-    inst.components.floater.bob_percent = 0
+    MakeInventoryFloatable(inst, "med", 0.45, {2, 1.1, 2}) 
+    inst.components.floater.bob_percent = 0 
 
     local land_time = (POPULATING and math.random()*5*FRAMES) or 0
     inst:DoTaskInTime(land_time, function(inst)
