@@ -3,13 +3,17 @@ local assets =
 	Asset("ANIM", "anim/hydroponic_slow_farmplot.zip"),
 }
 
-local prefabs =
-{
-    "",
-}
+local function ShouldAcceptGift(inst, item)
+    for k,v in pairs(inst.gifts) do
+        if k == item.prefab then
+            return true
+        end
+    end
+end
 
-local function OnGetgiftFromPlayer(inst, giver, item)
+local function OnGetGiftFromPlayer(inst, giver, item)
     inst.AnimState:OverrideSymbol("swap_grown", GetInventoryItemAtlas(item.prefab..".tex"), item.prefab..".tex")
+    TheWorld.components.swampbrain:ChangeMood(item.prefab, giver)
 end
 
 local function fn()
@@ -33,11 +37,13 @@ local function fn()
     end
 
     inst:AddComponent("trader")
-    --inst.components.trader:SetAcceptTest(ShouldAcceptgift)
-    inst.components.trader.onaccept = OnGetgiftFromPlayer
+    inst.components.trader:SetAcceptTest(ShouldAcceptGift)
+    inst.components.trader.onaccept = OnGetGiftFromPlayer
     --inst.components.trader.onrefuse = OnRefusegift
 
     inst:AddComponent("inspectable")
+
+    inst.gifts = TheWorld.components.swampbrain.mood_table
 
     return inst
 end

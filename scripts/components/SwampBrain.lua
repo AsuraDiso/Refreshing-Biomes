@@ -11,6 +11,8 @@ local SwampBrain = Class(function(self, inst)
         large = 0.075, 
         med = 0.05, 
         small = 0.025, 
+        ---------------------
+        seeds = 0.00005,
     } 
 
     self.roots = {}
