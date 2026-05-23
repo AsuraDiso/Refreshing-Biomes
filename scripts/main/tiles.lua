@@ -64,7 +64,7 @@ AddTile(
 	"LAND",
 	{ground_name = "Swamp_Ice"},
 	{
-		name = "deciduous",
+		name = "ocean_ice",
 		noise_texture = "levels/textures/Ground_noise_swamp_ice.tex",
 		runsound = "dontstarve/movement/run_ice",
 		walksound = "dontstarve/movement/run_ice",
@@ -93,6 +93,78 @@ AddTile(
         name = "map_edge",
         noise_texture = "levels/textures/Ground_noise_swamp.tex",
     }
+)
+
+AddTile(
+	"CORDYCEPS",
+	"LAND",
+	{ground_name = "Cordyceps"},
+	{
+		name = "carpet",
+		noise_texture = "levels/textures/Ground_noise_cordyceps.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/Ground_noise_cordyceps.tex",
+	}
+)
+
+AddTile(
+	"SAVANNAN",
+	"LAND",
+	{ground_name = "Savannan"},
+	{
+		name = "carpet",
+		noise_texture = "levels/textures/Ground_noise_savannan.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/Ground_noise_savannan.tex",
+	}
+)
+
+AddTile(
+	"LAVAGROUND",
+	"LAND",
+	{ground_name = "Lavarock"},
+	{
+		name = "carpet",
+		noise_texture = "levels/textures/Ground_noise_lavarock.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/Ground_noise_lavarock.tex",
+	}
+)
+
+AddTile(
+	"ASHGROUND",
+	"LAND",
+	{ground_name = "Ash Ground"},
+	{
+		name = "carpet",
+		noise_texture = "levels/textures/Ground_noise_ash.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/Ground_noise_ash.tex",
+	}
 )
 
 AddTile(

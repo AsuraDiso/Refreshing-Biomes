@@ -34,6 +34,11 @@ return function(inst)
 			end
 			return _IsOceanAtPoint(self, x, y, z, allow_boats, ...)
 		end
+		local _IsOceanIceAtPoint =	map.IsOceanIceAtPoint
+		map.IsOceanIceAtPoint = function(self, x, y, z, ...)
+			local tile = self:GetTileAtPoint(x, y, z)
+			return tile == WORLD_TILES.SWAMP_ICE or _IsOceanIceAtPoint(self, x, y, z, ...)
+		end
 
 		--this is not the best implementation... but oh well *shrug*
 		local _CalcPercentOceanTilesAtPoint = map.CalcPercentOceanTilesAtPoint

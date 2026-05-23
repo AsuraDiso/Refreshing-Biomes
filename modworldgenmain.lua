@@ -47,7 +47,31 @@ COLLISION.WORLD = COLLISION.WORLD + COLLISION.FAKE_WATER
 
 if firstTimeLoading then
 	local NEW_LOCKS_AND_KEYS = {
-		"SWAMPFOREST",
+		"SWAMPFOREST", --done
+		"SWAMP_SIDE_N",
+		"SWAMP_SIDE_NE",
+		"SWAMP_SIDE_E",
+		"SWAMP_SIDE_SE",
+		"SWAMP_SIDE_S",
+		"SWAMP_SIDE_SW",
+		"SWAMP_SIDE_W",
+		"SWAMP_SIDE_NW",
+		"SAVANNAH",
+		"JUNGLE",
+		"REDFOREST",
+		"CORDYCEPS", --done
+		"MARBLEFOREST", --done
+		"SURFACECAVE",
+		"LAVACAVE",
+		"CORRUPTION",
+		"HOUNDMOOR",
+		"BEEMEADOW",
+		"MERMSHORE",
+		"THORNBRUSH",
+		"STONEWREATH",
+		"ASHLANDS",
+		"SILKWOOD",
+		"GLOWWARREN",
 	}
 
 	for k, v in pairs(NEW_LOCKS_AND_KEYS) do
@@ -67,8 +91,31 @@ if firstTimeLoading then
 		KEYS[v] = i
 	end
 
-	--Надо сделать так, что бы все биомы подключались только к свампу, и чисто в теории он будет в центре карты, хоть это и не обязательно)
 	LOCKS_KEYS[LOCKS.SWAMPFOREST] = {KEYS.SWAMPFOREST}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_N] = {KEYS.SWAMP_SIDE_N}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_NE] = {KEYS.SWAMP_SIDE_NE}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_E] = {KEYS.SWAMP_SIDE_E}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_SE] = {KEYS.SWAMP_SIDE_SE}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_S] = {KEYS.SWAMP_SIDE_S}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_SW] = {KEYS.SWAMP_SIDE_SW}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_W] = {KEYS.SWAMP_SIDE_W}
+	LOCKS_KEYS[LOCKS.SWAMP_SIDE_NW] = {KEYS.SWAMP_SIDE_NW}
+	LOCKS_KEYS[LOCKS.SAVANNAH] = {KEYS.SAVANNAH}
+	LOCKS_KEYS[LOCKS.JUNGLE] = {KEYS.JUNGLE}
+	LOCKS_KEYS[LOCKS.REDFOREST] = {KEYS.REDFOREST}
+	LOCKS_KEYS[LOCKS.CORDYCEPS] = {KEYS.CORDYCEPS}
+	LOCKS_KEYS[LOCKS.MARBLEFOREST] = {KEYS.MARBLEFOREST}
+	LOCKS_KEYS[LOCKS.SURFACECAVE] = {KEYS.SURFACECAVE}
+	LOCKS_KEYS[LOCKS.LAVACAVE] = {KEYS.LAVACAVE}
+	LOCKS_KEYS[LOCKS.CORRUPTION] = {KEYS.CORRUPTION}
+	LOCKS_KEYS[LOCKS.HOUNDMOOR] = {KEYS.HOUNDMOOR}
+	LOCKS_KEYS[LOCKS.BEEMEADOW] = {KEYS.BEEMEADOW}
+	LOCKS_KEYS[LOCKS.MERMSHORE] = {KEYS.MERMSHORE}
+	LOCKS_KEYS[LOCKS.THORNBRUSH] = {KEYS.THORNBRUSH}
+	LOCKS_KEYS[LOCKS.STONEWREATH] = {KEYS.STONEWREATH}
+	LOCKS_KEYS[LOCKS.ASHLANDS] = {KEYS.ASHLANDS}
+	LOCKS_KEYS[LOCKS.SILKWOOD] = {KEYS.SILKWOOD}
+	LOCKS_KEYS[LOCKS.GLOWWARREN] = {KEYS.GLOWWARREN}
 		
 	for lock,keyset in pairs(LOCKS_KEYS) do
 		assert(lock and lock == LOCKS[LOCKS_ARRAY[lock]], "A lock in the lock_keys is misnamed!")
@@ -137,7 +184,9 @@ AddLocation({
 		start_location = "newland",
 		layout_mode = "LinkNodesByKeys",
 		season_start = "default",
-		world_size = "default",
+		world_size = "large",
+		branching = "default",
+		loop_percent = "never",
 		roads = "never",
 		wormhole_prefab = nil,
 	},
@@ -150,15 +199,44 @@ if firstTimeLoading then
 		name = "NewLand",
 		location = "newland",
 		tasks = {
-			"NewLand_Swamp",
+			-- Start spoke, then hub, then remaining spokes
+			"NewLand_Swamp_S",
+			"NewLand_SwampCore",
+			"NewLand_Swamp_N",
+			"NewLand_Swamp_NE",
+			"NewLand_Swamp_E",
+			"NewLand_Swamp_SE",
+			"NewLand_Swamp_SW",
+			"NewLand_Swamp_W",
+			"NewLand_Swamp_NW",
+			-- Inner ring (adjacent to swamp spokes)
+			"NewLand_Savannah",
+			"NewLand_BeeMeadow",
+			"NewLand_RedForest",
+			"NewLand_ThornBrush",
+			"NewLand_Jungle",
+			"NewLand_SaltFlats",
+			"NewLand_Ashlands",
+			"NewLand_Gloamwood",
+			-- Outer ring
+			"NewLand_GlowWarren",
+			"NewLand_CordycepsCaves",
+			"NewLand_Corruption",
+			"NewLand_Silkwood",
+			"NewLand_MermShore",
+			"NewLand_MarbleForest",
+			"NewLand_Lavacaves",
+			"NewLand_HoundMoor",
+			"NewLand_StoneWreath",
+			"NewLand_SurfaceCave",
 		},
 		numoptionaltasks = 0,
 		optionaltasks = {},
         valid_start_tasks = {
-			"NewLand_Swamp",
+			"NewLand_Swamp_S",
         },
 		
-		required_prefabs = {},
+		required_prefabs = { "greatswamptree" },
 		set_pieces = {},
 		ocean_prefill_setpieces = {},
 
@@ -166,10 +244,48 @@ if firstTimeLoading then
 		ocean_population_setpieces = {},
 	})
 
-	require("map/tasks/swamp")
+	require("map/worldgen_patches")
+	require("map/tasks/swamp_sides")
+	require("map/tasks/swamp_core")
+	require("map/tasks/savannah")
+	require("map/tasks/houndmoor")
+	require("map/tasks/beemeadow")
+	require("map/tasks/mermshore")
+	require("map/tasks/thornbrush")
+	require("map/tasks/redforest")
+	require("map/tasks/jungle")
+	require("map/tasks/gloamwood")
+	require("map/tasks/cordycepscaves")
+	require("map/tasks/marbleforest")
+	require("map/tasks/silkwood")
+	require("map/tasks/corruption")
+	require("map/tasks/surfacecave")
+	require("map/tasks/saltflats")
+	require("map/tasks/stonewreath")
+	require("map/tasks/lavacaves")
+	require("map/tasks/ashlands")
+	require("map/tasks/glowwarren")
 
 	local ROOMS = {
 		"swamp",
+		"savannah",
+		"houndmoor",
+		"beemeadow",
+		"mermshore",
+		"thornbrush",
+		"redforest",
+		"jungle",
+		"gloamwood",
+		"cordycepscaves",
+		"marbleforest",
+		"silkwood",
+		"corruption",
+		"surfacecave",
+		"saltflats",
+		"stonewreath",
+		"lavacaves",
+		"ashlands",
+		"glowwarren",
 	}
 
 	for k, v in pairs(ROOMS) do

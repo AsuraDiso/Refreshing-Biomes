@@ -520,12 +520,12 @@ local function common_postinit(inst)
             for i, node in ipairs(inst.topology.nodes) do
                 if string.lower(inst.topology.ids[i]):find("swamp") then
 
-                    if not TheNet:IsDedicated() then
-                        local mist = SpawnPrefab("swampmist")
-                        mist.Transform:SetPosition(node.x, 0, node.y)
-                        mist.particles_per_tick = 20 * 2
-                        mist:PostInit()
-                    end
+                    -- if not TheNet:IsDedicated() then
+                    --     local mist = SpawnPrefab("swampmist")
+                    --     mist.Transform:SetPosition(node.x, 0, node.y)
+                    --     mist.particles_per_tick = 20 * 2
+                    --     mist:PostInit()
+                    -- end
                 end
             end
 		end

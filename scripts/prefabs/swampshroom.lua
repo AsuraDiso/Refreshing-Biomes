@@ -20,7 +20,7 @@ local function Cough(inst)
 	inst.coughtask = inst:DoTaskInTime(30+math.random()*30, Cough)
 end
 
-local function MakeMushroom(name, bank, build, anim, canfloat) 
+local function MakeMushroom(name, bank, build, anim, canfloat, hue) 
 	local assets =
 	{
 		Asset("ANIM", "anim/"..build..".zip"),
@@ -39,7 +39,7 @@ local function MakeMushroom(name, bank, build, anim, canfloat)
 		inst.AnimState:SetBank(bank)	
 		inst.AnimState:SetBuild(build)
 		inst.AnimState:PlayAnimation(anim,true)
-
+		inst.AnimState:SetHue(hue)
 		local color = math.min(1, math.random() + 0.5)
 		local scale = math.min(1, math.random() + 0.75)
         inst.AnimState:SetMultColour(color, color, color, 1)    
@@ -90,15 +90,15 @@ local function spawner()
 
 	inst:DoTaskInTime(0, function()
 		local shroom = math.random(1, 3)
-		SpawnAt(shroom == 1 and "swamp_shroom_small" or shroom == 2 and "swamp_shroom_medium" or "swamp_shroom_big", inst)
+		SpawnAt(shroom == 1 and "swamp_shroom_small" or shroom == 2 and "swamp_shroom_small" or "swamp_shroom_big", inst)
 		inst:Remove()
 	end)
 
 	return inst
 end
 
-return MakeMushroom("swamp_shroom_small", "mushroom_swamp_small", "mushroom_swamp_small", "idle_loop", true),
-		MakeMushroom("swamp_shroom_medium", "mushroom_swamp_tall", "mushroom_swamp_tall", "idle_loop", true),
-		MakeMushroom("swamp_shroom_big", "mushroom_swamp_tall", "mushroom_swamp_tall", "idle_loop", true),
+return MakeMushroom("swamp_shroom_small", "swamp_mushroom_small", "swamp_mushroom_small", "idle_loop", true, .8),
+		--MakeMushroom("swamp_shroom_medium", "swamp_mushroom_big", "swamp_mushroom_big", "idle_loop", true),
+		MakeMushroom("swamp_shroom_big", "swamp_mushroom_big", "swamp_mushroom_big", "idle_loop", true, .6),
 		Prefab("swamp_shroom_spawner", spawner)
 

@@ -1,0 +1,32 @@
+-- -- Center hub: all eight side keys required before the great swamp tree task places.
+
+-- AddTask("NewLand_SwampCore", {
+--     locks = {
+--         LOCKS.SWAMP_SIDE_N,
+--         LOCKS.SWAMP_SIDE_NE,
+--         LOCKS.SWAMP_SIDE_E,
+--         LOCKS.SWAMP_SIDE_SE,
+--         LOCKS.SWAMP_SIDE_S,
+--         LOCKS.SWAMP_SIDE_SW,
+--         LOCKS.SWAMP_SIDE_W,
+--         LOCKS.SWAMP_SIDE_NW,
+--     },
+--     keys_given = { KEYS.SAVANNAH, KEYS.SWAMPFOREST },
+--     room_tags = { "RoadPoison", "SwampMist" },
+
+--     hub_room = "GreatSwampTree",
+--     entrance_room = "SwampCoreLink",
+--     entrance_room_chance = 1,
+--     room_choices = {
+--         ["GreatSwampTree"] = 1,
+--         ["SwampCoreLink"] = 1,
+--         ["GreatSwamp"] = 2,
+--         ["SwampBackground"] = 1,
+--     },
+
+--     background_room = "SwampBackground",
+--     room_bg = WORLD_TILES.SWAMP,
+--     crosslink_factor = 1,
+--     make_loop = true,
+--     colour = { r = 0.45, g = 0.55, b = 0.30, a = 1 },
+-- })
