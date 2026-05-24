@@ -16,7 +16,9 @@ local SwampBrain = Class(function(self, inst)
     } 
 
     self.roots = {}
-    self.tree = TheSim:FindFirstEntityWithTag("greattree")
+    self.inst:DoTaskInTime(0, function() 
+        self.tree = TheSim:FindFirstEntityWithTag("greattree")
+    end)
 end)
 
 function SwampBrain:Heal(target)
@@ -111,6 +113,18 @@ function SwampBrain:ChangeMood(type, target)
     self:ChangeFog(self.mood)
 
     self:Event(target, self.mood_table[type] > 0 and "positive" or self.mood_table[type] < 0 and "negative" or nil)
+end
+
+function SwampBrain:DestroyedTree()
+    if self.tree then
+        self.tree:Remove()
+    end
+end
+
+function SwampBrain:PlantedTree()
+    if self.tree then
+        self.tree:Remove()
+    end
 end
 
 function SwampBrain:OnSave()

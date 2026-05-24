@@ -74,11 +74,6 @@ local function EnterWaterFn(inst)
     inst.AnimState:SetFloatParams(0.3, 1.0, 0)
     inst.AnimState:SetDeltaTimeMultiplier(0.75)
 
-	inst.fakeplayer = inst:SpawnChild("fakeplayer") 
-	inst.fakeplayer:AttachToPlayer(inst) 
-	inst.fakeplayer.Transform:SetPosition(0,-.4,0) 
-	inst.fakeplayer.AnimState:SetFloatParams(-.15, 1.0, 0)
-
 	inst._inwater = true
 end
 
@@ -96,11 +91,6 @@ local function ExitWaterFn(inst)
 
 	if isriding then
 		inst.AnimState:SetBank("wilsonbeefalo")
-	end
-
-	if inst.fakeplayer then
-		inst.fakeplayer:Remove()
-		inst.fakeplayer = nil
 	end
 
 	SpawnAt("splash_green", inst)
@@ -143,80 +133,6 @@ local function ExitWaterFn(inst)
 end
 
 return function(inst)
-	local animstate = getmetatable(inst.AnimState)
-	local _PlayAnimation = animstate.__index["PlayAnimation"]
-	animstate.__index["PlayAnimation"] = function(self, ...)
-		_PlayAnimation(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer.AnimState:PlayAnimation(...)
-			end
-		end
-	end
-	local _PushAnimation = animstate.__index["PushAnimation"]
-	animstate.__index["PushAnimation"] = function(self, ...)
-		_PushAnimation(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer.AnimState:PushAnimation(...)
-			end
-		end
-	end
-	local _OverrideItemSkinSymbol = animstate.__index["OverrideItemSkinSymbol"]
-	animstate.__index["OverrideItemSkinSymbol"] = function(self, ...)
-		_OverrideItemSkinSymbol(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer.AnimState:OverrideItemSkinSymbol(...)
-			end
-		end
-	end
-	local _OverrideSymbol = animstate.__index["OverrideSymbol"]
-	animstate.__index["OverrideSymbol"] = function(self, ...)
-		_OverrideSymbol(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer.AnimState:OverrideSymbol(...)
-			end
-		end
-	end
-	local _Show = animstate.__index["Show"]
-	animstate.__index["Show"] = function(self, ...)
-		_Show(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer.AnimState:Show(...)
-			end
-		end
-	end
-	local _Hide = animstate.__index["Hide"]
-	animstate.__index["Hide"] = function(self, ...)
-		_Hide(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer.AnimState:Hide(...)
-			end
-		end
-	end
-	local _SetSkin = animstate.__index["SetSkin"]
-	animstate.__index["SetSkin"] = function(self, ...)
-		_SetSkin(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer:UpdateSkins(inst)
-			end
-		end
-	end
-	local _SetScale = animstate.__index["SetScale"]
-	animstate.__index["SetScale"] = function(self, ...)
-		_SetScale(self, ...)
-		if self == inst.AnimState then
-			if inst.fakeplayer then
-				inst.fakeplayer.AnimState:SetScale(...)
-			end
-		end
-	end
-
 	if not TheWorld.ismastersim then
 		return inst
 	end

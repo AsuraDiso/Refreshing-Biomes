@@ -2,7 +2,8 @@
 AddTask("NewLand_CordycepsCaves", {
     locks = { LOCKS.CORDYCEPS },
     keys_given = {},
-  
+    room_tags = { "RoadPoison", "Cordyceps" },
+
     room_choices = {
         ["CordycepsCenter"] = 1,
         ["CordycepsInfested"] = function() return math.random(1, 3) end,

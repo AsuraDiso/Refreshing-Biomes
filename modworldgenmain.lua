@@ -471,3 +471,18 @@ if ShardIndex then
 		return val
 	end
 end
+
+
+
+local MakeCordycepsSites = require("map/cordyceps_spawner")
+local forest_map = require("map/forest_map")
+local _Generate = forest_map.Generate
+forest_map.Generate = function(prefab, map_width, map_height, tasks, level, level_type, ...)
+	local save = _Generate(prefab, map_width, map_height, tasks, level, level_type, ...)
+	if save then
+    	MakeCordycepsSites(save.ents, save.map.topology, map_width, map_height)
+	else
+		print("Error: Failed to generate world, so cordyceps sites were not generated.")
+	end
+	return save
+end

@@ -162,4 +162,6 @@ return function(inst)
     if not inst.ismastersim then
 	    return
 	end
+	
+	inst:AddComponent("cordycepsmanager")
 end

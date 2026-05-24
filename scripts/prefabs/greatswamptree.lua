@@ -161,6 +161,7 @@ local function fn()
     inst.entity:SetAABB(60, 20)
 
     inst:AddTag("shadecanopy")
+    inst:AddTag("greattree")
 
     inst.MiniMapEntity:SetIcon("greatswamptree.tex")
 

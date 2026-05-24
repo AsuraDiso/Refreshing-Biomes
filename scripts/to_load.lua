@@ -1,4 +1,5 @@
 PrefabFiles = {
+	"swampretrofiter",
 	"mosquitoswarm",
 	"mosquitoswarm_cocoon",
 	"swampgrass",
@@ -20,7 +21,6 @@ PrefabFiles = {
 	"fume_fx",
 	"shroombrella",
 	"shroombrella_fx",
-	"fakeplayer",
 	"swampmist",
 	"greatswamp_house",
 	"swamptrees",
@@ -30,8 +30,13 @@ PrefabFiles = {
 	"newland",
 	"newland_network",
 
-	"newland_veggies",
+	--"newland_veggies",
 	--"moonbloom",
+	"swampretrofiter",
+	
+	"savannatrees",
+	"tempwork",
+	"cordyceps_family"
 }
 
 Assets = {

@@ -1,15 +1,9 @@
 local assets =
 {
-    Asset("ANIM", "anim/tree_leaf_short.zip"),
-    Asset("ANIM", "anim/tree_leaf_normal.zip"),
-    Asset("ANIM", "anim/tree_leaf_tall.zip"),
-    Asset("ANIM", "anim/tree_leaf_monster.zip"),
-    Asset("ANIM", "anim/tree_leaf_trunk_build.zip"), --trunk build (winter leaves build)
-    Asset("ANIM", "anim/tree_leaf_green_build.zip"), --spring, summer leaves build
-    Asset("ANIM", "anim/tree_leaf_red_build.zip"), --autumn leaves build
-    Asset("ANIM", "anim/tree_leaf_orange_build.zip"), --autumn leaves build
-    Asset("ANIM", "anim/tree_leaf_yellow_build.zip"), --autumn leaves build
-    Asset("ANIM", "anim/tree_leaf_poison_build.zip"), --poison leaves build
+	Asset("ANIM", "anim/tree_jungle_build.zip"),
+	Asset("ANIM", "anim/tree_jungle_normal.zip"),
+	Asset("ANIM", "anim/tree_jungle_short.zip"),
+	Asset("ANIM", "anim/tree_jungle_tall.zip"),
     Asset("SOUND", "sound/forest.fsb"),
     Asset("SOUND", "sound/deciduous.fsb"),
     Asset("MINIMAP_IMAGE", "tree_leaf"),
@@ -44,7 +38,7 @@ local builds =
 {
     normal = { --Green
         leavesbuild="tree_leaf_green_build",
-        prefab_name="swamptree",
+        prefab_name="savannatree",
         normal_loot = {"log", "log"},
         short_loot = {"log"},
         tall_loot = {"log", "log", "log", "acorn"},
@@ -55,7 +49,7 @@ local builds =
     },
     barren = {
         leavesbuild=nil,
-        prefab_name="swamptree",
+        prefab_name="savannatree",
         normal_loot = {"log", "log"},
         short_loot = {"log"},
         tall_loot = {"log", "log", "log"},
@@ -66,7 +60,7 @@ local builds =
     },
     red = {
         leavesbuild="tree_leaf_red_build",
-        prefab_name="swamptree",
+        prefab_name="savannatree",
         normal_loot = {"log", "log"},
         short_loot = {"log"},
         tall_loot = {"log", "log", "log", "acorn"},
@@ -77,7 +71,7 @@ local builds =
     },
     orange = {
         leavesbuild="tree_leaf_orange_build",
-        prefab_name="swamptree",
+        prefab_name="savannatree",
         normal_loot = {"log", "log"},
         short_loot = {"log"},
         tall_loot = {"log", "log", "log", "acorn"},
@@ -88,7 +82,7 @@ local builds =
     },
     yellow = {
         leavesbuild="tree_leaf_yellow_build",
-        prefab_name="swamptree",
+        prefab_name="savannatree",
         normal_loot = {"log", "log"},
         short_loot = {"log"},
         tall_loot = {"log", "log", "log", "acorn"},
@@ -99,7 +93,7 @@ local builds =
     },
     poison = {
         leavesbuild="tree_leaf_poison_build",
-        prefab_name="swamptree",
+        prefab_name="savannatree",
         normal_loot = {"livinglog", "acorn", "acorn"},
         short_loot = {"livinglog", "acorn"},
         tall_loot = {"livinglog", "acorn", "acorn", "acorn"},
@@ -1240,18 +1234,16 @@ local function makefn(build, stage, data)
         inst:AddTag("tree")
         inst:AddTag("birchnut")
         inst:AddTag("cattoyairborne")
-        inst:AddTag("swamptree")
+        inst:AddTag("savannatree")
         inst:AddTag("shelter")
 
         inst.build = build
-        inst.AnimState:SetBank("tree_leaf")
-        inst.AnimState:SetBuild("tree_leaf_trunk_build")
+        inst.AnimState:SetBank("jungletree")
+        inst.AnimState:SetBuild("tree_jungle_build")
+        inst.AnimState:SetHue(.85)
 
         inst.AnimState:Hide("mouseover")
 
-        if GetBuild(inst).leavesbuild ~= nil then
-            inst.AnimState:OverrideSymbol("swap_leaves", GetBuild(inst).leavesbuild, "swap_leaves")
-        end
 
         inst:SetPrefabName(GetBuild(inst).prefab_name)
 
@@ -1289,7 +1281,7 @@ local function makefn(build, stage, data)
         -- inst:AddComponent("plantregrowth")
         -- inst.components.plantregrowth:SetRegrowthRate(TUNING.DECIDUOUS_REGROWTH.OFFSPRING_TIME)
         -- inst.components.plantregrowth:SetProduct("acorn_sapling")
-        -- inst.components.plantregrowth:SetSearchTag("swamptree")
+        -- inst.components.plantregrowth:SetSearchTag("savannatree")
 
         inst:AddComponent("timer")
         inst:ListenForEvent("timerdone", OnTimerDone)
@@ -1377,9 +1369,9 @@ local function tree(name, build, stage, data)
     return Prefab(name, makefn(build, stage, data), assets, prefabs)
 end
 
-return tree("swamptree", "normal", 0),
-        tree("swamptree_normal", "normal", 2),
-        tree("swamptree_tall", "normal", 3),
-        tree("swamptree_short", "normal", 1),
-        tree("swamptree_burnt", "normal", 0, "burnt"),
-        tree("swamptree_stump", "normal", 0, "stump")
+return tree("savannatree", "normal", 0),
+        tree("savannatree_normal", "normal", 2),
+        tree("savannatree_tall", "normal", 3),
+        tree("savannatree_short", "normal", 1),
+        tree("savannatree_burnt", "normal", 0, "burnt"),
+        tree("savannatree_stump", "normal", 0, "stump")
