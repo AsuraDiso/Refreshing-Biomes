@@ -37,7 +37,7 @@ local _last_spawn_time = 0
 --[[ Private member functions ]]
 --------------------------------------------------------------------------
 
-local function SpawnCordycepss()
+local function SpawnCordyceps()
     if not next(_cordyceps_spots) then
         return
     end
@@ -88,8 +88,8 @@ local function OnseasonChange(src, season)
     if season == SEASONS.SPRING then
         if not _cordyceps_spawned and (TheWorld.state.cycles - _last_spawn_time > 5) then
             -- 为了防止频繁转动日晷进入繁茂季导致卡顿, 所以两次荆棘生长之间有5天的冷却时间
-            print("SpawnCordycepss", TheWorld.state.cycles, _last_spawn_time)
-            SpawnCordycepss()
+            print("SpawnCordyceps", TheWorld.state.cycles, _last_spawn_time)
+            SpawnCordyceps()
             _last_spawn_time = TheWorld.state.cycles
         end
     else
@@ -104,8 +104,8 @@ end
 function self:Disable(disable)
     _disabled = disable == true
 end
-function self:SpawnCordycepss()
-    SpawnCordycepss()
+function self:SpawnCordyceps()
+    SpawnCordyceps()
 end
 
 function self:RegisterCordyceps(cordyceps)

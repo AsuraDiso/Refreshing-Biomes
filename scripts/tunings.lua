@@ -10,6 +10,7 @@ local day_time = seg_time * day_segs
 local dusk_time = seg_time * dusk_segs
 local night_time = seg_time * night_segs
 
+GLOBAL.CORDYCEPS_DISTANCE = 2.5
 
 local REFRESH_TUNING = {
 	MOSQUITOSWARM_GROWTH = {

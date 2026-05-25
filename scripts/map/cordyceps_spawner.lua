@@ -36,7 +36,7 @@ local function MakeCordycepsSites(new_entities, topology_save, map_width, map_he
         if world_x ~= nil and world_y ~= nil then
             local tx = (world_x / TILE_SCALE) + (WIDTH / 2)
             local ty = (world_y / TILE_SCALE) + (HEIGHT / 2)
-            SetEntity("cordyceps_site", tx, ty)
+            SetEntity("cordycepssite", tx, ty)
         end
     end
 end

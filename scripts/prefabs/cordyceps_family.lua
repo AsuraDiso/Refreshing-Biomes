@@ -1,4 +1,3 @@
-local spawndist = 7
 local assets =
 {
 	Asset("ANIM", "anim/thorn_bush.zip"),
@@ -129,6 +128,7 @@ local function spikefn()
     inst.AnimState:SetBank("thorn_bush")
     inst.AnimState:SetBuild("thorn_bush_guard_build")
     inst.AnimState:PlayAnimation("idle")
+    inst.AnimState:SetScale(.5,.5,.5)
 	inst.AnimState:SetHue(.1)
 	inst.AnimState:SetMultColour(0.9, 0.6, 0.6, 1)
     inst.Transform:SetRotation(math.random() * 360)
@@ -203,7 +203,7 @@ local function OnLoadMain(inst, data)
     end
 end
 
-local function SpawnCordycepss(inst)
+local function SpawnCordyceps(inst)
     if inst.spawned then
         inst:Remove()
         return
@@ -211,7 +211,7 @@ local function SpawnCordycepss(inst)
 
     local x, y, z = inst.Transform:GetWorldPosition()
     local angle = 0
-    local dist = spawndist
+    local dist = CORDYCEPS_DISTANCE
 
     for i = 1, 4 do
         local new_spike = SpawnPrefab("cordycepsspike")
@@ -256,7 +256,7 @@ local function fn()
 
     inst.sustainable_hedges = 1000 -- this is too high tbh
 
-    inst:DoTaskInTime(0, SpawnCordycepss)
+    inst:DoTaskInTime(0, SpawnCordyceps)
 
     inst:WatchWorldState("season", OnseasonChange_Main)
     OnseasonChange_Main(inst, TheWorld.state.season)

@@ -59,3 +59,143 @@ function _G.wwaw()
 	_snowfx:PostInit()
 
 end
+
+local submerged = {}
+EntityScript.IsSubmerged = function(inst)
+	return submerged[inst]
+end
+
+EntityScript.SetSubmerged = function(inst, height)
+	local isriding = inst.components.rider and inst.components.rider:IsRiding()
+	if height == nil or height == 0 and not submerged[inst] then
+		local size = "small"
+		local scale = 0.7
+		local high = 0.1
+		if isriding then
+			size = "med"
+			scale = 1.75
+			high = 0.8
+		end
+
+		SpawnAt("splash_green", inst)
+		if not inst:HasTag("swampdef") and inst.components.locomotor then
+			inst.components.locomotor:SetExternalSpeedMultiplier(inst, "waterspeed", 0.5)
+		end
+
+		inst._waketask = inst:DoPeriodicTask(0.75, function()
+			local running
+			if inst.sg ~= nil then
+				running = inst.sg:HasStateTag("moving") 
+			else
+				running = inst:HasTag("moving")
+			end
+			if running then
+				local wake = SpawnPrefab("wake_small")
+				local theta = inst.Transform:GetRotation() * DEGREES
+				local offset = Vector3(math.cos( theta )*0.2, 0, -math.sin( theta )*0.2)
+				local pos = Vector3(inst.Transform:GetWorldPosition()) + offset
+				wake.Transform:SetPosition(pos.x,pos.y,pos.z)
+				wake.Transform:SetRotation(inst.Transform:GetRotation() - 90)
+				
+				inst.SoundEmitter:PlaySound("turnoftides/common/together/water/swim/medium")
+			end
+		end)
+
+		if inst.DynamicShadow then
+			inst.DynamicShadow:Enable(false)
+		end
+
+		if not isriding then
+			if inst.player_classified then
+				inst.player_classified.iscarefulwalking:set(true)
+			end
+		end
+
+		if not inst.front_fx then
+			inst.front_fx = SpawnPrefab("float_fx_front")
+			inst.front_fx.entity:SetParent(inst.entity)
+			inst.front_fx.Transform:SetPosition(0, high, 0)
+			inst.front_fx.Transform:SetScale(scale, scale, scale)
+			inst.front_fx.AnimState:PlayAnimation("idle_front_"..size, true)
+		end
+
+		if not inst.back_fx then
+			inst.back_fx = SpawnPrefab("float_fx_back")
+			inst.back_fx.entity:SetParent(inst.entity)
+			inst.back_fx.TransformSetPosition:(0, high, 0)
+			inst.back_fx.Transform:SetScale(scale, scale, scale)
+			inst.back_fx.AnimState:PlayAnimation("idle_back_"..size, true)
+		end
+		submerged[inst] = true
+	elseif submerged[inst] then
+		SpawnAt("splash_green", inst)
+
+		if inst.components.locomotor then
+			inst.components.locomotor:RemoveExternalSpeedMultiplier(inst, "waterspeed")
+		end
+
+		if inst.DynamicShadow then
+			inst.DynamicShadow:Enable(true)
+		end
+
+		if not isriding then
+			if inst.player_classified then
+				inst.player_classified.iscarefulwalking:set(false)
+			end
+		end
+
+		if inst.front_fx then
+			inst.front_fx:Remove()
+			inst.front_fx = nil
+		end
+
+		if inst.back_fx then
+			inst.back_fx:Remove()
+			inst.back_fx = nil
+		end
+		
+		if inst._waketask then
+			inst._waketask:Cancel()
+			inst._waketask = nil
+		end
+
+		if inst._inwater then
+			inst._inwater = nil
+		end
+		submerged[inst] = nil
+	end
+
+	if self.AnimState then
+		self.AnimState:SetSubmerged(height)
+	end
+end
+
+local shader = resolvefilepath("shaders/anim_submerge.ksh")
+local _AddAnimState = Entity.AddAnimState
+local _SetFloatParams = AnimState.SetFloatParams
+local submerged = {}
+AnimState.SetFloatParams = function(self, x, y, z, ...)
+	if submerged[self] then
+		return
+	end
+	_SetFloatParams(self, x, y, z, ...)
+end
+
+AnimState.Real_SetFloatParams = _SetFloatParams
+
+AnimState.SetSubmerged = function(self, height)
+	if height == nil or height == 0 then
+		submerged[self] = false
+	else
+		submerged[self] = true
+	end
+	
+	if submerged[self] then
+		self:SetDefaultEffectHandle(shader)
+    	self:SetDeltaTimeMultiplier(0.75)
+	else
+		--self:SetDefaultEffectHandle(nil)
+		self:SetDeltaTimeMultiplier(1)
+	end
+    _SetFloatParams(self, (-height)-.1, 1.0, height)
+end

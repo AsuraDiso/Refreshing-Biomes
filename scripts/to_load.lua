@@ -45,6 +45,8 @@ Assets = {
 
 	Asset("ATLAS","images/greatswamptree.xml"),
 	Asset("MINIMAP_IMAGE", "images/greatswamptree.tex"),
+
+	Asset("SHADER", "shaders/anim_submerge.ksh"),
 }
 
 AddMinimapAtlas("images/greatswamptreeshade.xml")

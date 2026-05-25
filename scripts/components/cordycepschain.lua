@@ -1,5 +1,3 @@
-local spawndist = 7
-
 local valid_tiles = {
     [WORLD_TILES.CORDYCEPS] = true,
 }
@@ -94,7 +92,7 @@ local function TestLocation(inst, pt)
 end
 
 local function SpawnSpike(inst, pt, rotation)
-    local new_spike = SpawnPrefab("cordyceps_spike")
+    local new_spike = SpawnPrefab("cordycepsspike")
     new_spike.Transform:SetPosition(pt.x, pt.y, pt.z)
     new_spike.Transform:SetRotation(rotation)
 
@@ -118,7 +116,7 @@ local CordycepsChain = Class(function(self, inst)
 end)
 
 function CordycepsChain:SpawnChain(angle)
-    local dist = spawndist + .5
+    local dist = CORDYCEPS_DISTANCE + .5
     local deflection = 0.6
 
     local pt = self.inst:GetPosition()

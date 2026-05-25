@@ -1,0 +1,133 @@
+#if defined( GL_ES )
+precision mediump float;
+#endif
+
+uniform vec4 TIMEPARAMS;
+uniform vec4 FLOAT_PARAMS; // Matches the Vertex Shader now
+
+uniform mat4 MatrixW;
+
+#if defined( TRIPLE_ATLAS )
+    uniform sampler2D SAMPLER[6];
+#else
+    uniform sampler2D SAMPLER[5];
+#endif
+
+#ifndef LIGHTING_H
+#define LIGHTING_H
+
+#if !defined( UI_CC )
+// Lighting
+varying vec3 PS_POS;
+#endif
+
+// xy = min, zw = max
+uniform vec4 LIGHTMAP_WORLD_EXTENTS;
+
+#define LIGHTMAP_TEXTURE SAMPLER[3]
+
+#ifndef LIGHTMAP_TEXTURE
+    #error If you use lighting, you must #define the sampler that the lightmap belongs to
+#endif
+
+vec3 CalculateLightingContribution()
+{
+    // Note: Lightmaps use .xz, so leaving PS_POS unshifted won't break your light mapping.
+    vec2 uv = ( PS_POS.xz - LIGHTMAP_WORLD_EXTENTS.xy ) * LIGHTMAP_WORLD_EXTENTS.zw;
+    return texture2D( LIGHTMAP_TEXTURE, uv.xy ).rgb;
+}
+
+#endif //LIGHTING.h
+
+
+varying vec3 PS_TEXCOORD;
+
+uniform mat4 COLOUR_XFORM;
+uniform vec3 PARAMS;
+uniform vec4 OCEAN_BLEND_PARAMS;
+uniform vec3 CAMERARIGHT;
+
+#define ALPHA_TEST PARAMS.x
+#define LIGHT_OVERRIDE PARAMS.y
+#define BLOOM_TOGGLE PARAMS.z
+
+uniform vec4 OCEAN_WORLD_EXTENTS;
+#define OCEAN_SAMPLER SAMPLER[4]
+
+#if defined( HOLO )
+    float filmSkipRand() // This should match the function with the same name in anim.vs
+    {
+        float steps = 12.;
+        float c = fract(sin(ceil(TIMEPARAMS.x * steps) / steps) * 10000.);
+        return (c * -.36) * step(.78, c);
+    }
+#endif
+
+void main()
+{
+    vec4 colour;
+    vec2 st = PS_TEXCOORD.xy;
+    #if defined( TRIPLE_ATLAS )
+        if( PS_TEXCOORD.z < 0.5 )
+        {
+            colour.rgba = texture2D( SAMPLER[0], st.xy );
+        }
+        else if( PS_TEXCOORD.z < 1.5 )
+        {
+            colour.rgba = texture2D( SAMPLER[1], st.xy );
+        }
+        else
+        {
+            colour.rgba = texture2D( SAMPLER[5], st.xy );
+        }
+    #else
+        if( PS_TEXCOORD.z < 0.5 )
+        {
+            colour.rgba = texture2D( SAMPLER[0], st.xy );
+        }
+        else
+        {
+            colour.rgba = texture2D( SAMPLER[1], st.xy );
+        }
+    #endif
+
+    if (BLOOM_TOGGLE == 1.0)
+    {
+        gl_FragColor.rgba = vec4(0, 0, 0, colour.a);
+        return;
+    }
+
+    // FIXED: Because PS_POS.y is now the clean, static world height, 
+    // this threshold will slice straight through the entity as it moves down.
+    if(FLOAT_PARAMS.y > 0.0)
+    {
+        if(PS_POS.y < FLOAT_PARAMS.x)
+        {
+            discard;
+        }
+    }
+    
+    if (ALPHA_TEST > 0.0)
+    {
+        if (colour.a >= ALPHA_TEST)
+        {
+            gl_FragColor = colour.rgba;    
+        }
+        else
+        {
+            discard;
+        }
+    }
+    else
+    {
+        gl_FragColor.rgba = colour.rgba * COLOUR_XFORM;
+
+        vec2 world_uv = ( PS_POS.xz - OCEAN_WORLD_EXTENTS.xy ) * OCEAN_WORLD_EXTENTS.zw;
+        vec3 world_tint = texture2D( OCEAN_SAMPLER, world_uv ).rgb;
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, gl_FragColor.rgb * world_tint.rgb, OCEAN_BLEND_PARAMS.x);
+
+        vec3 light = CalculateLightingContribution();
+
+        gl_FragColor.rgb *= light.rgb;
+    }
+}
