@@ -1,128 +1,221 @@
+local ROOT_LIMIT = 10
+local ROOT_SPAWN_COUNT = 3
+local ROOT_SPAWN_ATTEMPTS = 12
+local ROOT_MIN_RADIUS = 2
+local ROOT_MAX_RADIUS = 3
+
+local HEAL_INTERVAL = 1
+local HEAL_FX_RADIUS = 2
+local HEAL_FX_COUNT_MIN = 2
+local HEAL_FX_COUNT_MAX = 3
+
+local MOOD_MIN = -1
+local MOOD_MAX = 1
+
+local MOOD_VALUES =
+{
+    destroytree = -0.01,
+
+    planttree  = 0.005,
+
+    large      = 0.075,
+    med        = 0.05,
+    small      = 0.025,
+
+    seeds      = 0.00005,
+}
+
 local SwampBrain = Class(function(self, inst)
     self.inst = inst
-    
+
     self.mood = 0
-
-    self.mood_table = { 
-        destroytree = -0.01, 
-
-        planttree = 0.005, 
-        
-        large = 0.075, 
-        med = 0.05, 
-        small = 0.025, 
-        ---------------------
-        seeds = 0.00005,
-    } 
-
     self.roots = {}
-    self.inst:DoTaskInTime(0, function() 
+    self.tree = nil
+
+    self.mood_values = MOOD_VALUES
+
+    self.inst:DoTaskInTime(0, function()
         self.tree = TheSim:FindFirstEntityWithTag("greattree")
     end)
 end)
 
-function SwampBrain:Heal(target)
-    local workable = target and target.components.workable
-    if workable then
-        self.inst:DoPeriodicTask(1, function()
-            if workable.workmax > workable.workleft then
-                workable.workleft = workable.workleft + 1
-            end
-        end)
+local function Clamp(value, min, max)
+    return math.max(min, math.min(max, value))
+end
 
-        local spawned = {}
-        local x, y, z = target.Transform:GetWorldPosition()
-        local radius = 2
-        local n = math.random(2, 3)
-        for i = 1, n do
-            local a = i / n * 2 * PI
-            local pos = Vector3(x + math.cos(a) * radius, 0, z + math.sin(a) * radius)
-            local pref = SpawnAt("greattreehealfx", pos)
-            table.insert(spawned, pref)
-        end
+function SwampBrain:GetMoodDelta(action)
+    return self.mood_values[action] or 0
+end
+
+function SwampBrain:IsPositiveAction(action)
+    return self:GetMoodDelta(action) > 0
+end
+
+function SwampBrain:IsNegativeAction(action)
+    return self:GetMoodDelta(action) < 0
+end
+
+function SwampBrain:ChangeMood(action, target)
+    local delta = self:GetMoodDelta(action)
+
+    self.mood = Clamp(
+        self.mood + delta,
+        MOOD_MIN,
+        MOOD_MAX
+    )
+
+    self:UpdateFog()
+
+    if delta > 0 then
+        self:HandleMoodEvent(target, "positive")
+    elseif delta < 0 then
+        self:HandleMoodEvent(target, "negative")
     end
 end
 
-function SwampBrain:Event(target, mood)
-    if target then
-        if math.random() > .5 then
-            if mood == "positive" then
-                self:CalmRoots()
-            elseif mood == "negative" then
-                if #self.roots < 10 then
-                    self:RootAttack(target, Remap(self.mood,1,0,0.75,1.125))
-                end
-            end
+function SwampBrain:UpdateFog()
+    local fog_level = math.ceil(
+        Remap(self.mood, 1, 0, 0.5, 5)
+    )
+
+    TheWorld:PushEvent("changeswampmood",
+    {
+        level = fog_level,
+    })
+end
+
+function SwampBrain:HandleMoodEvent(target, mood_type)
+    if not target or math.random() <= 0.5 then
+        return
+    end
+
+    if mood_type == "positive" then
+        self:CalmRoots()
+
+    elseif mood_type == "negative" then
+        if #self.roots < ROOT_LIMIT then
+            local level = Remap(self.mood, 1, 0, 0.75, 1.125)
+            self:SpawnRootAttack(target, level)
         end
     end
 end
 
 function SwampBrain:CalmRoots()
-    if self.mood >= 0 then
-        for k, v in ipairs(self.roots) do
-            if math.random() < .5 then
-                self.roots[k]:Calm()
-                self.roots[k] = nil
-            end
+    if self.mood < 0 then
+        return
+    end
+
+    for index, root in ipairs(self.roots) do
+        if root ~= nil and math.random() < 0.5 then
+            root:Calm()
+            self.roots[index] = nil
         end
     end
 end
 
-function SwampBrain:RootAttack(target, level)
-    local pt = target:GetPosition()
-    local PREFABS_AMOUNT = 3
-    local attempts = 12
+function SwampBrain:SpawnRootAttack(target, level)
+    local target_pos = target:GetPosition()
 
-    for i = 1, PREFABS_AMOUNT do
+    for _ = 1, ROOT_SPAWN_COUNT do
         target:DoTaskInTime(math.random(), function()
-            local theta = math.random() * 2 * PI
-            local radius = math.random(2, 3)	
-            local result_offset = FindValidPositionByFan(theta, radius, attempts, function(offset)
-                local pos = pt + offset
-                return TheWorld.Map:IsPassableAtPoint(pos:Get()) and TheWorld.Map:IsDeployPointClear(pos, nil, 1)
-            end)
-        
-            if result_offset ~= nil then							
-                local x, z = pt.x + result_offset.x, pt.z + result_offset.z
-                local pref = SpawnPrefab("swamproot")
-                pref.Transform:SetPosition(x, 0, z)
-                pref:SetLevel(level)
-                table.insert(self.roots, pref)
-            end
+            self:SpawnSingleRoot(target_pos, level)
         end)
     end
+end
 
-    self.inst:DoTaskInTime(1.1, function()
-        for k, v in ipairs(self.roots) do
-            self.roots[k]:ListenForEvent("onremove", function()
-                self.roots[k] = nil
-            end)
+function SwampBrain:SpawnSingleRoot(center_pos, level)
+    local theta = math.random() * 2 * PI
+    local radius = math.random(ROOT_MIN_RADIUS, ROOT_MAX_RADIUS)
+
+    local offset = FindValidPositionByFan(
+        theta,
+        radius,
+        ROOT_SPAWN_ATTEMPTS,
+        function(test_offset)
+            local pos = center_pos + test_offset
+
+            return TheWorld.Map:IsPassableAtPoint(pos:Get())
+                and TheWorld.Map:IsDeployPointClear(pos, nil, 1)
         end
+    )
+
+    if offset == nil then
+        return
+    end
+
+    local root = SpawnPrefab("swamproot")
+
+    if root == nil then
+        return
+    end
+
+    local x = center_pos.x + offset.x
+    local z = center_pos.z + offset.z
+
+    root.Transform:SetPosition(x, 0, z)
+    root:SetLevel(level)
+
+    table.insert(self.roots, root)
+
+    root:ListenForEvent("onremove", function()
+        self:RemoveRoot(root)
     end)
 end
 
-function SwampBrain:ChangeFog(level)
-    TheWorld:PushEvent("changeswampmood", {level = math.ceil(Remap(level,1,0,0.5,5))})
+function SwampBrain:RemoveRoot(root_to_remove)
+    for index, root in ipairs(self.roots) do
+        if root == root_to_remove then
+            table.remove(self.roots, index)
+            return
+        end
+    end
 end
 
-function SwampBrain:ChangeMood(type, target)
-    local newmood = self.mood + self.mood_table[type]
-    if newmood <= 1 and newmood >= -1 then
-        self.mood = newmood
-    end
-    self:ChangeFog(self.mood)
+function SwampBrain:Heal(target)
+    local workable = target and target.components.workable
 
-    self:Event(target, self.mood_table[type] > 0 and "positive" or self.mood_table[type] < 0 and "negative" or nil)
+    if workable == nil then
+        return
+    end
+
+    self.inst:DoPeriodicTask(HEAL_INTERVAL, function()
+        if workable.workleft < workable.workmax then
+            workable.workleft = workable.workleft + 1
+        end
+    end)
+
+    self:SpawnHealFX(target)
+end
+
+function SwampBrain:SpawnHealFX(target)
+    local x, y, z = target.Transform:GetWorldPosition()
+
+    local fx_count = math.random(
+        HEAL_FX_COUNT_MIN,
+        HEAL_FX_COUNT_MAX
+    )
+
+    for i = 1, fx_count do
+        local angle = (i / fx_count) * 2 * PI
+
+        local position = Vector3(
+            x + math.cos(angle) * HEAL_FX_RADIUS,
+            0,
+            z + math.sin(angle) * HEAL_FX_RADIUS
+        )
+
+        SpawnAt("greattreehealfx", position)
+    end
 end
 
 function SwampBrain:DestroyedTree()
-    if self.tree then
+    if self.tree ~= nil then
         self.tree:Remove()
     end
 end
 
 function SwampBrain:PlantedTree()
-    if self.tree then
+    if self.tree ~= nil then
         self.tree:Remove()
     end
 end
@@ -135,11 +228,9 @@ function SwampBrain:OnSave()
 end
 
 function SwampBrain:OnLoad(data)
-    if data.mood then
+    if data ~= nil and data.mood ~= nil then
         self.mood = data.mood
     end
 end
 
-
 return SwampBrain
-    

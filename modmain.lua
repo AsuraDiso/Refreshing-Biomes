@@ -9,6 +9,7 @@ local modimport = modimport
 local AddAction = AddAction
 local AddStategraphActionHandler = AddStategraphActionHandler
 local AddComponentAction = AddComponentAction
+local AddSimPostInit = AddSimPostInit
 
 GLOBAL.UpvalueHacker = require("tools/upvaluehacker")
 
@@ -61,11 +62,25 @@ function _G.wwaw()
 end
 
 local submerged = {}
+local canbesubmerged = {}
+
+EntityScript.SetCanBeSubmerged = function(inst, canbe_submerged)
+	canbesubmerged[inst] = canbe_submerged
+end
+
+EntityScript.CanBeSubmerged = function(inst)
+	return canbesubmerged[inst] == nil and true or canbesubmerged[inst]
+end
+
 EntityScript.IsSubmerged = function(inst)
 	return submerged[inst]
 end
 
 EntityScript.SetSubmerged = function(inst, height)
+	if not inst:CanBeSubmerged() then
+		return
+	end
+
 	local isriding = inst.components.rider and inst.components.rider:IsRiding()
 	if height == nil or height == 0 and not submerged[inst] then
 		local size = "small"
@@ -78,6 +93,7 @@ EntityScript.SetSubmerged = function(inst, height)
 		end
 
 		SpawnAt("splash_green", inst)
+
 		if not inst:HasTag("swampdef") and inst.components.locomotor then
 			inst.components.locomotor:SetExternalSpeedMultiplier(inst, "waterspeed", 0.5)
 		end
@@ -122,11 +138,13 @@ EntityScript.SetSubmerged = function(inst, height)
 		if not inst.back_fx then
 			inst.back_fx = SpawnPrefab("float_fx_back")
 			inst.back_fx.entity:SetParent(inst.entity)
-			inst.back_fx.TransformSetPosition:(0, high, 0)
+			inst.back_fx.Transform:SetPosition(0, high, 0)
 			inst.back_fx.Transform:SetScale(scale, scale, scale)
 			inst.back_fx.AnimState:PlayAnimation("idle_back_"..size, true)
 		end
+		
 		submerged[inst] = true
+
 	elseif submerged[inst] then
 		SpawnAt("splash_green", inst)
 
@@ -165,8 +183,8 @@ EntityScript.SetSubmerged = function(inst, height)
 		submerged[inst] = nil
 	end
 
-	if self.AnimState then
-		self.AnimState:SetSubmerged(height)
+	if inst.AnimState then
+		inst.AnimState:SetSubmerged(height)
 	end
 end
 
@@ -194,8 +212,14 @@ AnimState.SetSubmerged = function(self, height)
 		self:SetDefaultEffectHandle(shader)
     	self:SetDeltaTimeMultiplier(0.75)
 	else
-		--self:SetDefaultEffectHandle(nil)
+		self:ClearDefaultEffectHandle(nil)
 		self:SetDeltaTimeMultiplier(1)
 	end
     _SetFloatParams(self, (-height)-.1, 1.0, height)
 end
+
+AddSimPostInit(function()
+	if _G.TheWorld.components.worldoceandepth then
+		_G.TheWorld.components.worldoceandepth:Initialize()
+	end
+end)

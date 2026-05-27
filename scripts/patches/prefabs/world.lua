@@ -162,6 +162,6 @@ return function(inst)
     if not inst.ismastersim then
 	    return
 	end
-	
+	inst:AddComponent("worldoceandepth")
 	inst:AddComponent("cordycepsmanager")
 end

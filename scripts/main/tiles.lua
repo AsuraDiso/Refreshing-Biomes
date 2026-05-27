@@ -10,6 +10,14 @@ local LAVA_OCEAN_COLOR =
     minimap_color =         {  191,  89,  0, 180 },
 }
 
+local SWAMP_OCEAN_COLOR = 
+{ 
+    primary_color =         {  38,  52,  28, 60 },
+    secondary_color =       {  76,  88,  48, 140 },
+    secondary_color_dusk =  {  53,  59,  34, 50 },
+    minimap_color =         {  48,  64,  36, 102 },
+}
+ 
 local WAVETINTS = 
 {
     lava =             {0.75, 0.35, 0},           
@@ -40,18 +48,20 @@ AddTile(
 
 AddTile(
 	"SWAMP_FLOOD",
-	"LAND",
+	"OCEAN",
 	{ground_name = "Swamp_Flood"},
 	{
-		name = "marsh_pond",
-		noise_texture = "levels/textures/Ground_noise_swamp_water.tex",
+		name = "cave",
+		noise_texture = "levels/textures/ocean_noise.tex",
 		runsound = "turnoftides/common/together/water/swim/run_water_med",
 		walksound = "turnoftides/common/together/water/swim/walk_water_med",
 		snowsound = "turnoftides/common/together/water/swim/walk_water_med",
 		mudsound = "turnoftides/common/together/water/swim/walk_water_med",
-		--cannotbedug = true,
-        --flooring = true,
-        hard = true,
+        ocean_depth = "SHALLOW",
+		flashpoint_modifier = 500,
+		is_shoreline = true,
+		colors = SWAMP_OCEAN_COLOR,
+		wavetint = WAVETINTS.lava
 	},
 	{
 		name = "map_edge",
@@ -176,9 +186,9 @@ ChangeTileRenderOrder(WORLD_TILES.SWAMP_FLOOD, WORLD_TILES.ROAD, false)
 ChangeTileRenderOrder(WORLD_TILES.SWAMP_ICE, WORLD_TILES.CARPET, false)
 
 TileGroups.OceanAndFakeWater = TileGroupManager:AddTileGroup(TileGroups.OceanTiles)
-TileGroupManager:AddValidTile(TileGroups.OceanAndFakeWater, WORLD_TILES.SWAMP_FLOOD)
+TileGroupManager:AddInvalidTile(TileGroups.OceanAndFakeWater, WORLD_TILES.SWAMP_FLOOD)
 
 TileGroups.LandAndNotFakeWater = TileGroupManager:AddTileGroup(TileGroups.LandTiles)
-TileGroupManager:AddInvalidTile(TileGroups.LandAndNotFakeWater, WORLD_TILES.SWAMP_FLOOD)
+TileGroupManager:AddValidTile(TileGroups.LandAndNotFakeWater, WORLD_TILES.SWAMP_FLOOD)
 
-TileGroupManager:SetIsOceanTileGroup(TileGroups.OceanAndFakeWater)
+--TileGroupManager:SetIsOceanTileGroup(TileGroups.OceanAndFakeWater)
