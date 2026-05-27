@@ -76,6 +76,54 @@ EntityScript.IsSubmerged = function(inst)
 	return submerged[inst] or false
 end
 
+local TILE_SCALE = 4
+function GetInterpolatedSubmergeHeight(inst)
+	local x, y, z = inst.Transform:GetWorldPosition()
+	local tx, ty = TheWorld.Map:GetTileCoordsAtPoint(x, 0, z)
+	local verts = nil
+	if TheWorld.components.worldoceandepth then
+		verts = TheWorld.components.worldoceandepth:GetVertsAtTile(tx, ty)
+	elseif inst.components.oceandepth_renderer then
+		verts = inst.components.oceandepth_renderer:GetVertsAtTile(tx, ty)
+	elseif ThePlayer and ThePlayer.components.oceandepth_renderer then
+		verts = ThePlayer.components.oceandepth_renderer:GetVertsAtTile(tx, ty)
+	end
+
+	local calculated_height = 0
+	if verts then
+		local v1 = verts[1] or 0
+		local v2 = verts[2] or 0
+		local v3 = verts[3] or 0
+		local v4 = verts[4] or 0
+
+		local cx, _, cz = TheWorld.Map:GetTileCenterPoint(x, 0, z)
+		local half_scale = TILE_SCALE / 2
+
+		local p1x, p1z = cx - half_scale, cz - half_scale
+		local p2x, p2z = cx + half_scale, cz - half_scale
+		local p3x, p3z = cx - half_scale, cz + half_scale
+		local p4x, p4z = cx + half_scale, cz + half_scale
+
+		local x_norm = math.max(0, math.min(1, (x - p1x) / TILE_SCALE))
+		local z_norm = math.max(0, math.min(1, (z - p1z) / TILE_SCALE))
+
+		local depth = (1 - x_norm) * (1 - z_norm) * v1
+					+ x_norm * (1 - z_norm) * v2
+					+ (1 - x_norm) * z_norm * v3
+					+ x_norm * z_norm * v4
+
+		local isriding = inst.components.rider and inst.components.rider:IsRiding()
+		local scale = 0.25
+		local max_submerge = -1.5
+		if isriding then
+			scale = 0.15
+			max_submerge = -1.0
+		end
+		calculated_height = depth--math.max(depth * scale, max_submerge)
+	end
+	return calculated_height
+end
+
 EntityScript.SetSubmerged = function(inst, height)
 	if not inst:CanBeSubmerged() then
 		return
@@ -118,8 +166,18 @@ EntityScript.SetSubmerged = function(inst, height)
 			end
 		end)
 
+		inst._submerge_update_task = inst:DoPeriodicTask(0, function()
+			local cur_height = GetInterpolatedSubmergeHeight(inst)
+			if inst.AnimState then
+				inst.AnimState:SetSubmerged(cur_height)
+			end
+		end)
+
+		local init_height = GetInterpolatedSubmergeHeight(inst)
+		height = init_height
+
 		if inst.DynamicShadow then
-	elseif not wants_submerged and submerged[inst] then
+			inst.DynamicShadow:Enable(false)
 		end
 
 		if not isriding then
@@ -178,6 +236,11 @@ EntityScript.SetSubmerged = function(inst, height)
 			inst._waketask = nil
 		end
 
+		if inst._submerge_update_task then
+			inst._submerge_update_task:Cancel()
+			inst._submerge_update_task = nil
+		end
+
 		if inst._inwater then
 			inst._inwater = nil
 		end
@@ -202,20 +265,19 @@ end
 AnimState.Real_SetFloatParams = _SetFloatParams
 
 AnimState.SetSubmerged = function(self, height)
-	if height == nil or height == 0 then
-		submerged[self] = false
-	else
-		submerged[self] = true
-	end
+	local is_submerged = height ~= nil and height ~= 0
 	
-	if submerged[self] then
-		self:SetDefaultEffectHandle(shader)
-    	self:SetDeltaTimeMultiplier(0.75)
-	else
-		self:ClearDefaultEffectHandle(nil)
-		self:SetDeltaTimeMultiplier(1)
+	if submerged[self] ~= is_submerged then
+		submerged[self] = is_submerged
+		if is_submerged then
+			self:SetDefaultEffectHandle(shader)
+			self:SetDeltaTimeMultiplier(0.75)
+		else
+			self:ClearDefaultEffectHandle(nil)
+			self:SetDeltaTimeMultiplier(1)
+		end
 	end
-    _SetFloatParams(self, 0, 1.0, height)--(-height)-.1
+	_SetFloatParams(self, 0, 1.0, height or 0)
 end
 AddSimPostInit(function()
 	if _G.TheWorld.components.worldoceandepth then

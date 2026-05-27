@@ -1,0 +1,126 @@
+#ifdef GL_ES
+    precision highp float;
+#endif
+
+uniform sampler2D SAMPLER[4];
+
+uniform vec4 TIMEPARAMS;
+
+uniform vec3 CAMERARIGHT;
+
+varying vec3 PS_TEXCOORD_LIFE;
+varying vec4 PS_COLOUR;
+
+#ifndef LIGHTING_H
+    #define LIGHTING_H
+
+    varying vec3 PS_POS;
+
+    uniform vec4 LIGHTMAP_WORLD_EXTENTS;
+
+    #define LIGHTMAP_TEXTURE SAMPLER[3]
+    #ifndef LIGHTMAP_TEXTURE
+        #error If you use lighting, you must #define the sampler that the lightmap belongs to
+    #endif
+
+    vec3 CalculateLightingContribution()
+    {
+        vec2 uv = (PS_POS.xz - LIGHTMAP_WORLD_EXTENTS.xy) * LIGHTMAP_WORLD_EXTENTS.zw;
+        return texture2D(LIGHTMAP_TEXTURE, uv.xy).rgb;
+    }
+#endif
+
+// CONSTANTS
+#define PI 3.1415926535897932384626433832795
+#define E 2.7182818284590452353602874713527
+const vec3 OCEAN_COLOR = vec3(5.0 / 255.0, 73.0 / 255.0, 107.0 / 255.0);
+const vec3 SKY_COLOR = vec3(88.0 / 255.0, 209.0 / 255.0, 239.0 / 255.0);
+//
+
+// PROCEDURAL WAVE
+float Wave(vec2 uv_scale, vec2 uv_offset, float wave_sharpness, float time_scale)
+{
+    float time = 2.0 * PI * fract(TIMEPARAMS.x / (2.0 * PI));
+    vec2 _uv = PS_POS.xz * uv_scale + uv_offset;
+
+    wave_sharpness = 5.0 - 5.0 * wave_sharpness; // 5 is max sharpness
+
+    float w1 = sin(0.4 * (_uv.x + _uv.y) + 3.0 * time * time_scale);
+    float w2 = cos(0.6 * (_uv.x + _uv.y) + 2.0 * time * time_scale);
+    float w3 = sin(0.8 * (_uv.x + _uv.y) + time * time_scale);
+    float w4 = cos(0.7 * (_uv.x + _uv.y) + time * time_scale);
+    float wave = w1 * w2 * w3 * w4 + 0.5 * sin(_uv.y + time * time_scale);
+
+    float epow = pow(abs(sin(0.5 * (wave + _uv.x + _uv.y) + time * time_scale)), 4.0) / wave_sharpness;
+    float z = pow(E, epow);
+    z += 0.2 * pow(abs(sin(_uv.x + _uv.y + time)), 2.0) - 1.0;
+    z /= 2.0;
+
+    return z;
+}
+//
+
+// FRESNEL EFFECT
+float Fresnel(float amount, vec3 normal, vec3 view)
+{
+	return pow(
+		1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0),
+		amount
+	);
+}
+//
+
+vec3 DepthToColor(vec3 color)
+{
+    return mix(color, OCEAN_COLOR * 0.5, min(1.0, pow(-PS_POS.y / 16.0, 0.25)));
+}
+
+void main()
+{
+    // BACKFACE CULLING
+    if (!gl_FrontFacing)
+    {
+        discard;
+    }
+
+    // VARS
+    // float SUN = u_mouse.x / u_resolution.x; // 0.0 - 1.0, morning to evening
+    // float X_PIXEL_SIZE = 1.0 / u_resolution.x; // X-axis pixel size as a fraction
+    // float Y_PIXEL_SIZE = 1.0 / u_resolution.y; // Y-axis pixel size as a fraction
+    float X_PIXEL_SIZE = 1.0 / 500.0; // 1 / 500 should give high enough precision
+    float Y_PIXEL_SIZE = 1.0 / 500.0;
+    float WAVES_SCALE = 1.0;
+    float WAVES_SHARPNESS = 0.65;
+    float WAVES_TIME_SCALE = 1.0;
+
+    // WAVES
+    float wave_noise = Wave(vec2(WAVES_SCALE), vec2(0.0, 0.0), WAVES_SHARPNESS, WAVES_TIME_SCALE);
+
+    if (PS_POS.y > wave_noise - 1.0)
+    {
+	    vec4 color = texture2D(SAMPLER[0], PS_TEXCOORD_LIFE.xy);
+	    gl_FragColor = vec4(color.rgb * PS_COLOUR.rgb, color.a * PS_COLOUR.a);
+    }
+    else
+    {
+        // NORMALS
+        float waves_noise_x = Wave(vec2(WAVES_SCALE), vec2(-X_PIXEL_SIZE, 0.0), WAVES_SHARPNESS, WAVES_TIME_SCALE);
+        float waves_noise_y = Wave(vec2(WAVES_SCALE), vec2(0.0, -Y_PIXEL_SIZE), WAVES_SHARPNESS, WAVES_TIME_SCALE);
+
+        vec3 waves_normal = vec3(
+            (-normalize(cross(vec3(-X_PIXEL_SIZE, wave_noise - waves_noise_x, 0.0), vec3(0.0, 0.0, 1.0))).x + 1.0) * 0.5,
+            (-normalize(cross(vec3(-Y_PIXEL_SIZE, wave_noise - waves_noise_y, 0.0), vec3(0.0, 0.0, 1.0))).x + 1.0) * 0.5,
+            0.5 + (wave_noise + 1.0) * 0.25
+        );
+        
+        // RENDER
+        vec3 waves_incident = vec3(0.0, 0.0, 1.0); // TODO: Make camera dependant
+        float water_IOF = 1.33;
+        vec4 refracted_color = texture2D(SAMPLER[0], PS_TEXCOORD_LIFE.xy + refract(waves_incident, waves_normal, water_IOF).xy * 0.1);
+
+        gl_FragColor = vec4(refracted_color.rgb * PS_COLOUR.rgb, refracted_color.a * PS_COLOUR.a);
+        // gl_FragColor.rgb = DepthToColor(gl_FragColor.rgb);
+    }
+
+    gl_FragColor.rgb *= CalculateLightingContribution();
+}

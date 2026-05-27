@@ -1,5 +1,5 @@
 local TEXTURE = "levels/textures/Ground_noise_swamp.tex"
-local SHADER = "shaders/vfx_oceandepth.ksh"
+local SHADER = "shaders/swamptile.ksh"
 
 local COLOUR_ENVELOPE_NAME = "oceandepth_colour_envelope"
 local SCALE_ENVELOPE_NAME = "oceandepth_scale_envelope"
@@ -93,7 +93,7 @@ local function fn()
                 local pz = tz + grid_z * TILE_SCALE
 
                 local tile = TheWorld.Map:GetTileAtPoint(px, 0, pz)
-                if TileGroupManager:IsOceanTile(tile) then
+                if tile == WORLD_TILES.SWAMP_FLOOD then
                     local verts = ThePlayer.components.oceandepth_renderer:GetVertsAtPoint(px, 0, pz)
                     verts[1] = verts[1] or 0
                     verts[2] = verts[2] or 0
