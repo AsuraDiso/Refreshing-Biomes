@@ -80,6 +80,7 @@ AddTile(
 		walksound = "dontstarve/movement/walk_marsh",
 		snowsound = "dontstarve/movement/run_ice",
 		mudsound = "dontstarve/movement/run_mud",
+        ocean_depth = "SHALLOW",
     },
     {
         name = "map_edge",

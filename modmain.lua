@@ -73,7 +73,7 @@ EntityScript.CanBeSubmerged = function(inst)
 end
 
 EntityScript.IsSubmerged = function(inst)
-	return submerged[inst]
+	return submerged[inst] or false
 end
 
 EntityScript.SetSubmerged = function(inst, height)
@@ -82,7 +82,8 @@ EntityScript.SetSubmerged = function(inst, height)
 	end
 
 	local isriding = inst.components.rider and inst.components.rider:IsRiding()
-	if height == nil or height == 0 and not submerged[inst] then
+	local wants_submerged = height ~= nil and height ~= 0
+	if wants_submerged and not submerged[inst] then
 		local size = "small"
 		local scale = 0.7
 		local high = 0.1
@@ -118,7 +119,7 @@ EntityScript.SetSubmerged = function(inst, height)
 		end)
 
 		if inst.DynamicShadow then
-			inst.DynamicShadow:Enable(false)
+	elseif not wants_submerged and submerged[inst] then
 		end
 
 		if not isriding then
@@ -191,7 +192,6 @@ end
 local shader = resolvefilepath("shaders/anim_submerge.ksh")
 local _AddAnimState = Entity.AddAnimState
 local _SetFloatParams = AnimState.SetFloatParams
-local submerged = {}
 AnimState.SetFloatParams = function(self, x, y, z, ...)
 	if submerged[self] then
 		return
@@ -215,9 +215,8 @@ AnimState.SetSubmerged = function(self, height)
 		self:ClearDefaultEffectHandle(nil)
 		self:SetDeltaTimeMultiplier(1)
 	end
-    _SetFloatParams(self, (-height)-.1, 1.0, height)
+    _SetFloatParams(self, 0, 1.0, height)--(-height)-.1
 end
-
 AddSimPostInit(function()
 	if _G.TheWorld.components.worldoceandepth then
 		_G.TheWorld.components.worldoceandepth:Initialize()

@@ -114,7 +114,7 @@ return Class(function(self, inst)
             for y = 1, HEIGHT - 2 do
                 local center_tile = TheWorld.Map:GetTile(x, y)
 
-                if IsOceanTile(center_tile) then
+                if center_tile == WORLD_TILES.SWAMP_FLOOD or center_tile == WORLD_TILES.SWAMP_FLOOD_GEN then
                     local tiles = {
                         TheWorld.Map:GetTile(x - 1, y + 1), TheWorld.Map:GetTile(x, y + 1), TheWorld.Map:GetTile(x + 1, y + 1),
                         TheWorld.Map:GetTile(x - 1, y),     center_tile,                    TheWorld.Map:GetTile(x + 1, y),

@@ -4,17 +4,11 @@
 
 return Class(function(self, inst)
 
-assert(TheWorld.ismastersim, "CordycepsManager should not exist on client")
+assert(TheWorld.ismastersim, "SwampManager should not exist on client")
 
 --------------------------------------------------------------------------
 --[[ Private constants ]]
 --------------------------------------------------------------------------
-
-local VALID_TILES = {
-    [WORLD_TILES.CORDYCEPS] = true,
-}
-
-local CORDYCEPS_MIN_DISTANCE_SQ = 80 * 80
 
 --------------------------------------------------------------------------
 --[[ Public Member Variables ]]
