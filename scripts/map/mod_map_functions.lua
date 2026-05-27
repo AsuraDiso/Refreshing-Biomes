@@ -97,7 +97,7 @@ function SwampTileSetFunction(id, entities, data)
 				WorldSim:SetTile(x, y, WORLD_TILES.SWAMP)
 			else
 				if not IsCloseToWater(WorldSim, x, y, math.random(1,2)) then
-					WorldSim:SetTile(x, y, WORLD_TILES.SWAMP_FLOOD)
+					WorldSim:SetTile(x, y, WORLD_TILES.SWAMP_FLOOD_GEN)
 				end
 			end
 		end

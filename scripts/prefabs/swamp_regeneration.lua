@@ -23,7 +23,7 @@ local function get_growth_count(stage)
 end
 
 local function offset_key(x, y)
-    return x .. "," .. y
+    return bit.bor(bit.lshift(x + 32, 6), y + 32)
 end
 
 local function has_free_neighbor(parent_x, parent_y, occupied)
@@ -357,4 +357,4 @@ local function fn()
     return inst
 end
 
-return Prefab("tempwork", fn)
+return Prefab("swamp_regeneration", fn)

@@ -70,6 +70,24 @@ AddTile(
 )
 
 AddTile(
+    "SWAMP_FLOOD_GEN",
+    "LAND",
+    {ground_name = "Swamp_Gen"},
+    {
+        name = "deciduous",
+		noise_texture = "levels/textures/Ground_noise_swamp_ice.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+    },
+    {
+        name = "map_edge",
+        noise_texture = "levels/textures/Ground_noise_swamp.tex",
+    }
+)
+
+AddTile(
 	"SWAMP_ICE",
 	"LAND",
 	{ground_name = "Swamp_Ice"},

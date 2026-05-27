@@ -577,6 +577,7 @@ local function master_postinit(inst)
 	inst:AddComponent("messagebottlemanager")
 
     inst:AddComponent("swampbrain")
+    inst:AddComponent("swampmanager")
 
     if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
         inst:AddComponent("gingerbreadhunter")

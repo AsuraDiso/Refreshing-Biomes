@@ -36,7 +36,7 @@ PrefabFiles = {
 	"oceandepth",
 	
 	"savannatrees",
-	"tempwork",
+	-- "tempwork",
 	"cordyceps_family"
 }
 
@@ -48,6 +48,7 @@ Assets = {
 	Asset("MINIMAP_IMAGE", "images/greatswamptree.tex"),
 
 	Asset("SHADER", "shaders/anim_submerge.ksh"),
+	Asset("SHADER", "shaders/vfx_oceandepth.ksh"),
 }
 
 AddMinimapAtlas("images/greatswamptreeshade.xml")
