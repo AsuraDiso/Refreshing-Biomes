@@ -3,7 +3,7 @@ local _MIN_VERT_DEPTH = -32
 local _MAX_VERT_DEPTH = 0
 
 return Class(function(self, inst)
-    assert(TheWorld.ismastersim, "WorldOceanDepth should not exist on client!")
+    assert(TheWorld.ismastersim, "SubmergedTerrain should not exist on client!")
 
 	-- [ Public fields ] --
 	self.inst = inst
@@ -100,21 +100,36 @@ return Class(function(self, inst)
     end
 
     function self:UpdateClientVerts()
-        inst:PushEvent("ms_updateoceandepthverts", self:OnSave())
+        inst:PushEvent("ms_updatesubmergedterrainverts", self:OnSave())
     end
 
-    function self:Initialize()
-        if _loaded then
+    function self:Initialize(force)
+        if _loaded and not force then
             return
         end
 
-        print("Initializing WorldOceanDepth...")
+        if force then
+            _verts_grid = nil
+            _loaded = false
+        end
+
+        print("Initializing SubmergedTerrain...")
+
+        if _verts_grid == nil then
+            InitializeDataGrids()
+        end
 
         for x = 1, WIDTH - 2 do
             for y = 1, HEIGHT - 2 do
                 local center_tile = TheWorld.Map:GetTile(x, y)
 
-                if center_tile == WORLD_TILES.SWAMP_FLOOD or center_tile == WORLD_TILES.SWAMP_FLOOD_GEN then
+                local converted_tile = SUBMERGEDTERRAIN_GEN_TO_BASE and SUBMERGEDTERRAIN_GEN_TO_BASE[center_tile]
+                if converted_tile ~= nil then
+                    TheWorld.Map:SetTile(x, y, converted_tile)
+                    center_tile = converted_tile
+                end
+
+                if IsSubmergedTile(center_tile) then
                     local tiles = {
                         TheWorld.Map:GetTile(x - 1, y + 1), TheWorld.Map:GetTile(x, y + 1), TheWorld.Map:GetTile(x + 1, y + 1),
                         TheWorld.Map:GetTile(x - 1, y),     center_tile,                    TheWorld.Map:GetTile(x + 1, y),
@@ -166,6 +181,8 @@ return Class(function(self, inst)
             end
         end
 
+        _loaded = true
+
         inst:DoTaskInTime(0, function() -- Let the network prefab get created first
             self:UpdateClientVerts()
         end)
@@ -184,7 +201,7 @@ return Class(function(self, inst)
 
         _loaded = true
 
-        print("Loaded WorldOceanDepth data...")
+        print("Loaded SubmergedTerrain data...")
 
         inst:DoTaskInTime(0, function() -- Let the network prefab get created first
             self:UpdateClientVerts()

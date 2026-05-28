@@ -122,6 +122,10 @@ self.inst:DoTaskInTime(0, function()
                     end
                 end
             end
+
+            if TheWorld.components.submergedterrain then
+                TheWorld.components.submergedterrain:Initialize(true)
+            end
         end
     end
 end)

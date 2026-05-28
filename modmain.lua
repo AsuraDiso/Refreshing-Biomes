@@ -13,15 +13,36 @@ local AddSimPostInit = AddSimPostInit
 
 GLOBAL.UpvalueHacker = require("tools/upvaluehacker")
 
-GLOBAL.FAKEOCEANTILES = {
-	[WORLD_TILES.SWAMP_FLOOD] = true,
+GLOBAL.setfenv(1, GLOBAL)
+
+SUBMERGEDTERRAIN_TILE_ORDER = {
+	"SWAMP_FLOOD",
+	"DEEPWEB",
 }
 
-GLOBAL.FAKEOCEAN_CAN_DEPLOY = {
+SUBMERGEDTERRAIN_TILES = {}
+SUBMERGEDTERRAIN_GEN_TO_BASE = {}
+for _, tile_name in ipairs(SUBMERGEDTERRAIN_TILE_ORDER) do
+	local tile = WORLD_TILES[tile_name]
+	if tile ~= nil then
+		SUBMERGEDTERRAIN_TILES[tile] = true
+		SUBMERGEDTERRAIN_TILES[tile_name] = true
+	end
+	tile = WORLD_TILES[tile_name.."_GEN"]
+	if tile ~= nil then
+		SUBMERGEDTERRAIN_TILES[tile] = true
+		SUBMERGEDTERRAIN_TILES[tile_name.."_GEN"] = true
+		SUBMERGEDTERRAIN_GEN_TO_BASE[tile] = WORLD_TILES[tile_name]
+	end
+end
+
+function IsSubmergedTile(tile)
+	return SUBMERGEDTERRAIN_TILES[tile] == true
+end
+
+SUBMERGEDTERRAIN_CAN_DEPLOY = {
 	"lilypad_seed",
 }
-
-GLOBAL.setfenv(1, GLOBAL)
 
 modimport("scripts/main.lua")
 modimport("scripts/to_load.lua")
@@ -81,12 +102,12 @@ function GetInterpolatedSubmergeHeight(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
 	local tx, ty = TheWorld.Map:GetTileCoordsAtPoint(x, 0, z)
 	local verts = nil
-	if TheWorld.components.worldoceandepth then
-		verts = TheWorld.components.worldoceandepth:GetVertsAtTile(tx, ty)
-	elseif inst.components.oceandepth_renderer then
-		verts = inst.components.oceandepth_renderer:GetVertsAtTile(tx, ty)
-	elseif ThePlayer and ThePlayer.components.oceandepth_renderer then
-		verts = ThePlayer.components.oceandepth_renderer:GetVertsAtTile(tx, ty)
+	if TheWorld.components.submergedterrain then
+		verts = TheWorld.components.submergedterrain:GetVertsAtTile(tx, ty)
+	elseif inst.components.submergedterrain_renderer then
+		verts = inst.components.submergedterrain_renderer:GetVertsAtTile(tx, ty)
+	elseif ThePlayer and ThePlayer.components.submergedterrain_renderer then
+		verts = ThePlayer.components.submergedterrain_renderer:GetVertsAtTile(tx, ty)
 	end
 
 	local calculated_height = 0
@@ -280,7 +301,7 @@ AnimState.SetSubmerged = function(self, height)
 	_SetFloatParams(self, 0, 1.0, height or 0)
 end
 AddSimPostInit(function()
-	if _G.TheWorld.components.worldoceandepth then
-		_G.TheWorld.components.worldoceandepth:Initialize()
+	if _G.TheWorld.components.submergedterrain then
+		_G.TheWorld.components.submergedterrain:Initialize(true)
 	end
 end)

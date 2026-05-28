@@ -2,6 +2,7 @@
 AddTask("NewLand_Lavacaves", {
     locks = { LOCKS.ASHLANDS },
     keys_given = {},
+    room_tags = { "LavaCave" },
   
     room_choices = {
         ["LavaCenter"] = 1,

@@ -72,7 +72,7 @@ return function(self)
 				local node, node_index = TheWorld.Map:FindVisualNodeAtPoint(x, y, z)
 				local data =
 				{
-					cave = node and node.tags and table.contains(node.tags, "Cave") or false,
+					cave = node and node.tags and table.contains(node.tags, "AirCave") or false,
 					lava = node and node.tags and table.contains(node.tags, "LavaCave") or false,
 				}
 				player:PushEvent("onchangecavezone", data)

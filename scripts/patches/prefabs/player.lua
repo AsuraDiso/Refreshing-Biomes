@@ -11,11 +11,11 @@ local function ExitWaterFn(inst)
 end
 
 return function(inst)
-	inst:AddComponent("oceandepth_renderer")
+	inst:AddComponent("submergedterrain_renderer")
 
     if not _G.TheNet:IsDedicated() then
-        inst.oceandepth = _G.SpawnPrefab("oceandepth")
-        inst.oceandepth.entity:SetParent(inst.entity)
+		inst.submergedterrain = _G.SpawnPrefab("submergedterrain")
+		inst.submergedterrain.entity:SetParent(inst.entity)
     end
 
 	if not TheWorld.ismastersim then

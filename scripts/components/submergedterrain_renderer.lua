@@ -4,27 +4,27 @@ return Class(function(self, inst)
 
 	-- [ Private fields ] --
 	local _map = TheWorld.Map
-    local _encoded_data = net_string(inst.GUID, "oceandepth_renderer.encoded_data", "encoded_datadirty")
+    local _encoded_data = net_string(inst.GUID, "submergedterrain_renderer.encoded_data", "submergedterrain_datadirty")
 
 	if TheWorld.ismastersim then
-		TheWorld:ListenForEvent("ms_updateoceandepthverts", function(inst, data) self:UpdateData(data.str) end)
+		TheWorld:ListenForEvent("ms_updatesubmergedterrainverts", function(inst, data) self:UpdateData(data.str) end)
 
 		function self:UpdateData(str)
 			if str == nil then return end
 			_encoded_data:set(str)
-			self.inst.oceandepth.forceupdate = true
+			self.inst.submergedterrain.forceupdate = true
 		end
 
 		function self:GetVertsAtTile(tx, ty)
-			return TheWorld.components.worldoceandepth:GetVertsAtTile(tx, ty)
+			return TheWorld.components.submergedterrain:GetVertsAtTile(tx, ty)
 		end
 
 		function self:GetVertsAtPoint(x, y, z)
-			return TheWorld.components.worldoceandepth:GetVertsAtPoint(x, y, z)
+			return TheWorld.components.submergedterrain:GetVertsAtPoint(x, y, z)
 		end
 
 		function self:GetVertAtCoords(x, y)
-			return TheWorld.components.worldoceandepth:GetVertAtCoords(x, y)
+			return TheWorld.components.submergedterrain:GetVertAtCoords(x, y)
 		end
 	elseif not TheNet:IsDedicated() then
 		local WIDTH, HEIGHT = _map:GetSize() -- The network is set up after the world size is set
@@ -33,12 +33,12 @@ return Class(function(self, inst)
 
 		local _verts_grid = DataGrid(WIDTH, HEIGHT)
 
-		inst:ListenForEvent("encoded_datadirty", function() self:UpdateOceanDepthVerts() end)
+		inst:ListenForEvent("submergedterrain_datadirty", function() self:UpdateSubmergedTerrainVerts() end)
 
-		function self:UpdateOceanDepthVerts()
+		function self:UpdateSubmergedTerrainVerts()
 			if _verts_grid and _encoded_data:value() ~= nil then
 				_verts_grid:Load(DecodeAndUnzipSaveData({ str = _encoded_data:value() }))
-				self.inst.oceandepth.forceupdate = true
+				self.inst.submergedterrain.forceupdate = true
 			end
 		end
 

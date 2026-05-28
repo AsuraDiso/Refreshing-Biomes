@@ -3,6 +3,7 @@ _G.UpvalueHacker = require("tools/upvaluehacker")
 local Story = require("map/storygen")
 local rawget = _G.rawget
 local rawset = _G.rawset
+local modimport = modimport
 
 mods = rawget(_G, "mods")
 if not mods then
@@ -11,17 +12,17 @@ if not mods then
 end
 env.mods = mods
 
+local menv = env
+GLOBAL.setfenv(1, GLOBAL)
+
 local firstTimeLoading = true
-if _G.WORLD_TILES.SWAMP then
+if _G.WORLD_TILES.OCEAN_LAVA then
 	firstTimeLoading = false
 end
 
 if firstTimeLoading then
 	modimport("scripts/main/tiles.lua")
 end
-
-local menv = env
-GLOBAL.setfenv(1, GLOBAL)
 
 local function GetNextAvaliableCollisionMask()
     local mask = 0
@@ -72,6 +73,7 @@ if firstTimeLoading then
 		"ASHLANDS",
 		"SILKWOOD",
 		"GLOWWARREN",
+		"SPIDERCAVES",
 	}
 
 	for k, v in pairs(NEW_LOCKS_AND_KEYS) do
@@ -116,6 +118,7 @@ if firstTimeLoading then
 	LOCKS_KEYS[LOCKS.ASHLANDS] = {KEYS.ASHLANDS}
 	LOCKS_KEYS[LOCKS.SILKWOOD] = {KEYS.SILKWOOD}
 	LOCKS_KEYS[LOCKS.GLOWWARREN] = {KEYS.GLOWWARREN}
+	LOCKS_KEYS[LOCKS.SPIDERCAVES] = {KEYS.SPIDERCAVES}
 		
 	for lock,keyset in pairs(LOCKS_KEYS) do
 		assert(lock and lock == LOCKS[LOCKS_ARRAY[lock]], "A lock in the lock_keys is misnamed!")
@@ -200,15 +203,7 @@ if firstTimeLoading then
 		location = "newland",
 		tasks = {
 			-- Start spoke, then hub, then remaining spokes
-			"NewLand_Swamp_S",
 			"NewLand_SwampCore",
-			"NewLand_Swamp_N",
-			"NewLand_Swamp_NE",
-			"NewLand_Swamp_E",
-			"NewLand_Swamp_SE",
-			"NewLand_Swamp_SW",
-			"NewLand_Swamp_W",
-			"NewLand_Swamp_NW",
 			-- Inner ring (adjacent to swamp spokes)
 			"NewLand_Savannah",
 			"NewLand_BeeMeadow",
@@ -229,11 +224,12 @@ if firstTimeLoading then
 			"NewLand_HoundMoor",
 			"NewLand_StoneWreath",
 			"NewLand_SurfaceCave",
+			"NewLand_SpiderCaves",
 		},
 		numoptionaltasks = 0,
 		optionaltasks = {},
         valid_start_tasks = {
-			"NewLand_Swamp_S",
+			"NewLand_SwampCore",
         },
 		
 		required_prefabs = { "greatswamptree" },
@@ -245,7 +241,6 @@ if firstTimeLoading then
 	})
 
 	require("map/worldgen_patches")
-	require("map/tasks/swamp_sides")
 	require("map/tasks/swamp_core")
 	require("map/tasks/savannah")
 	require("map/tasks/houndmoor")
@@ -265,6 +260,7 @@ if firstTimeLoading then
 	require("map/tasks/lavacaves")
 	require("map/tasks/ashlands")
 	require("map/tasks/glowwarren")
+	require("map/tasks/spidercaves")
 
 	local ROOMS = {
 		"swamp",
@@ -286,6 +282,7 @@ if firstTimeLoading then
 		"lavacaves",
 		"ashlands",
 		"glowwarren",
+		"spidercaves",
 	}
 
 	for k, v in pairs(ROOMS) do

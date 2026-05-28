@@ -2,6 +2,7 @@
 AddTask("NewLand_GlowWarren", {
     locks = { LOCKS.GLOWWARREN },
     keys_given = {},
+    room_tags = { "AirCave" },
   
     room_choices = {
         ["GlowWarrenCenter"] = 1,

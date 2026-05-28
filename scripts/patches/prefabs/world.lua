@@ -5,7 +5,7 @@ return function(inst)
 	if map then
 		local _IsAboveGroundAtPoint =	map.IsAboveGroundAtPoint
 		map.IsAboveGroundAtPoint = function(self, x, y, z, allow_water, ...)
-			if not allow_water and FAKEOCEANTILES[self:GetTileAtPoint(x, y, z)] then
+			if not allow_water and IsSubmergedTile(self:GetTileAtPoint(x, y, z)) then
 				return false
 			end
 			return _IsAboveGroundAtPoint(self, x, y, z, allow_water, ...)
@@ -13,7 +13,7 @@ return function(inst)
 
 		local _IsVisualGroundAtPoint = map.IsVisualGroundAtPoint
 		map.IsVisualGroundAtPoint = function(self, x, y, z, ...)
-			if FAKEOCEANTILES[self:GetTileAtPoint(x, y, z)] then
+			if IsSubmergedTile(self:GetTileAtPoint(x, y, z)) then
 				return false
 			end
 			return _IsVisualGroundAtPoint(self, x, y, z, ...)
@@ -21,7 +21,7 @@ return function(inst)
 		--local x,y,z = ThePlayer.Transform:GetWorldPosition() print(TheWorld.Map:IsOceanTileAtPoint(x,y,z))
 		local _IsOceanTileAtPoint =	map.IsOceanTileAtPoint
 		map.IsOceanTileAtPoint = function(self, x, y, z, ...)
-			if FAKEOCEANTILES[self:GetTileAtPoint(x, y, z)] then
+			if IsSubmergedTile(self:GetTileAtPoint(x, y, z)) then
 				return true
 			end
 			return _IsOceanTileAtPoint(self, x, y, z, ...)
@@ -29,7 +29,7 @@ return function(inst)
 
 		local _IsOceanAtPoint =	map.IsOceanAtPoint
 		map.IsOceanAtPoint = function(self, x, y, z, allow_boats, ...)
-			if FAKEOCEANTILES[self:GetTileAtPoint(x, y, z)] then
+			if IsSubmergedTile(self:GetTileAtPoint(x, y, z)) then
 				return (allow_boats or self:GetPlatformAtPoint(x, z) == nil)
 			end
 			return _IsOceanAtPoint(self, x, y, z, allow_boats, ...)
@@ -53,7 +53,7 @@ return function(inst)
 				--z direction
 				for j = -r, r, 4 do
 					totalTiles = totalTiles + 1
-					if TheWorld.Map:GetTileAtPoint(x + i, y, z + j) == WORLD_TILES.SWAMP_FLOOD then
+					if IsSubmergedTile(self:GetTileAtPoint(x + i, y, z + j)) then
 						numWaterTiles = numWaterTiles + 1
 					end
 				end
@@ -69,7 +69,7 @@ return function(inst)
 			end
 
 			if self:IsOceanTileAtPoint(pt.x, pt.y, pt.z) then
-				if FAKEOCEAN_CAN_DEPLOY[inst.prefab] then
+				if SUBMERGEDTERRAIN_CAN_DEPLOY[inst.prefab] then
 					return self:IsDeployPointClear(pt, inst, inst.replica.inventoryitem ~= nil and inst.replica.inventoryitem:DeploySpacingRadius() or DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT])
 				end
 				return false
@@ -84,7 +84,7 @@ return function(inst)
 			pt = Vector3(math.floor(pt.x) + 0.5, pt.y, math.floor(pt.z) + 0.5)
 			local x,y,z = pt:Get()
 
-			if self:IsOceanAtPoint(x, y, z, false) and FAKEOCEAN_CAN_DEPLOY[inst.prefab] then
+			if self:IsOceanAtPoint(x, y, z, false) and SUBMERGEDTERRAIN_CAN_DEPLOY[inst.prefab] then
 				return self:IsDeployPointClear(pt, inst, 1, nil, IsNearOtherWallOrPlayerFN, false)
 			end
 
@@ -93,7 +93,7 @@ return function(inst)
 
 		local _CanDeployAtPoint = map.CanDeployAtPoint
 		map.CanDeployAtPoint = function(self, pt, inst, mouseover, ...)
-			if self:IsOceanAtPoint(pt.x, pt.y, pt.z, false) and FAKEOCEAN_CAN_DEPLOY[inst.prefab] then
+			if self:IsOceanAtPoint(pt.x, pt.y, pt.z, false) and SUBMERGEDTERRAIN_CAN_DEPLOY[inst.prefab] then
 				return (mouseover == nil or mouseover:HasTag("player") or mouseover:HasTag("walkableplatform"))
         			and self:IsDeployPointClear(pt, inst, inst.replica.inventoryitem ~= nil and inst.replica.inventoryitem:DeploySpacingRadius() or DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT])
 			end
@@ -105,7 +105,7 @@ return function(inst)
 
 		map.CanDeployBoatAtPointInWater = function(self, pt, inst, mouseover, data)
 			local tile = self:GetTileAtPoint(pt.x, pt.y, pt.z)
-			if (inst:HasTag("boatbuilder") and FAKEOCEANTILES[tile]) or (inst:HasTag("lilypad") and not FAKEOCEANTILES[tile]) then
+			if (inst:HasTag("boatbuilder") and IsSubmergedTile(tile)) or (inst:HasTag("lilypad") and not IsSubmergedTile(tile)) then
 				return false
 			end
 
@@ -114,7 +114,7 @@ return function(inst)
 
 		local _CanDeployRecipeAtPoint = map.CanDeployRecipeAtPoint
 		map.CanDeployRecipeAtPoint = function(self, pt, recipe, rot, ...)
-			if self:IsOceanAtPoint(pt.x, pt.y, pt.z, false) and FAKEOCEAN_CAN_DEPLOY[recipe.name] then
+			if self:IsOceanAtPoint(pt.x, pt.y, pt.z, false) and SUBMERGEDTERRAIN_CAN_DEPLOY[recipe.name] then
 				return (recipe.testfn == nil or recipe.testfn(pt, rot))
         			and self:IsDeployPointClear(pt, nil, recipe.min_spacing or 3.2)
 			end
@@ -162,6 +162,6 @@ return function(inst)
     if not inst.ismastersim then
 	    return
 	end
-	inst:AddComponent("worldoceandepth")
+	inst:AddComponent("submergedterrain")
 	inst:AddComponent("cordycepsmanager")
 end

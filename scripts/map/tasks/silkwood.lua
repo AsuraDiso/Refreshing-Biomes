@@ -1,7 +1,7 @@
 -- South (outer): spider silkwood beyond the jungle.
 AddTask("NewLand_Silkwood", {
     locks = { LOCKS.JUNGLE },
-    keys_given = {},
+    keys_given = { KEYS.SILKWOOD },
   
     room_choices = {
         ["SilkwoodCenter"] = 1,

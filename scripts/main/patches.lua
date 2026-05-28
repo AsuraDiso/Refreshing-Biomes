@@ -73,10 +73,10 @@ end
 
 --[[local _IsOceanTile = IsOceanTile
 function IsOceanTile(tile)
-	return FAKEOCEANTILES[tile] or _IsOceanTile(tile)
+	return SUBMERGEDTERRAIN_TILES[tile] or _IsOceanTile(tile)
 end
 
 local _IsLandTile = IsLandTile
 function IsLandTile(tile)
-	return not FAKEOCEANTILES[tile] or _IsLandTile(tile)
+	return not SUBMERGEDTERRAIN_TILES[tile] or _IsLandTile(tile)
 end]]

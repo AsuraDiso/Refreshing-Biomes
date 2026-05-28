@@ -2,7 +2,7 @@
 AddTask("NewLand_CordycepsCaves", {
     locks = { LOCKS.CORDYCEPS },
     keys_given = {},
-    room_tags = { "RoadPoison", "Cordyceps" },
+    room_tags = { "RoadPoison", "Cordyceps", "AirCave" },
 
     room_choices = {
         ["CordycepsCenter"] = 1,

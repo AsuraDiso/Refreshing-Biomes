@@ -33,7 +33,7 @@ PrefabFiles = {
 	--"newland_veggies",
 	--"moonbloom",
 	"swampretrofiter",
-	"oceandepth",
+	"submergedterrain",
 	
 	"savannatrees",
 	-- "tempwork",

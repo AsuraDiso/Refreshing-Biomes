@@ -2,7 +2,8 @@
 AddTask("NewLand_SurfaceCave", {
     locks = { LOCKS.SURFACECAVE },
     keys_given = {},
-  
+    room_tags = { "AirCave" },
+
     room_choices = {
         ["CaveCenter"] = 1,
         ["CaveSpiderNest"] = function() return math.random(1, 2) end,

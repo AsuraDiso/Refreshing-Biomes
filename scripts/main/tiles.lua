@@ -1,7 +1,4 @@
 
-local TileGroupManager = GLOBAL.TileGroupManager
-local TileGroups = GLOBAL.TileGroups
-
 local LAVA_OCEAN_COLOR = 
 { 
     primary_color =         { 255, 30, 0,  255 },
@@ -17,11 +14,74 @@ local SWAMP_OCEAN_COLOR =
     secondary_color_dusk =  {  53,  59,  34, 50 },
     minimap_color =         {  48,  64,  36, 102 },
 }
+
+local DEEPWEB_OCEAN_COLOR = 
+{ 
+    primary_color =         {  0,0,0,0 },
+    secondary_color =         {  0,0,0,0 },
+    secondary_color_dusk =         {  0,0,0,0 },
+    minimap_color =         {  0,0,0,0 },
+}
  
 local WAVETINTS = 
 {
     lava =             {0.75, 0.35, 0},           
 }
+
+function AddSubmergedTerrain(tile_name, texture, colors)
+	AddTile(
+		tile_name,
+		"OCEAN",
+		{ground_name = tile_name},
+		{
+			name = "cave",
+			noise_texture = texture,
+			runsound = "turnoftides/common/together/water/swim/run_water_med",
+			walksound = "turnoftides/common/together/water/swim/walk_water_med",
+			snowsound = "turnoftides/common/together/water/swim/walk_water_med",
+			mudsound = "turnoftides/common/together/water/swim/walk_water_med",
+			ocean_depth = "SHALLOW",
+			flashpoint_modifier = 500,
+			is_shoreline = true,
+			colors = colors,
+			wavetint = WAVETINTS.lava
+		},
+		{
+			name = "map_edge",
+			noise_texture = texture,
+		}
+	)
+
+	AddTile(
+		tile_name.."_GEN",
+		"LAND",
+		{ground_name = tile_name.."_GEN"},
+		{
+			name = "deciduous",
+			noise_texture = texture,
+			runsound = "dontstarve/movement/run_marsh",
+			walksound = "dontstarve/movement/walk_marsh",
+			snowsound = "dontstarve/movement/run_ice",
+			mudsound = "dontstarve/movement/run_mud",
+			ocean_depth = "SHALLOW",
+		},
+		{
+			name = "map_edge",
+			noise_texture = texture,
+		}
+	)
+
+	local tile_group_manager = GLOBAL.TileGroupManager
+	local tile_groups = GLOBAL.TileGroups
+	if tile_group_manager ~= nil and tile_groups ~= nil then
+		tile_groups.OceanAndFakeWater = tile_group_manager:AddTileGroup(tile_groups.OceanTiles)
+		tile_group_manager:AddInvalidTile(tile_groups.OceanAndFakeWater, WORLD_TILES[tile_name])
+
+		tile_groups.LandAndNotFakeWater = tile_group_manager:AddTileGroup(tile_groups.LandTiles)
+		tile_group_manager:AddValidTile(tile_groups.LandAndNotFakeWater, WORLD_TILES[tile_name])
+	end
+	ChangeTileRenderOrder(WORLD_TILES[tile_name], WORLD_TILES.ROAD, false)
+end
 
 AddTile(
 	"OCEAN_LAVA",
@@ -46,47 +106,8 @@ AddTile(
 	}
 )
 
-AddTile(
-	"SWAMP_FLOOD",
-	"OCEAN",
-	{ground_name = "Swamp_Flood"},
-	{
-		name = "cave",
-		noise_texture = "levels/textures/ocean_noise.tex",
-		runsound = "turnoftides/common/together/water/swim/run_water_med",
-		walksound = "turnoftides/common/together/water/swim/walk_water_med",
-		snowsound = "turnoftides/common/together/water/swim/walk_water_med",
-		mudsound = "turnoftides/common/together/water/swim/walk_water_med",
-        ocean_depth = "SHALLOW",
-		flashpoint_modifier = 500,
-		is_shoreline = true,
-		colors = SWAMP_OCEAN_COLOR,
-		wavetint = WAVETINTS.lava
-	},
-	{
-		name = "map_edge",
-		noise_texture = "levels/textures/Ground_noise_swamp_water.tex",
-	}
-)
-
-AddTile(
-    "SWAMP_FLOOD_GEN",
-    "LAND",
-    {ground_name = "Swamp_Gen"},
-    {
-        name = "deciduous",
-		noise_texture = "levels/textures/Ground_noise_swamp_ice.tex",
-		runsound = "dontstarve/movement/run_marsh",
-		walksound = "dontstarve/movement/walk_marsh",
-		snowsound = "dontstarve/movement/run_ice",
-		mudsound = "dontstarve/movement/run_mud",
-        ocean_depth = "SHALLOW",
-    },
-    {
-        name = "map_edge",
-        noise_texture = "levels/textures/Ground_noise_swamp.tex",
-    }
-)
+AddSubmergedTerrain("SWAMP_FLOOD", "levels/textures/Ground_noise_swamp.tex", SWAMP_OCEAN_COLOR)
+AddSubmergedTerrain("DEEPWEB", "levels/textures/web_noise.tex", DEEPWEB_OCEAN_COLOR)
 
 AddTile(
 	"SWAMP_ICE",
@@ -201,13 +222,7 @@ AddTile(
     "NOISE"
 )
 
-ChangeTileRenderOrder(WORLD_TILES.SWAMP_FLOOD, WORLD_TILES.ROAD, false)
 ChangeTileRenderOrder(WORLD_TILES.SWAMP_ICE, WORLD_TILES.CARPET, false)
 
-TileGroups.OceanAndFakeWater = TileGroupManager:AddTileGroup(TileGroups.OceanTiles)
-TileGroupManager:AddInvalidTile(TileGroups.OceanAndFakeWater, WORLD_TILES.SWAMP_FLOOD)
-
-TileGroups.LandAndNotFakeWater = TileGroupManager:AddTileGroup(TileGroups.LandTiles)
-TileGroupManager:AddValidTile(TileGroups.LandAndNotFakeWater, WORLD_TILES.SWAMP_FLOOD)
 
 --TileGroupManager:SetIsOceanTileGroup(TileGroups.OceanAndFakeWater)
