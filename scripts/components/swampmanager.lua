@@ -21,13 +21,17 @@ self.inst = inst
 --------------------------------------------------------------------------
 
 local _swamp_grid = {}
+local _total_swap_count = 0
+
+local _withered_grid = {}
+local _current_withered_count = 0
 
 --------------------------------------------------------------------------
 --[[ Private member functions ]]
 --------------------------------------------------------------------------
 
 local function offset_key(x, z)
-    return bit.bor(bit.lshift(x, 10), z)
+    return x ~= nil and z ~= nil and bit.bor(bit.lshift(x, 10), z) or x
 end
 
 local function getNodeBox(polygon)
@@ -84,13 +88,25 @@ function self:GetSwampGrid()
 end
 
 function self:IsTileSwamp(x, z)
-    local key = x ~= nil and z ~= nil and offset_key(x, z) or x
-    return _swamp_grid[key] == false
+    return _swamp_grid[offset_key(x, z)] ~= nil
 end
 
 function self:IsTileFlood(x, z)
-    local key = x ~= nil and z ~= nil and offset_key(x, z) or x
-    return _swamp_grid[key]
+    return _swamp_grid[offset_key(x, z)]
+end
+
+function self:IsTileWithered(x, z)
+    return _withered_grid[offset_key(x, z)]
+end
+
+function self:SetTileIsWithered(x, z, value)
+    _withered_grid[offset_key(x, z)] = value
+
+    if value then
+        _current_withered_count = _current_withered_count + 1
+    else
+        _current_withered_count = _current_withered_count - 1
+    end
 end
 
 --------------------------------------------------------------------------
@@ -112,10 +128,12 @@ self.inst:DoTaskInTime(0, function()
                     for z = minZ, maxZ, TILE_SCALE do
                         local tile = TheWorld.Map:GetTileAtPoint(x, 0, z)
                         if tile == WORLD_TILES.SWAMP_FLOOD_GEN or tile == WORLD_TILES.SWAMP then
-                            _swamp_grid[offset_key(x, z)] = tile == WORLD_TILES.SWAMP_FLOOD_GEN
+                            local tx, tz = TheWorld.Map:GetTileCoordsAtPoint(x, 0, z) 
+                            _swamp_grid[offset_key(tx, tz)] = tile == WORLD_TILES.SWAMP_FLOOD_GEN
                             
+                            _total_swap_count = _total_swap_count + 1
+
                             if tile == WORLD_TILES.SWAMP_FLOOD_GEN then
-                                local tx, tz = TheWorld.Map:GetTileCoordsAtPoint(x, 0, z) 
                                 TheWorld.Map:SetTile(tx, tz, WORLD_TILES.SWAMP_FLOOD)
                             end
                         end
@@ -136,7 +154,10 @@ end)
 
 function self:OnSave()
     return {
-        swamp_grid = _swamp_grid,
+        swamp_grid = _swamp_grid or {},
+        total_swap_count = _total_swap_count or 0,
+        withered_grid = _withered_grid or {},
+        total_withered_count = _current_withered_count or 0,
     }
 end
 
@@ -146,6 +167,9 @@ function self:OnLoad(data)
     end
 
     _swamp_grid = data.swamp_grid
+    _total_swap_count = data.total_swap_count
+    _withered_grid = data.withered_grid
+    _current_withered_count = data.total_withered_count
 end
 
 --------------------------------------------------------------------------
