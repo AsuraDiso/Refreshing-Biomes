@@ -28,6 +28,11 @@ local WAVETINTS =
     lava =             {0.75, 0.35, 0},           
 }
 
+local tile_group_manager = GLOBAL.TileGroupManager
+local tile_groups = GLOBAL.TileGroups
+tile_groups.OceanAndFakeWater = tile_group_manager:AddTileGroup(tile_groups.OceanTiles)
+tile_groups.LandAndNotFakeWater = tile_group_manager:AddTileGroup(tile_groups.LandTiles)
+
 function AddSubmergedTerrain(tile_name, texture, colors)
 	AddTile(
 		tile_name,
@@ -71,15 +76,8 @@ function AddSubmergedTerrain(tile_name, texture, colors)
 		}
 	)
 
-	local tile_group_manager = GLOBAL.TileGroupManager
-	local tile_groups = GLOBAL.TileGroups
-	if tile_group_manager ~= nil and tile_groups ~= nil then
-		tile_groups.OceanAndFakeWater = tile_group_manager:AddTileGroup(tile_groups.OceanTiles)
-		tile_group_manager:AddInvalidTile(tile_groups.OceanAndFakeWater, WORLD_TILES[tile_name])
-
-		tile_groups.LandAndNotFakeWater = tile_group_manager:AddTileGroup(tile_groups.LandTiles)
-		tile_group_manager:AddValidTile(tile_groups.LandAndNotFakeWater, WORLD_TILES[tile_name])
-	end
+	tile_group_manager:AddInvalidTile(tile_groups.OceanAndFakeWater, WORLD_TILES[tile_name])
+	tile_group_manager:AddValidTile(tile_groups.LandAndNotFakeWater, WORLD_TILES[tile_name])
 	ChangeTileRenderOrder(WORLD_TILES[tile_name], WORLD_TILES.ROAD, false)
 end
 

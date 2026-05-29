@@ -8,34 +8,6 @@ local assets =
 local prefabs =
 {
 }
-local DATA = {
-	SMALL = {
-		HEALTH = 50,
-		SCALE = 0.5,
-		SPEEDDOWN = 0.9,
-		
-		PERIOD = 15,
-		DMG = 1,
-	},
-	
-	MEDIUM = {
-		HEALTH = 100,
-		SCALE = 0.75,
-		SPEEDDOWN = 0.75,
-		
-		PERIOD = 15,
-		DMG = 2,
-	},
-	
-	NORMAL = {
-		HEALTH = 200,
-		SCALE = 1,
-		SPEEDDOWN = 0.5,
-		
-		PERIOD = 10,
-		DMG = 3
-	},
-}
 
 local function DeattachEntity(inst)
 	if not inst.attachedentity then
@@ -88,7 +60,7 @@ local function SetData(inst, id)
     if not id then
 		return
 	end
-	inst.data = id == 1 and DATA.SMALL or id == 2 and DATA.MEDIUM or DATA.NORMAL
+	inst.data = id == 1 and TUNING.MOSQUITOSWARM.SMALL or id == 2 and TUNING.MOSQUITOSWARM.MEDIUM or TUNING.MOSQUITOSWARM.NORMAL
 end
 
 local function CombineSwarms(inst, other)
@@ -110,20 +82,20 @@ local function SplitSwarms(inst)
 	if inst.data.SCALE == 1 then
 		if math.random() < 0.4 then
 			local mosq = SpawnAt("mosquitoswarm", inst)
-			mosq.data = DATA.MEDIUM
+			mosq.data = TUNING.MOSQUITOSWARM.MEDIUM
 			mosq.sg:GoToState("hit")
 			mosq:UpdateSwarm()
 			mosq.components.timer:StartTimer("cantcombine", TUNING.MOSQUITOSWARM_RESTOCK)
 			
 			local mosq2 = SpawnAt("mosquitoswarm", inst)
-			mosq2.data = DATA.SMALL
+			mosq2.data = TUNING.MOSQUITOSWARM.SMALL
 			mosq2.sg:GoToState("hit")
 			mosq2:UpdateSwarm()
 			mosq2.components.timer:StartTimer("cantcombine", TUNING.MOSQUITOSWARM_RESTOCK)
 		else 
 			for i = 1, 3 do
 				local mosq = SpawnAt("mosquitoswarm", inst)
-				mosq.data = DATA.SMALL
+				mosq.data = TUNING.MOSQUITOSWARM.SMALL
 				mosq.sg:GoToState("hit")
 				mosq:UpdateSwarm()
 				mosq.components.timer:StartTimer("cantcombine", TUNING.MOSQUITOSWARM_RESTOCK)
@@ -132,7 +104,7 @@ local function SplitSwarms(inst)
 	elseif inst.data.SCALE == 0.75 then
 		for i = 1, 2 do
 			local mosq = SpawnAt("mosquitoswarm", inst)
-			mosq.data = DATA.SMALL
+			mosq.data = TUNING.MOSQUITOSWARM.SMALL
 			mosq.sg:GoToState("hit")
 			mosq:UpdateSwarm()
 			mosq.components.timer:StartTimer("cantcombine", TUNING.MOSQUITOSWARM_RESTOCK)
@@ -279,7 +251,7 @@ local function fn()
 	inst.SplitSwarms = SplitSwarms
 	inst.CombineSwarms = CombineSwarms
 
-	inst.data = DATA.NORMAL
+	inst.data = TUNING.MOSQUITOSWARM.NORMAL
 	inst:DoTaskInTime(0, UpdateSwarm)
 	
     inst.OnSave = OnSave

@@ -18,8 +18,6 @@ local function fn()
 
     MakeInventoryFloatable(inst, "small")
 
-    --inst.Transform:SetScale(4, 4, 4)
-
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -29,8 +27,6 @@ local function fn()
     inst:AddComponent("inspectable")
 
     inst:AddComponent("inventoryitem")
-    --inst.components.inventoryitem.atlasname = "images/inventoryimages/fumeagatorskin.xml"
-    --inst.components.inventoryitem.imagename = "fumeagatorskin"
 
     inst:AddComponent("stackable")
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM

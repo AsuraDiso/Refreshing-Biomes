@@ -12,7 +12,6 @@ PrefabFiles = {
 	"greatswamptree",
 	"greatswampaltar",
 	"greattreehealfx",
-	"houndfish",
 	"fumeagator",
 	"swampdeco",
 	"swampshroom",
@@ -23,7 +22,7 @@ PrefabFiles = {
 	"shroombrella_fx",
 	"swampmist",
 	"greatswamp_house",
-	"swamptrees",
+	"newland_trees",
 	"fumeagator_armor", 
 	"fumeagatorskin", 
 
@@ -31,14 +30,12 @@ PrefabFiles = {
 	"newland_network",
 
 	--"newland_veggies",
-	--"moonbloom",
 	"swampretrofiter",
 	"submergedterrain",
 	
-	"savannatrees",
-	-- "tempwork",
+	-- replaced by newland_trees above
 	"cordyceps_family",
-
+	"swamp_regeneration",
 	"ancientdweller",
 }
 

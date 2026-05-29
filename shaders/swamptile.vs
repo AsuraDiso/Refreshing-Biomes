@@ -1,4 +1,4 @@
-#define UV_FRAMES_PER_SIDE 4.0
+#define UV_FRAMES_PER_SIDE 8.0
 
 #ifdef GL_ES
     precision highp float;
@@ -85,9 +85,11 @@ void main()
 	float ix = floor(tile_center.x / 4.0 + 0.5) + 10000.0;
 	float iz = floor(tile_center.z / 4.0 + 0.5) + 10000.0;
 	
-	vec2 uv_mapped;
-	uv_mapped.x = (uv_local.x + mod(ix, UV_FRAMES_PER_SIDE)) / UV_FRAMES_PER_SIDE;
-	uv_mapped.y = (uv_local.y + mod(iz, UV_FRAMES_PER_SIDE)) / UV_FRAMES_PER_SIDE;
+	// Use world-space repeating UVs mapped into the same atlas frame
+	float TILE_REPEAT = 2.0; // adjust to make texture appear smaller/larger
+	vec2 frameIndex = floor(TEXCOORD0_LIFE.xy * UV_FRAMES_PER_SIDE);
+	vec2 uv_intracell = fract(world_pos.xz * TILE_REPEAT);
+	vec2 uv_mapped = (frameIndex + uv_intracell) / UV_FRAMES_PER_SIDE;
 
 	PS_TEXCOORD_LIFE.xy = uv_mapped;
 	PS_TEXCOORD_LIFE.z = TEXCOORD0_LIFE.z;

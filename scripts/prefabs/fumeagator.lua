@@ -74,91 +74,6 @@ for k, v in pairs(Ents) do
     end 
 end 
 
-local function EnterWaterFn(inst)
-    local size = "med"
-    local scale = 1.85
-    local high = 0.7
-
-	SpawnAt("splash_green", inst)
-
-	--inst.components.locomotor:SetExternalSpeedMultiplier(inst, "waterspeed", 0.5)
-    inst.AnimState:HideSymbol("gator_leg", "fumeagator_leg", "gator_leg")
-    --inst.AnimState:HideSymbol("gator_tail")
-	
-	inst._waketask = inst:DoPeriodicTask(0.75, function()
-		local running
-		if inst.sg ~= nil then
-			running = inst.sg:HasStateTag("moving") 
-		else
-			running = inst:HasTag("moving")
-		end
-		if running then
-			local wake = SpawnPrefab("wake_small")
-			local theta = inst.Transform:GetRotation() * DEGREES
-			local offset = Vector3(math.cos( theta )*0.2, 0, -math.sin( theta )*0.2)
-			local pos = Vector3(inst.Transform:GetWorldPosition()) + offset
-			wake.Transform:SetPosition(pos.x,pos.y+0.5,pos.z)
-			wake.Transform:SetRotation(inst.Transform:GetRotation() - 90)
-			
-			inst.SoundEmitter:PlaySound("turnoftides/common/together/water/swim/medium")
-		end
-	end)
-
-	if inst.DynamicShadow then
-		inst.DynamicShadow:Enable(false)
-	end
-
-	if not inst.front_fx then
-		inst.front_fx = SpawnPrefab("float_fx_front")
-		inst.front_fx.entity:SetParent(inst.entity)
-		inst.front_fx.Transform:SetPosition(0, high, 0)
-		inst.front_fx.Transform:SetScale(scale, scale, scale)
-		inst.front_fx.AnimState:PlayAnimation("idle_front_"..size, true)
-	end
-
-	if not inst.back_fx then
-		inst.back_fx = SpawnPrefab("float_fx_back")
-		inst.back_fx.entity:SetParent(inst.entity)
-		inst.back_fx.Transform:SetPosition(0, high, 0)
-		inst.back_fx.Transform:SetScale(scale, scale, scale)
-		inst.back_fx.AnimState:PlayAnimation("idle_back_"..size, true)
-	end
-
-    --inst.AnimState:SetFloatParams(0.3, 1.0, 0)
-    --inst.AnimState:SetDeltaTimeMultiplier(0.75)
-end
-
-local function ExitWaterFn(inst)
-
-	SpawnAt("splash_green", inst)
-
-	--inst.components.locomotor:RemoveExternalSpeedMultiplier(inst, "waterspeed")
-    inst.AnimState:ShowSymbol("gator_leg", "fumeagator_leg", "gator_leg")
-    --inst.AnimState:ShowSymbol("gator_tail")
-
-	if inst.DynamicShadow then
-		inst.DynamicShadow:Enable(true)
-	end
-
-	if inst.front_fx then
-		inst.front_fx:Remove()
-		inst.front_fx = nil
-	end
-
-	if inst.back_fx then
-		inst.back_fx:Remove()
-		inst.back_fx = nil
-	end
-
-    --inst.AnimState:SetFloatParams(0, 0, 0)
-    --inst.AnimState:SetDeltaTimeMultiplier(1)
-
-	if inst._waketask then
-		inst._waketask:Cancel()
-		inst._waketask = nil
-	end
-end
-
 local function fn()
     local inst = CreateEntity()
 
@@ -221,14 +136,6 @@ local function fn()
     inst:AddComponent("embarker")
     inst.components.embarker.embark_speed = inst.components.locomotor.runspeed
     inst.components.embarker.antic = true
-
-    
-
-    inst:AddComponent("amphibiouscreature")
-    inst.components.amphibiouscreature:SetBanks("gator", "gator")
-	inst.components.amphibiouscreature:SetEnterWaterFn(EnterWaterFn)         
-	inst.components.amphibiouscreature:SetExitWaterFn(ExitWaterFn)
-   
 
     MakeLargeBurnableCharacter(inst, "gator_body")
     MakeLargeFreezableCharacter(inst, "gator_body")

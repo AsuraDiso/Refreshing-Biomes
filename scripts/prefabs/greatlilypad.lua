@@ -2,9 +2,6 @@ local assets =
 {
 	Asset("ANIM", "anim/lily_pad.zip"),
 	Asset("ANIM", "anim/seaweed_seed.zip"),
-
-	Asset("IMAGE", "images/inventoryimages/seaweed_seed.tex"),
-    Asset("ATLAS", "images/inventoryimages/seaweed_seed.xml"),
 }
 
 local prefabs = {}
@@ -34,9 +31,6 @@ local function OnDrown(inst, onload)
 	local ents = TheSim:FindEntities(x,y,z, inst.radius)
 
 	for k, v in ipairs(ents) do
-		if v.prefab == "houndfish" then
-			return false
-		end
 		if v and v.components.floater then
 			v.components.floater:OnLandedServer()
 		end
@@ -364,8 +358,6 @@ local function seed()
 
     inst:AddComponent("inspectable")
     inst:AddComponent("inventoryitem")
-    inst.components.inventoryitem.atlasname = "images/inventoryimages/seaweed_seed.xml"
-	inst.components.inventoryitem.imagename = "seaweed_seed"
 
     inst:AddComponent("stackable")
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
