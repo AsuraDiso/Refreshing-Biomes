@@ -1,7 +1,7 @@
 -- North: open grasslands bordering the swamp.
 AddTask("NewLand_Savannah", {
     locks = { LOCKS.SWAMP_SIDE_N },
-    keys_given = {},
+    keys_given = { KEYS.SAVANNAH },
 
     room_choices = {
         ["SavannahCenter"] = 1,

@@ -109,7 +109,6 @@ function self:SpawnCordyceps()
 end
 
 function self:RegisterCordyceps(cordyceps)
-    print("RegisterCordyceps", cordyceps, _cordyceps_spawned)
     local x, _, z = cordyceps.Transform:GetWorldPosition()
     table.insert(_cordyceps_spots, {x = x, z = z})
     cordyceps:Remove()

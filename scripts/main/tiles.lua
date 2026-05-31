@@ -216,6 +216,78 @@ AddTile(
 )
 
 AddTile(
+	"ANCIENTCITY_SUBURB",
+	"LAND",
+	{ground_name = "AncientCity_Suburb"},
+	{
+		name = "stoneroad",
+		noise_texture = "levels/textures/noise_mossy_blossom.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/noise_mossy_blossom.tex",
+	}
+)
+
+AddTile(
+	"ANCIENTCITY_TILES",
+	"LAND",
+	{ground_name = "AncientCity_Tiles"},
+	{
+		name = "stoneroad",
+		noise_texture = "levels/textures/Ground_noise_fanstone.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/Ground_noise_fanstone.tex",
+	}
+)
+
+AddTile(
+	"ANCIENTCITY_ROAD",
+	"LAND",
+	{ground_name = "AncientCity_Road"},
+	{
+		name = "stoneroad",
+		noise_texture = "levels/textures/Ground_noise_cobbleroad.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/Ground_noise_cobbleroad.tex",
+	}
+)
+
+AddTile(
+	"ANCIENTCITY_FARM",
+	"LAND",
+	{ground_name = "AncientCity_Farm"},
+	{
+		name = "stoneroad",
+		noise_texture = "levels/textures/noise_gardenstone.tex",
+		runsound = "dontstarve/movement/run_marsh",
+		walksound = "dontstarve/movement/walk_marsh",
+		snowsound = "dontstarve/movement/run_ice",
+		mudsound = "dontstarve/movement/run_mud",
+	},
+	{
+		name = "map_edge",
+		noise_texture = "levels/textures/noise_gardenstone.tex",
+	}
+)
+
+AddTile(
     "SWAMP_NOISE",
     "NOISE"
 )

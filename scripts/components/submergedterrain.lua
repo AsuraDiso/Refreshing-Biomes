@@ -113,8 +113,6 @@ return Class(function(self, inst)
             _loaded = false
         end
 
-        print("Initializing SubmergedTerrain...")
-
         if _verts_grid == nil then
             InitializeDataGrids()
         end

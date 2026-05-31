@@ -37,6 +37,8 @@ PrefabFiles = {
 	"cordyceps_family",
 	"swamp_regeneration",
 	"ancientdweller",
+	"ancientcity_road",
+	"ancientcity_decos",
 }
 
 Assets = {

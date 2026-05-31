@@ -1,5 +1,6 @@
 local _G = GLOBAL
 _G.UpvalueHacker = require("tools/upvaluehacker")
+
 local Story = require("map/storygen")
 local rawget = _G.rawget
 local rawset = _G.rawset
@@ -14,6 +15,69 @@ env.mods = mods
 
 local menv = env
 GLOBAL.setfenv(1, GLOBAL)
+
+local map_data = {}
+local map_tags = {}
+
+function AddMapData(dataname, value)
+    map_data[dataname] = value
+end
+function AddMapTag(tagname, fn)
+    map_tags[tagname] = fn
+end
+
+local _MakeTags
+local function MakeTags(...)
+    if not _MakeTags then
+        local _map_maptags_preload = package.preload["map/maptags"]
+        local _map_maptags_loaded= package.loaded["map/maptags"]
+        package.preload["map/maptags"] = nil
+        package.loaded["map/maptags"] = nil
+        _MakeTags = require("map/maptags")
+        package.preload["map/maptags"] = _map_maptags_preload
+        package.loaded["map/maptags"] = _map_maptags_loaded
+    end
+
+    local maptags = deepcopy(_MakeTags(...))
+    for k, v in pairs(map_data) do
+        maptags.TagData[k] = v
+    end
+    for k, v in pairs(map_tags) do
+        maptags.Tag[k] = v
+    end
+    return maptags
+end
+
+package.loaded["map/maptags"] = nil
+package.preload["map/maptags"] = function() return MakeTags end --this effictively replaces the return value of map/maptags, if the value was cleared from package.loaded.
+
+local funcs = {
+	["City2"] = function(tagdata)
+		return "GLOBALTAG", "City2"
+	end,							
+	["City1"] = function(tagdata)
+		return "GLOBALTAG", "City1"
+	end,			
+	["Cultivated"] = function(tagdata)
+		return "GLOBALTAG", "Cultivated"
+	end,							
+}
+for k, v in pairs(funcs) do
+	AddMapTag(k, v)
+end
+
+local _GetExtrasForRoom = Story.GetExtrasForRoom
+function Story:GetExtrasForRoom(next_room)
+	if next_room ~= nil and next_room.tags ~= nil and self.map_tags ~= nil and self.map_tags.Tag ~= nil then
+		for _, tag in ipairs(next_room.tags) do
+			if self.map_tags.Tag[tag] == nil and map_tags[tag] ~= nil then
+				self.map_tags.Tag[tag] = map_tags[tag]
+			end
+		end
+	end
+
+	return _GetExtrasForRoom(self, next_room)
+end
 
 local firstTimeLoading = true
 if _G.WORLD_TILES.OCEAN_LAVA then
@@ -136,7 +200,11 @@ AddLevel(LEVELTYPE.NEWLAND, {
 	baseid = LEVELTYPE.NEWLAND,
 	id = LEVELTYPE.NEWLAND,
 	name = "NewLand - Don't Starve",
+	settings_name = "NewLand - Don't Starve",
+	worldgen_name = "NewLand - Don't Starve",
 	desc = "Refreshing Biomes!",
+	settings_desc = "Refreshing Biomes!",
+	worldgen_desc = "Refreshing Biomes!",
 	location = "newland",
 	version = 4,
 	overrides={
@@ -225,6 +293,8 @@ if firstTimeLoading then
 			"NewLand_StoneWreath",
 			"NewLand_SurfaceCave",
 			"NewLand_SpiderCaves",
+			"NewLand_AncientCity",
+			"NewLand_AncientCity_Farmlands",
 		},
 		numoptionaltasks = 0,
 		optionaltasks = {},
@@ -261,6 +331,7 @@ if firstTimeLoading then
 	require("map/tasks/ashlands")
 	require("map/tasks/glowwarren")
 	require("map/tasks/spidercaves")
+	require("map/tasks/ancientcity")
 
 	local ROOMS = {
 		"swamp",
@@ -283,6 +354,7 @@ if firstTimeLoading then
 		"ashlands",
 		"glowwarren",
 		"spidercaves",
+		"ancient_city",
 	}
 
 	for k, v in pairs(ROOMS) do
@@ -472,12 +544,71 @@ end
 
 
 local MakeCordycepsSites = require("map/cordyceps_spawner")
+local MakeAncientCities = require("map/ancient_city_builder")
 local forest_map = require("map/forest_map")
 local _Generate = forest_map.Generate
+
+local MoonCity = {
+	CITY_TAG = "City1",
+	PARKS = {
+		COMMON = {
+			"map/static_layouts/mooncity/city_park_1",
+			"map/static_layouts/mooncity/city_park_2",    
+			"map/static_layouts/mooncity/city_park_3",
+			"map/static_layouts/mooncity/city_park_4",    
+			"map/static_layouts/mooncity/city_park_5",    
+			"map/static_layouts/mooncity/city_park_8",  
+		},
+		UNIQUE = {
+			"map/static_layouts/mooncity/city_park_6",     
+			"map/static_layouts/mooncity/city_park_7",     
+			"map/static_layouts/mooncity/city_park_9",     
+			"map/static_layouts/mooncity/city_park_10",     
+		},
+	},
+	FARMS = {
+		COMMON = {
+			"map/static_layouts/mooncity/farm_1",   
+			"map/static_layouts/mooncity/farm_2", 
+			"map/static_layouts/mooncity/farm_3", 
+			"map/static_layouts/mooncity/farm_4",     
+			"map/static_layouts/mooncity/farm_5",     
+		},
+		UNIQUE = {
+			"map/static_layouts/mooncity/farm_fill_1",   
+			"map/static_layouts/mooncity/farm_fill_2", 
+			"map/static_layouts/mooncity/farm_fill_3", 
+		},
+	},
+	MUST_SETPIECES = {
+		"map/static_layouts/mooncity/pig_cityhall_1",
+		"map/static_layouts/mooncity/pig_playerhouse_1",
+	},
+	BUILDING_QUOTAS = {
+		{prefab="pig_shop_deli",num=1},
+		{prefab="pig_shop_academy",num=1},
+		{prefab="pig_shop_florist",num=1},
+		{prefab="pig_shop_general",num=1},
+		{prefab="pig_shop_hoofspa",num=1},
+		{prefab="pig_shop_produce",num=1},
+		{prefab="pig_shop_bank",num=1},    
+		{prefab="pig_guard_tower",num=15},
+		{prefab="pighouse_city",num=50}
+	},
+	VALID_TILES = {
+		CITY = {WORLD_TILES.ANCIENTCITY_SUBURB,WORLD_TILES.ANCIENTCITY_TILES},
+		FARM = {WORLD_TILES.ANCIENTCITY_FARMLAND},
+	},
+	ROAD = WORLD_TILES.ANCIENTCITY_ROAD,
+	TILE = WORLD_TILES.ANCIENTCITY_TILES,
+	SUBURB = WORLD_TILES.ANCIENTCITY_SUBURB,
+}
+
 forest_map.Generate = function(prefab, map_width, map_height, tasks, level, level_type, ...)
 	local save = _Generate(prefab, map_width, map_height, tasks, level, level_type, ...)
 	if save then
     	MakeCordycepsSites(save.ents, save.map.topology, map_width, map_height)
+		MakeAncientCities(save.ents, save.map.topology, map_width, map_height)
 	else
 		print("Error: Failed to generate world, so cordyceps sites were not generated.")
 	end
