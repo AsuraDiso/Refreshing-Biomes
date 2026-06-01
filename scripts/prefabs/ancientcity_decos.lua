@@ -59,13 +59,9 @@ local prefabs = {
     "lawnornament_7",
     "wall_stone_repaired",
     "pig_shop_spawner",
-    "pighouse_city",
     "lawnornament_4",
-    "pig_guard_tower",
     "city_lamp",
     "fast_farmplot_planted",
-    "pighouse_farm",
-    "pighouse_mine",
 }
 
 local all_prefabs = {}

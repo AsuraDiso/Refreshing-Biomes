@@ -16,6 +16,7 @@ AddRoom("SwampStart", {
 	contents =  {
 		distributepercent = .08,
 		distributeprefabs= {
+			swamptree = .1,
 			swampgrass_spawner = .12,
 			swampreed_spawner = .14,
 			grass = .04,
@@ -37,6 +38,7 @@ AddRoom("GreatSwampTree", {
 		},
 		distributepercent = .04,
 		distributeprefabs= {
+			swamptree = .1,
 			swampgrass_spawner = .08,
 			swampreed_spawner = .12,
 		}
@@ -55,6 +57,7 @@ AddRoom("SwampCoreLink", {
 	contents =  {
 		distributepercent = .06,
 		distributeprefabs= {
+			swamptree = .1,
 			swampgrass_spawner = .1,
 			swampreed_spawner = .12,
 		}
@@ -71,6 +74,7 @@ AddRoom("SwampSideBorder", {
 	contents =  {
 		distributepercent = .08,
 		distributeprefabs= {
+			swamptree = .1,
 			swampgrass_spawner = .12,
 			swampreed_spawner = .16,
 			tentacle = .03,
@@ -85,6 +89,7 @@ AddRoom("SwampBackground", {
 	contents =  {
 		distributepercent = .04,
 		distributeprefabs= {
+			swamptree = .1,
 			swampgrass_spawner = .06,
 			swampreed_spawner = .08,
 		}
@@ -120,6 +125,7 @@ AddRoom("GreatSwampReeds", {
 		},
 		distributepercent = .08,
 		distributeprefabs= {
+			swamptree = .1,
 			swampreed_spawner = .18,
 			swampgrass_spawner = .1,
 			tentacle = .03,
@@ -137,6 +143,7 @@ AddRoom("GreatSwampDeep", {
 	contents =  {
 		distributepercent = .1,
 		distributeprefabs= {
+			swamptree = .1,
 			swampgrass_spawner = .14,
 			swampreed_spawner = .16,
 			blue_mushroom = .04,

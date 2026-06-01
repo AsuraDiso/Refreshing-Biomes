@@ -516,6 +516,7 @@ if FrontEndExists then
 		end
 
 		self:SetTab("newland")
+		self:SetTab("newland2")
 	end
 
 	local self = TheFrontEnd:GetActiveScreen() 
@@ -549,7 +550,11 @@ local forest_map = require("map/forest_map")
 local _Generate = forest_map.Generate
 
 local MoonCity = {
+	-- Tag used in topology nodes to identify which map nodes belong to this city.
+	-- Must match one of the tags registered in AddMapTag above ("City1", "City2", …).
 	CITY_TAG = "City1",
+	-- Tag used to identify farm/cultivated nodes (optional – set to nil if unused).
+	FARM_TAG = "Cultivated1",
 	PARKS = {
 		COMMON = {
 			"map/static_layouts/mooncity/city_park_1",
@@ -580,6 +585,7 @@ local MoonCity = {
 			"map/static_layouts/mooncity/farm_fill_3", 
 		},
 	},
+	-- Setpieces that are always placed first, in order, before any random parks.
 	MUST_SETPIECES = {
 		"map/static_layouts/mooncity/pig_cityhall_1",
 		"map/static_layouts/mooncity/pig_playerhouse_1",
@@ -595,22 +601,32 @@ local MoonCity = {
 		{prefab="pig_guard_tower",num=15},
 		{prefab="pighouse_city",num=50}
 	},
+	-- Tiles the city road/block builder is allowed to place onto.
 	VALID_TILES = {
-		CITY = {WORLD_TILES.ANCIENTCITY_SUBURB,WORLD_TILES.ANCIENTCITY_TILES},
+		CITY = {WORLD_TILES.ANCIENTCITY_SUBURB, WORLD_TILES.ANCIENTCITY_TILES},
 		FARM = {WORLD_TILES.ANCIENTCITY_FARMLAND},
 	},
-	ROAD = WORLD_TILES.ANCIENTCITY_ROAD,
-	TILE = WORLD_TILES.ANCIENTCITY_TILES,
+	ROAD   = WORLD_TILES.ANCIENTCITY_ROAD,
+	TILE   = WORLD_TILES.ANCIENTCITY_TILES,
 	SUBURB = WORLD_TILES.ANCIENTCITY_SUBURB,
+	-- Prefabs that clearground() will never remove (e.g. quest markers, special spawns).
+	REQUIRED_PREFABS = {},
+}
+
+-- List of all city configs to build. Add more tables here to create additional cities.
+-- Each entry must have a unique CITY_TAG matching a tag registered with AddMapTag.
+local ANCIENT_CITY_CONFIGS = {
+	MoonCity,
+	-- SecondCity,  -- example: add more cities by inserting additional config tables
 }
 
 forest_map.Generate = function(prefab, map_width, map_height, tasks, level, level_type, ...)
 	local save = _Generate(prefab, map_width, map_height, tasks, level, level_type, ...)
 	if save then
-    	MakeCordycepsSites(save.ents, save.map.topology, map_width, map_height)
-		MakeAncientCities(save.ents, save.map.topology, map_width, map_height)
+		MakeCordycepsSites(save.ents, save.map.topology, map_width, map_height)
+		MakeAncientCities(save.ents, save.map.topology, map_width, map_height, ANCIENT_CITY_CONFIGS)
 	else
-		print("Error: Failed to generate world, so cordyceps sites were not generated.")
+		print("Error: Failed to generate world, so ancient cities were not generated.")
 	end
 	return save
 end

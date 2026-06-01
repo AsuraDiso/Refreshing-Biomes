@@ -163,6 +163,7 @@ return function(inst)
 	    return
 	end
 	inst:AddComponent("submergedterrain")
+	inst:AddComponent("ancientcity")
 	inst:AddComponent("cordycepsmanager")
 	inst:AddComponent("submergedmanager")
 end

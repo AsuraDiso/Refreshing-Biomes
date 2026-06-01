@@ -183,7 +183,9 @@ EntityScript.SetSubmerged = function(inst, height)
 				wake.Transform:SetPosition(pos.x,pos.y,pos.z)
 				wake.Transform:SetRotation(inst.Transform:GetRotation() - 90)
 				
-				inst.SoundEmitter:PlaySound("turnoftides/common/together/water/swim/medium")
+				if inst.SoundEmitter then
+					inst.SoundEmitter:PlaySound("turnoftides/common/together/water/swim/medium")
+				end
 			end
 		end)
 

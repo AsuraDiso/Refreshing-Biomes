@@ -2,17 +2,11 @@ AddRoom("SavannahCenter", {
 	colour={r=.80,g=.70,b=.20,a=.50},
 	value = WORLD_TILES.SAVANNAN,
 	contents =  {
-		countprefabs= {
-			firepit = 1,
-		},
 		distributepercent = .15,
 		distributeprefabs= {
 			grass = .3,
-			sapling = .1,
-			berrybush = .05,
-			berrybush_juicy = .025,
-			flower = .05,
-			rabbithole = .05,
+			savannatree = .2,
+			rabbithole = .1,
 		} 
 	}
 })
@@ -27,9 +21,8 @@ AddRoom("SavannahBeefalo", {
 		distributepercent = .12,
 		distributeprefabs= {
 			grass = .4,
-			sapling = .05,
-			rabbithole = .03,
-			flower = .02,
+			savannatree = .2,
+			rabbithole = .05,
 		} 
 	}
 })
@@ -44,9 +37,8 @@ AddRoom("SavannahRabbits", {
 		distributepercent = .12,
 		distributeprefabs= {
 			grass = .35,
-			sapling = .1,
-			rabbithole = .1,
-			flower = .05,
+			savannatree = .15,
+			rabbithole = .2,
 		} 
 	}
 })
@@ -58,9 +50,8 @@ AddRoom("SavannahClearing", {
 		distributepercent = .08,
 		distributeprefabs= {
 			grass = .4,
-			sapling = .05,
-			flower = .05,
-			rabbithole = .02,
+			savannatree = .1,
+			rabbithole = .03,
 		} 
 	}
 })
