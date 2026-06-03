@@ -81,6 +81,38 @@ function tree_common.CreateTreePrefabs(def)
         return builds[inst.build] or builds.normal
     end
 
+    local function GetStageLeavesBuild(inst, stage_name)
+        local stage_build_def = def.stage_builds and def.stage_builds[stage_name]
+        if stage_build_def then
+            if stage_build_def.leavesbuild ~= nil then
+                return stage_build_def.leavesbuild
+            elseif stage_build_def.clear_leavesbuild then
+                return nil  -- explicit clear
+            end
+        end
+        return GetBuild(inst).leavesbuild
+    end
+
+    local function ApplyStageBankAndBuild(inst, stage_name)
+        -- Bank
+        local bank = (def.stage_banks and def.stage_banks[stage_name]) or def.anim_bank
+        inst.AnimState:SetBank(bank)
+
+        -- Build
+        local stage_build_def = def.stage_builds and def.stage_builds[stage_name]
+        if stage_build_def and stage_build_def.build then
+            inst.AnimState:SetBuild(stage_build_def.build)
+        end
+
+        -- leavesbuild
+        local lb = GetStageLeavesBuild(inst, stage_name)
+        if lb then
+            inst.AnimState:OverrideSymbol("swap_leaves", lb, "swap_leaves")
+        else
+            inst.AnimState:ClearOverrideSymbol("swap_leaves")
+        end
+    end
+
     local function SpawnLeafFX(inst, waittime, chop)
         if (inst.components.burnable ~= nil and inst.components.burnable:IsBurning()) or
             inst:HasTag("stump") or
@@ -149,6 +181,14 @@ function tree_common.CreateTreePrefabs(def)
             inst.spawnleaffxtask = nil
         end
     end
+    local growth_stages = def.growth_stages
+    local function GetCurrentStageName(inst)
+        if inst.components.growable ~= nil then
+            local st = growth_stages[inst.components.growable.stage]
+            return st and st.name or "tall"
+        end
+        return "tall"
+    end
 
     local function GrowLeavesFn(inst, monster, monsterout)
         if (inst.components.burnable ~= nil and inst.components.burnable:IsBurning()) or
@@ -165,8 +205,9 @@ function tree_common.CreateTreePrefabs(def)
             end
         end
 
-        if GetBuild(inst).leavesbuild then
-            inst.AnimState:OverrideSymbol("swap_leaves", GetBuild(inst).leavesbuild, "swap_leaves")
+        local lb = GetStageLeavesBuild(inst, GetCurrentStageName(inst))
+        if lb then
+            inst.AnimState:OverrideSymbol("swap_leaves", lb, "swap_leaves")
         else
             inst.AnimState:ClearOverrideSymbol("swap_leaves")
         end
@@ -218,8 +259,9 @@ function tree_common.CreateTreePrefabs(def)
             inst.build = "normal"
 
             if inst.leaf_state == "barren" then
-                if GetBuild(inst).leavesbuild then
-                    inst.AnimState:OverrideSymbol("swap_leaves", GetBuild(inst).leavesbuild, "swap_leaves")
+                local lb = GetStageLeavesBuild(inst, GetCurrentStageName(inst))
+                if lb then
+                    inst.AnimState:OverrideSymbol("swap_leaves", lb, "swap_leaves")
                 else
                     inst.AnimState:ClearOverrideSymbol("swap_leaves")
                 end
@@ -252,6 +294,10 @@ function tree_common.CreateTreePrefabs(def)
                 (stage_name == "short" and short_anims) or
                 (stage_name == "normal" and normal_anims) or
                 tall_anims
+            -- Apply per-stage bank/build when not monster
+            if not inst.monster then
+                ApplyStageBankAndBuild(inst, stage_name)
+            end
         end
         Sway(inst, nil, inst.monster)
     end
@@ -263,6 +309,7 @@ function tree_common.CreateTreePrefabs(def)
                 inst.components.workable:SetWorkLeft(TUNING.DECIDUOUS_CHOPS_SMALL)
             end
             inst.components.lootdropper:SetLoot(GetBuild(inst).short_loot)
+            ApplyStageBankAndBuild(inst, "short")
         end
     end
 
@@ -283,6 +330,7 @@ function tree_common.CreateTreePrefabs(def)
             inst.components.workable:SetWorkLeft(TUNING.DECIDUOUS_CHOPS_NORMAL)
         end
         inst.components.lootdropper:SetLoot(GetBuild(inst).normal_loot)
+        ApplyStageBankAndBuild(inst, "normal")
     end
 
     local function GrowNormal(inst)
@@ -300,6 +348,7 @@ function tree_common.CreateTreePrefabs(def)
             inst.components.workable:SetWorkLeft(TUNING.DECIDUOUS_CHOPS_TALL)
         end
         inst.components.lootdropper:SetLoot(GetBuild(inst).tall_loot)
+        ApplyStageBankAndBuild(inst, "tall")
     end
 
     local function GrowTall(inst)
@@ -317,7 +366,6 @@ function tree_common.CreateTreePrefabs(def)
         tall = { fn = SetTall, growfn = GrowTall, time = 3 },
     }
 
-    local growth_stages = def.growth_stages
     if not growth_stages then
         growth_stages = {}
         local stages_to_use = def.stages or {"short", "normal", "tall"}
@@ -400,10 +448,6 @@ function tree_common.CreateTreePrefabs(def)
         if inst.monster_stop_task ~= nil then
             inst.monster_stop_task:Cancel()
             inst.monster_stop_task = nil
-        end
-        if inst.leaveschangetask ~= nil then
-            inst.leaveschangetask:Cancel()
-            inst.leaveschangetask = nil
         end
         if inst.leaveschangetask ~= nil then
             inst.leaveschangetask:Cancel()
@@ -581,7 +625,7 @@ function tree_common.CreateTreePrefabs(def)
             inst:RemoveComponent("deciduoustreeupdater")
             inst:RemoveComponent("combat")
             inst.sg:GoToState("empty")
-            inst.AnimState:SetBank("tree_leaf")
+            ApplyStageBankAndBuild(inst, GetCurrentStageName(inst))
             inst:DoTaskInTime(FRAMES, onburntchanges)
         else
             onburntchanges(inst)
@@ -596,7 +640,7 @@ function tree_common.CreateTreePrefabs(def)
                 inst:RemoveComponent("deciduoustreeupdater")
                 inst:RemoveComponent("combat")
                 inst.sg:GoToState("empty")
-                inst.AnimState:SetBank("tree_leaf")
+                ApplyStageBankAndBuild(inst, GetCurrentStageName(inst))
                 inst:DoTaskInTime(FRAMES, onburntchanges)
             else
                 onburntchanges(inst)
@@ -639,8 +683,9 @@ function tree_common.CreateTreePrefabs(def)
             inst.target_leaf_state = "normal"
         end
 
-        if GetBuild(inst).leavesbuild ~= nil then
-            inst.AnimState:OverrideSymbol("swap_leaves", GetBuild(inst).leavesbuild, "swap_leaves")
+        local lb = GetStageLeavesBuild(inst, "short")
+        if lb ~= nil then
+            inst.AnimState:OverrideSymbol("swap_leaves", lb, "swap_leaves")
         else
             inst.AnimState:ClearOverrideSymbol("swap_leaves")
         end
@@ -650,6 +695,9 @@ function tree_common.CreateTreePrefabs(def)
         end
         inst.SoundEmitter:PlaySound("dontstarve/forest/treeGrow")
         inst.anims = short_anims
+
+        -- Apply the short-stage bank/build after seed sprout
+        ApplyStageBankAndBuild(inst, "short")
 
         UpdateIdleLeafFx(inst)
         PushSway(inst)
@@ -666,12 +714,14 @@ function tree_common.CreateTreePrefabs(def)
         if inst.components.workable ~= nil then
             inst.components.workable:SetWorkLeft(TUNING.DECIDUOUS_CHOPS_MONSTER)
         end
-        inst.AnimState:SetBank("tree_leaf_monster")
+        local monster_bank = def.monster_bank or "tree_leaf_monster"
+        inst.AnimState:SetBank(monster_bank)
         inst.AnimState:PlayAnimation("transform_in")
         inst.SoundEmitter:PlaySound("dontstarve_DLC001/creatures/deciduous/transform_in")
         inst.SoundEmitter:PlaySound("dontstarve_DLC001/creatures/deciduous/transform_voice")
         SpawnLeafFX(inst, 7 * FRAMES)
-        local leavesbuild = GetBuild(inst).leavesbuild
+        local leavesbuild = def.monster_leavesbuild
+            or GetStageLeavesBuild(inst, GetCurrentStageName(inst))
         if leavesbuild ~= nil then
             inst.AnimState:OverrideSymbol("legs", leavesbuild, "legs")
             inst.AnimState:OverrideSymbol("legs_mouseover", leavesbuild, "legs_mouseover")
@@ -729,6 +779,14 @@ function tree_common.CreateTreePrefabs(def)
             inst.components.growable:StartGrowing()
         end
         inst.AnimState:SetBank("tree_leaf")
+
+        -- After monster-stop, restore the correct per-stage bank/build
+        if inst.components.growable ~= nil then
+            local st = growth_stages[inst.components.growable.stage]
+            local stage_name = st and st.name or "tall"
+            ApplyStageBankAndBuild(inst, stage_name)
+        end
+
         inst:AddTag("cattoyairborne")
 
         inst.target_leaf_state =
@@ -846,7 +904,7 @@ function tree_common.CreateTreePrefabs(def)
                 inst.AnimState:ClearOverrideSymbol("legs")
                 inst.AnimState:ClearOverrideSymbol("legs_mouseover")
             end
-            inst.AnimState:SetBank("tree_leaf")
+            ApplyStageBankAndBuild(inst, GetCurrentStageName(inst))
             OnBurnt(inst, true)
         end
 
@@ -950,14 +1008,21 @@ function tree_common.CreateTreePrefabs(def)
                 (stage_name == "normal" and normal_anims) or
                 tall_anims
 
+            -- Restore per-stage bank/build on load (skip for monster; it sets its own bank)
+            if not inst.monster and not data.stump and not data.burnt then
+                ApplyStageBankAndBuild(inst, stage_name)
+            end
+
             if data.stump then
                 if data.monster then
-                    inst.AnimState:SetBank("tree_leaf_monster")
-                    if GetBuild(inst).leavesbuild ~= nil then
-                        inst.AnimState:OverrideSymbol("legs", GetBuild(inst).leavesbuild, "legs")
-                        inst.AnimState:OverrideSymbol("legs_mouseover", GetBuild(inst).leavesbuild, "legs_mouseover")
-                        inst.AnimState:OverrideSymbol("eye", GetBuild(inst).leavesbuild, "eye")
-                        inst.AnimState:OverrideSymbol("mouth", GetBuild(inst).leavesbuild, "mouth")
+                    inst.AnimState:SetBank(def.monster_bank or "tree_leaf_monster")
+                    local leavesbuild = def.monster_leavesbuild
+                        or GetStageLeavesBuild(inst, GetCurrentStageName(inst))
+                    if leavesbuild ~= nil then
+                        inst.AnimState:OverrideSymbol("legs", leavesbuild, "legs")
+                        inst.AnimState:OverrideSymbol("legs_mouseover", leavesbuild, "legs_mouseover")
+                        inst.AnimState:OverrideSymbol("eye", leavesbuild, "eye")
+                        inst.AnimState:OverrideSymbol("mouth", leavesbuild, "mouth")
                     else
                         inst.AnimState:ClearOverrideSymbol("legs")
                         inst.AnimState:ClearOverrideSymbol("legs_mouseover")
@@ -1159,6 +1224,10 @@ function tree_common.CreateTreePrefabs(def)
             MakeSnowCoveredPristine(inst)
             inst:AddTag("__combat")
 
+            if def.commonfn ~= nil then
+                def.commonfn(inst)
+            end
+
             inst.entity:SetPristine()
 
             if not TheWorld.ismastersim then
@@ -1224,6 +1293,17 @@ function tree_common.CreateTreePrefabs(def)
                 inst.AnimState:PlayAnimation(inst.anims.stump)
                 inst.MiniMapEntity:SetIcon(def.minimap_icon_stump or "tree_leaf_stump.png")
             else
+                -- Apply the initial stage bank/build for non-stump, non-burnt spawns.
+                -- stage==0 means random; the growable component already picked a stage above.
+                local initial_stage_name
+                if inst.components.growable ~= nil then
+                    local st = growth_stages[inst.components.growable.stage]
+                    initial_stage_name = st and st.name or "tall"
+                else
+                    initial_stage_name = "tall"
+                end
+                ApplyStageBankAndBuild(inst, initial_stage_name)
+
                 OnInitSeason(inst)
                 inst.AnimState:SetTime(math.random() * 2)
                 if data == "burnt" then
@@ -1236,6 +1316,11 @@ function tree_common.CreateTreePrefabs(def)
             inst.OnEntitySleep = OnEntitySleep
             inst.OnEntityWake = OnEntityWake
             inst._wasonfire = nil
+
+            if def.masterfn ~= nil then
+                def.masterfn(inst)
+            end
+
             return inst
         end
     end

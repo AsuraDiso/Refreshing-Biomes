@@ -268,10 +268,9 @@ EntityScript.SetSubmerged = function(inst, height)
 			inst._inwater = nil
 		end
 		submerged[inst] = nil
-	end
-
-	if inst.AnimState then
-		inst.AnimState:SetSubmerged(height)
+		if inst.AnimState then
+			inst.AnimState:SetSubmerged(0)
+		end
 	end
 end
 
@@ -300,7 +299,7 @@ AnimState.SetSubmerged = function(self, height)
 			self:SetDeltaTimeMultiplier(1)
 		end
 	end
-	_SetFloatParams(self, 0, 1.0, height or 0)
+	_SetFloatParams(self, 0, height and 1.0 or 0, height or 0)
 end
 AddSimPostInit(function()
 	if _G.TheWorld.components.submergedterrain then

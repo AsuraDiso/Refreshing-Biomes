@@ -120,8 +120,7 @@ local function fn()
 	inst.AnimState:SetBuild("grass_tall")
     inst.AnimState:PlayAnimation("idle",true)
 
-	local color = math.min(1, math.random() + 0.5)
-	inst.AnimState:SetMultColour(color, color, color, 1)    
+	inst.AnimState:SetMultColour(.8+(math.random()*0.2), .8+(math.random()*0.2), .1+(math.random()*0.2), 1)    
 	
     MakeInventoryFloatable(inst, "small", 0.1, {1.1, 0.9, 1.1})
     inst.components.floater.bob_percent = 0
