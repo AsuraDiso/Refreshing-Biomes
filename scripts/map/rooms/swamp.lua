@@ -5,6 +5,16 @@ local StaticLayout = require("map/static_layout")
 
 AllLayouts["GreatSwampTreeCenter"] = StaticLayout.Get("map/static_layouts/greatswamptree", {})
 
+local density = 2
+local basiccontent = {
+	swamptree = .25,
+	swampgrass_spawner = .12,
+	swampreed_spawner = .14,
+	swamp_fern_spawner = .14,
+	swamp_fern = .5,
+	grass = .04,
+	sapling = .03,
+}
 AddRoom("SwampStart", {
 	colour={r=.48,g=.52,b=.38,a=.50},
 	value = WORLD_TILES.SWAMP,
@@ -14,14 +24,8 @@ AddRoom("SwampStart", {
 		data = {}
 	},
 	contents =  {
-		distributepercent = .08,
-		distributeprefabs= {
-			swamptree = .1,
-			swampgrass_spawner = .12,
-			swampreed_spawner = .14,
-			grass = .04,
-			sapling = .03,
-		}
+		distributepercent = density*.08,
+		distributeprefabs = basiccontent
 	}
 })
 
@@ -36,12 +40,8 @@ AddRoom("GreatSwampTree", {
 		countprefabs = {
 			greatswamptree = 1,
 		},
-		distributepercent = .04,
-		distributeprefabs= {
-			swamptree = .1,
-			swampgrass_spawner = .08,
-			swampreed_spawner = .12,
-		}
+		distributepercent = density*.04,
+		distributeprefabs = basiccontent
 	}
 })
 
@@ -55,12 +55,8 @@ AddRoom("SwampCoreLink", {
 		data = {}
 	},
 	contents =  {
-		distributepercent = .06,
-		distributeprefabs= {
-			swamptree = .1,
-			swampgrass_spawner = .1,
-			swampreed_spawner = .12,
-		}
+		distributepercent = density*.06,
+		distributeprefabs= basiccontent
 	}
 })
 
@@ -72,13 +68,8 @@ AddRoom("SwampSideBorder", {
 		data = {}
 	},
 	contents =  {
-		distributepercent = .08,
-		distributeprefabs= {
-			swamptree = .1,
-			swampgrass_spawner = .12,
-			swampreed_spawner = .16,
-			tentacle = .03,
-		}
+		distributepercent = density*.08,
+		distributeprefabs= basiccontent
 	}
 })
 
@@ -87,12 +78,8 @@ AddRoom("SwampBackground", {
 	colour={r=.45,g=.5,b=.85,a=.50},
 	value = WORLD_TILES.SWAMP,
 	contents =  {
-		distributepercent = .04,
-		distributeprefabs= {
-			swamptree = .1,
-			swampgrass_spawner = .06,
-			swampreed_spawner = .08,
-		}
+		distributepercent = density*.04,
+		distributeprefabs= basiccontent
 	}
 })
 
@@ -104,11 +91,8 @@ AddRoom("GreatSwamp", {
 		data = {}
 	},
 	contents =  {
-		distributepercent = .05,
-		distributeprefabs= {
-			swampgrass_spawner = .1,
-			swampreed_spawner = .2,
-		} 
+		distributepercent = density*.05,
+		distributeprefabs= basiccontent
 	}
 })
 
@@ -123,13 +107,8 @@ AddRoom("GreatSwampReeds", {
 		countprefabs= {
 			swampreed_spawner = function() return 4 + math.random(4) end,
 		},
-		distributepercent = .08,
-		distributeprefabs= {
-			swamptree = .1,
-			swampreed_spawner = .18,
-			swampgrass_spawner = .1,
-			tentacle = .03,
-		}
+		distributepercent = density*.08,
+		distributeprefabs= basiccontent
 	}
 })
 
@@ -141,14 +120,8 @@ AddRoom("GreatSwampDeep", {
 		data = {}
 	},
 	contents =  {
-		distributepercent = .1,
-		distributeprefabs= {
-			swamptree = .1,
-			swampgrass_spawner = .14,
-			swampreed_spawner = .16,
-			blue_mushroom = .04,
-			tentacle = .04,
-		}
+		distributepercent = density*.1,
+		distributeprefabs= basiccontent
 	}
 })
 
@@ -179,11 +152,7 @@ AddRoom("OldVillage", {
 						--mermhead = function () return math.random(3) end,
 						--pumpkin_lantern = function () return IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) and (1 + math.random(3)) or 0 end,
 					},
-					distributepercent = .1,
-					distributeprefabs= {
-						--grass = .05,
-						--berrybush=.05,
-						--berrybush_juicy = 0.025,
-					},
+					distributepercent = density*.1,
+					distributeprefabs= basiccontent
 				}
 	})

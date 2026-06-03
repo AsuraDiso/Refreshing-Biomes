@@ -2,6 +2,7 @@ require("behaviours/wander")
 require("behaviours/runaway")
 require("behaviours/chaseandattack")
 require("behaviours/doaction")
+require("behaviours/follow")
 
 local WANDER_DIST = 8
 local WAVE_DIST = 5
@@ -85,6 +86,35 @@ local function FindWorkAction(inst)
     return nil
 end
 
+local function ShouldTalk(inst)
+    if inst._next_talk_time == nil then
+        inst._next_talk_time = GetTime() + 10 + math.random() * 10
+    end
+    
+    if GetTime() > inst._next_talk_time then
+        inst._next_talk_time = GetTime() + 10 + math.random() * 10
+        return true
+    end
+    return false
+end
+
+local function DoTalk(inst)
+    if inst.components.talker ~= nil and inst.sg ~= nil and not inst.sg:HasStateTag("busy") then
+        if math.random() < 0.25 then
+            if TheWorld.state.isnight then
+                local night_quotes = { "Time for bed.", "So dark...", "I should go home." }
+                inst.components.talker:Say(night_quotes[math.random(#night_quotes)])
+            elseif TheWorld.state.isdusk then
+                local dusk_quotes = { "A lovely evening.", "Time for a walk.", "The day is ending." }
+                inst.components.talker:Say(dusk_quotes[math.random(#dusk_quotes)])
+            else
+                local day_quotes = { "Nice day for it.", "Busy, busy...", "The city needs me.", "Greetings!", "Working hard!" }
+                inst.components.talker:Say(day_quotes[math.random(#day_quotes)])
+            end
+        end
+    end
+end
+
 local AncientCityCitizenBrain = Class(Brain, function(self, inst)
     Brain._ctor(self, inst)
 end)
@@ -92,6 +122,17 @@ end)
 function AncientCityCitizenBrain:OnStart()
     local root = PriorityNode(
     {
+        IfNode(
+            function() 
+                if ShouldTalk(self.inst) then
+                    DoTalk(self.inst)
+                end
+                return false
+            end,
+            "TalkRoutine",
+            ActionNode(function() end)
+        ),
+        
         WhileNode(
             function()
                 return self.inst._is_guard == true and GetHostilePlayer(self.inst, 20) ~= nil
@@ -137,10 +178,49 @@ function AncientCityCitizenBrain:OnStart()
             end)
         ),
 
-        IfNode(
-            function() return not TheWorld.state.isdusk and not TheWorld.state.isnight end,
+        WhileNode(
+            function() return self.inst.components.follower ~= nil and self.inst.components.follower.leader ~= nil end,
+            "FollowLeader",
+            Follow(self.inst, function(inst) return inst.components.follower.leader end, 2, 4, 8)
+        ),
+
+        WhileNode(
+            function() return TheWorld.state.isday end,
             "DoWork",
             DoAction(self.inst, FindWorkAction, "work", true)
+        ),
+
+        WhileNode(
+            function() return TheWorld.state.isdusk end,
+            "WanderPark",
+            Wander(self.inst, function()
+                local park = FindEntity(self.inst, 30, nil, {"parkdeco"})
+                if park ~= nil then
+                    return park:GetPosition()
+                end
+                return GetHome(self.inst)
+            end, WANDER_DIST)
+        ),
+
+        WhileNode(
+            function() return TheWorld.state.isnight end,
+            "RunHome",
+            ActionNode(function()
+                local home = GetHome(self.inst)
+                if home ~= nil and self.inst:GetDistanceSqToPoint(home) > 4 then
+                    self.inst.components.locomotor:GoToPoint(home, nil, true)
+                else
+                    self.inst.components.locomotor:Stop()
+                    local x,y,z = self.inst.Transform:GetWorldPosition()
+                    local ents = TheSim:FindEntities(x,y,z, 4, {"structure"})
+                    for _, house in ipairs(ents) do
+                        if house.components.spawner ~= nil and house.components.spawner.child == self.inst then
+                            house.components.spawner:GoHome(self.inst)
+                            return
+                        end
+                    end
+                end
+            end)
         ),
 
         Wander(self.inst, GetHome, WANDER_DIST),

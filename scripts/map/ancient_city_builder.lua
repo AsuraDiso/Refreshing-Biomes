@@ -69,7 +69,9 @@ end
 local function setEntity(prop, x, z, cityID, extra)
     if entities[prop] == nil then entities[prop] = {} end
     x, z = screenToWorld(x, z)
-    local save_data = { x=x+2, z=z+2, scenario=nil, data={} }
+    local save_data = { x=x, z=z, scenario=nil, data={
+        cityID = cityID,
+    } }
     if extra then
         for key, value in pairs(extra) do save_data.data[key] = value end
     end

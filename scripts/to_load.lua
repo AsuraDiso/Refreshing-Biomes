@@ -1,48 +1,61 @@
 PrefabFiles = {
-	"swampretrofiter",
+	--SWAMP/DESERT
+	-----SWAMP
+	"swamp_fern",
 	"mosquitoswarm",
 	"mosquitoswarm_cocoon",
 	"swampgrass",
 	"swampreed",
 	"mossybeehive",
 	"mossybee",
-	"glowflyswarm",
+	"glowflyswarm", --?
 	"greatlilypad",
 	"swamptree_root",
 	"greatswamptree",
 	"greatswampaltar",
 	"greattreehealfx",
 	"fumeagator",
-	"swampdeco",
-	"swampshroom",
 	"swamplotus",
 	"greatlotus",
 	"fume_fx",
-	"shroombrella",
-	"shroombrella_fx",
-	"swampmist",
 	"greatswamp_house",
-	"newland_trees",
 	"fumeagator_armor", 
 	"fumeagatorskin", 
 
-	"newland",
-	"newland_network",
-
-	--"newland_veggies",
+	-----DESERT
 	"swampretrofiter",
-	"submergedterrain",
-	
-	-- replaced by newland_trees above
-	"cordyceps_family",
 	"swamp_regeneration",
-	"ancientdweller",
-	"ancientdweller_small",
+	"swamp_desertification",
 
+	--CITY
 	"ancientcity_road",
 	"ancientcity_decos",
 	"ancientcity_houses",
 	"ancientcity_citizen",
+
+	--CORDYCEPS
+	"shroombrella",
+	"shroombrella_fx",
+	"cordyceps_family",
+
+	--SPIDERCAVE
+	"ancientdweller",
+	"ancientdweller_small",
+
+	--BUNNYCLUB
+
+	--MISC
+	"newland",
+	"newland_network",
+
+	"swampmist",
+	"newland_trees",
+	"submergedterrain",
+
+	"swampshroom", --?
+
+
+	--"newland_veggies",
 }
 
 Assets = {

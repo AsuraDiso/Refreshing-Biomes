@@ -15,6 +15,18 @@ local function onhit(inst, worker)
     inst.AnimState:PushAnimation("idle")
 end
 
+local function OnSave(inst, data)
+    if inst.components.city_member and inst.components.city_member.cityID then
+        data.cityID = inst.components.city_member.cityID
+    end
+end
+
+local function OnLoad(inst, data)
+    if data and data.cityID and inst.components.city_member then
+        inst.components.city_member:SetCity(data.cityID)
+    end
+end
+
 local function make_house(name, citizen_type_index)
     local function fn()
         local inst = CreateEntity()
@@ -57,16 +69,11 @@ local function make_house(name, citizen_type_index)
 
         inst:AddComponent("spawner")
         inst.components.spawner:Configure("ancientcity_citizen", TUNING.TOTAL_DAY_TIME * 2)
-        inst.components.spawner.onspawn = function(inst, child)
+        inst.components.spawner.onspawnedfn = function(inst, child)
             if citizen_type_index ~= nil and child.SetCitizenType ~= nil then
                 child:SetCitizenType(citizen_type_index)
             end
-            if inst.components.city_member then
-                if child.components.city_member == nil then
-                    child:AddComponent("city_member")
-                end
-                child.components.city_member:SetCity(inst.components.city_member.cityID)
-            end
+            child.components.city_member:SetCity(inst.components.city_member.cityID)
         end
 
         inst:DoTaskInTime(0, function()
@@ -90,6 +97,9 @@ local function make_house(name, citizen_type_index)
                 inst.components.spawner:SpawnWithDelay(1 + math.random() * 2)
             end
         end)
+
+        inst.OnLoad = OnLoad
+        inst.OnSave = OnSave
 
         return inst
     end

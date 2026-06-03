@@ -3,6 +3,7 @@ local function MakeLumber(inst)
     inst.AnimState:OverrideSymbol("swap_object", "swap_goldenaxe", "swap_goldenaxe")
     inst.AnimState:Show("ARM_carry")
     inst.AnimState:Hide("ARM_normal")
+    inst._has_item = true
 end
 
 local function MakeMiner(inst)
@@ -10,10 +11,66 @@ local function MakeMiner(inst)
     inst.AnimState:OverrideSymbol("swap_object", "swap_pickaxe", "swap_pickaxe")
     inst.AnimState:Show("ARM_carry")
     inst.AnimState:Hide("ARM_normal")
+    inst._has_item = true
+end
+
+local function MayorGuardCheck(inst)
+    if inst:HasTag("INLIMBO") or inst.components.health:IsDead() then
+        if inst._guards then
+            for _, guard in ipairs(inst._guards) do
+                if guard and guard:IsValid() then
+                    local fx = SpawnPrefab("spawn_fx_small")
+                    fx.Transform:SetPosition(guard.Transform:GetWorldPosition())
+                    guard:Remove()
+                end
+            end
+            inst._guards = nil
+        end
+    else
+        if inst._guards == nil then
+            inst._guards = {}
+        end
+        
+        for i = #inst._guards, 1, -1 do
+            local guard = inst._guards[i]
+            if not guard or not guard:IsValid() or guard.components.health:IsDead() then
+                table.remove(inst._guards, i)
+            end
+        end
+        
+        while #inst._guards < 2 do
+            local guard = SpawnPrefab("ancientcity_citizen")
+            guard.Transform:SetPosition(inst.Transform:GetWorldPosition())
+            guard.SetCitizenType(guard, 7)
+            guard.persists = false
+            if guard.components.follower then
+                guard.components.follower:SetLeader(inst)
+            end
+            local fx = SpawnPrefab("spawn_fx_small")
+            fx.Transform:SetPosition(guard.Transform:GetWorldPosition())
+            table.insert(inst._guards, guard)
+        end
+    end
 end
 
 local function MakeMayor(inst)
     inst.AnimState:SetBuild("waxwell")
+    if not TheWorld.ismastersim then return end
+
+    if inst._guard_task == nil then
+        inst._guard_task = inst:DoPeriodicTask(1, MayorGuardCheck)
+    end
+    
+    inst:ListenForEvent("onremove", function()
+        if inst._guards then
+            for _, guard in ipairs(inst._guards) do
+                if guard and guard:IsValid() then
+                    guard:Remove()
+                end
+            end
+            inst._guards = nil
+        end
+    end)
 end
 
 local function MakeShopkeeper(inst)
@@ -25,6 +82,7 @@ local function MakeGuard(inst)
     inst.AnimState:OverrideSymbol("swap_object", "swap_spear", "swap_spear")
     inst.AnimState:Show("ARM_carry")
     inst.AnimState:Hide("ARM_normal")
+    inst._has_item = true
 end
 
 local function MakeFarmer(inst)
@@ -32,6 +90,7 @@ local function MakeFarmer(inst)
     inst.AnimState:OverrideSymbol("swap_object", "quagmire_hoe", "swap_quagmire_hoe")
     inst.AnimState:Show("ARM_carry")
     inst.AnimState:Hide("ARM_normal")
+    inst._has_item = true
 end
 
 local function MakeBuilder(inst)
@@ -39,6 +98,7 @@ local function MakeBuilder(inst)
     inst.AnimState:OverrideSymbol("swap_object", "swap_hammer", "swap_hammer")
     inst.AnimState:Show("ARM_carry")
     inst.AnimState:Hide("ARM_normal")
+    inst._has_item = true
 end
 
 local Types = {
@@ -153,6 +213,56 @@ local function OnLoad(inst, data)
     end
 end
 
+local function UpdateClothing(inst)
+    if inst:HasTag("INLIMBO") or inst.components.health:IsDead() then 
+        return 
+    end
+    
+    inst.AnimState:ClearOverrideSymbol("swap_hat")
+    inst.AnimState:ClearOverrideSymbol("swap_body")
+    inst.AnimState:Hide("HAT")
+    inst.AnimState:Hide("HAIR_HAT")
+    inst.AnimState:Show("HAIR_NOHAT")
+    inst.AnimState:Show("HAIR")
+    inst.AnimState:Show("HEAD")
+    inst.AnimState:Hide("HEAD_HAT")
+    
+    if not inst._has_item then
+        inst.AnimState:ClearOverrideSymbol("swap_object")
+        inst.AnimState:Hide("ARM_carry")
+        inst.AnimState:Show("ARM_normal")
+    end
+
+    if TheWorld.state.israining then
+        if not inst._has_item then
+            inst.AnimState:OverrideSymbol("swap_object", "swap_umbrella", "swap_umbrella")
+            inst.AnimState:Show("ARM_carry")
+            inst.AnimState:Hide("ARM_normal")
+        else
+            inst.AnimState:OverrideSymbol("swap_body", "torso_rain", "swap_body")
+            inst.AnimState:OverrideSymbol("swap_hat", "hat_rain", "swap_hat")
+            inst.AnimState:Show("HAT")
+            inst.AnimState:Show("HAIR_HAT")
+            inst.AnimState:Hide("HAIR_NOHAT")
+            inst.AnimState:Hide("HAIR")
+        end
+    elseif TheWorld.state.issummer then
+        inst.AnimState:OverrideSymbol("swap_body", "torso_hawaiian", "swap_body")
+        inst.AnimState:OverrideSymbol("swap_hat", "hat_straw", "swap_hat")
+        inst.AnimState:Show("HAT")
+        inst.AnimState:Show("HAIR_HAT")
+        inst.AnimState:Hide("HAIR_NOHAT")
+        inst.AnimState:Hide("HAIR")
+    elseif TheWorld.state.iswinter then
+        inst.AnimState:OverrideSymbol("swap_body", "torso_winter", "swap_body")
+        inst.AnimState:OverrideSymbol("swap_hat", "hat_winter", "swap_hat")
+        inst.AnimState:Show("HAT")
+        inst.AnimState:Show("HAIR_HAT")
+        inst.AnimState:Hide("HAIR_NOHAT")
+        inst.AnimState:Hide("HAIR")
+    end
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -194,6 +304,8 @@ local function fn()
     
     inst:AddComponent("health")
     inst:AddComponent("combat")
+    inst:AddComponent("follower")
+    inst:AddComponent("leader")
     inst.components.combat:SetAttackPeriod(2.5)
     inst.components.combat:SetDefaultDamage(20)
     inst.components.combat:SetRange(1.5)
@@ -220,6 +332,8 @@ local function fn()
         end
     end)
 
+
+
     local brain = require("brains/ancientcity_citizenbrain")
     inst:SetBrain(brain)
     inst:SetStateGraph("SGancientcity_citizen")
@@ -230,6 +344,11 @@ local function fn()
 
     local type_index = math.random(#Types)
     ApplyCitizenType(inst, Types[type_index], type_index)
+
+    inst:WatchWorldState("israining", UpdateClothing)
+    inst:WatchWorldState("issummer", UpdateClothing)
+    inst:WatchWorldState("iswinter", UpdateClothing)
+    UpdateClothing(inst)
 
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad

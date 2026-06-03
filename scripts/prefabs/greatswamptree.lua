@@ -295,6 +295,13 @@ local function OnDeath(inst, data)
         inst.components.timer:StopTimer(t)
     end
 
+    -- Spawn desertification at the tree's location
+    local x, y, z = inst.Transform:GetWorldPosition()
+    local desertification = SpawnPrefab("swamp_desertification")
+    if desertification then
+        desertification.Transform:SetPosition(x, y, z)
+    end
+
     inst.sg:GoToState("death")
 end
 

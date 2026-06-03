@@ -46,25 +46,18 @@ return {
             Asset("ANIM", "anim/tree_jungle_normal.zip"),
             Asset("ANIM", "anim/tree_jungle_short.zip"),
             Asset("ANIM", "anim/tree_jungle_tall.zip"),
-            Asset("SOUND", "sound/forest.fsb"),
-            Asset("SOUND", "sound/deciduous.fsb"),
-            Asset("MINIMAP_IMAGE", "tree_leaf"),
-            Asset("MINIMAP_IMAGE", "tree_leaf_burnt"),
-            Asset("MINIMAP_IMAGE", "tree_leaf_stump"),
         },
     },
     cactustrees = {
         prefab_name = "cactustree",
         tree_tag = "cactustree",
-        anim_bank = "tubertree",
-        anim_build = "tuber_tree_build",
+        anim_bank = "desertcactus",
+        anim_build = "desertcactus",
         stages = {"short", "tall"},
         make_monster = false,
         hue = .85,
         assets = {
-            Asset("ANIM", "anim/tuber_tree_build.zip"),
-            Asset("ANIM", "anim/tuber_tree.zip"),
-            Asset("SOUND", "sound/forest.fsb"),
+            Asset("ANIM", "anim/desertcactus.zip"),
         },
     }
 }

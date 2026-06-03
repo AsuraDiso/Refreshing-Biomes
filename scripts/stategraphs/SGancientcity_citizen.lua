@@ -16,11 +16,6 @@ local events =
             inst.sg:GoToState("wave", data ~= nil and data.target or nil)
         end
     end),
-    EventHandler("scare", function(inst)
-        if not inst.components.health:IsDead() and not inst._is_guard and not inst.sg:HasStateTag("busy") then
-            inst.sg:GoToState("run_start")
-        end
-    end),
     EventHandler("attacked", function(inst, data)
         if inst.components.health:IsDead() then
             return
@@ -65,9 +60,7 @@ local states =
         events =
         {
             EventHandler("animover", function(inst)
-                if inst.AnimState:AnimDone() then
-                    inst.sg:GoToState("walk")
-                end
+                inst.sg:GoToState("walk")
             end),
         },
     },
@@ -94,35 +87,31 @@ local states =
         events =
         {
             EventHandler("animover", function(inst)
-                if inst.AnimState:AnimDone() then
-                    inst.sg:GoToState("idle")
-                end
+                inst.sg:GoToState("idle")
             end),
         },
     },
 
     State{
         name = "run_start",
-        tags = { "moving", "canrotate" },
+        tags = { "moving", "running", "canrotate" },
 
         onenter = function(inst)
             inst.components.locomotor:RunForward()
-            inst.AnimState:PlayAnimation("run_pre")
+            inst.AnimState:PlayAnimation("run_pre", false)
         end,
 
         events =
         {
             EventHandler("animover", function(inst)
-                if inst.AnimState:AnimDone() then
-                    inst.sg:GoToState("run")
-                end
+                inst.sg:GoToState("run")
             end),
         },
     },
 
     State{
         name = "run",
-        tags = { "moving", "canrotate" },
+        tags = { "moving", "running", "canrotate" },
 
         onenter = function(inst)
             inst.components.locomotor:RunForward()
@@ -142,9 +131,7 @@ local states =
         events =
         {
             EventHandler("animover", function(inst)
-                if inst.AnimState:AnimDone() then
-                    inst.sg:GoToState("idle")
-                end
+                inst.sg:GoToState("idle")
             end),
         },
     },
@@ -184,7 +171,7 @@ local states =
         {
             EventHandler("animover", function(inst)
                 if inst.AnimState:AnimDone() then
-                    inst.sg:GoToState(inst._is_guard and "idle" or "run_start")
+                    inst.sg:GoToState("idle")
                 end
             end),
         },
