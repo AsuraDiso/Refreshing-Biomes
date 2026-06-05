@@ -60,7 +60,13 @@ local funcs = {
 	end,			
 	["Cultivated"] = function(tagdata)
 		return "GLOBALTAG", "Cultivated"
-	end,							
+	end,
+	["Cultivated1"] = function(tagdata)
+		return "GLOBALTAG", "Cultivated1"
+	end,
+	["Cultivated2"] = function(tagdata)
+		return "GLOBALTAG", "Cultivated2"
+	end,
 }
 for k, v in pairs(funcs) do
 	AddMapTag(k, v)
@@ -294,7 +300,7 @@ if firstTimeLoading then
 			"NewLand_SurfaceCave",
 			"NewLand_SpiderCaves",
 			"NewLand_AncientCity",
-			"NewLand_AncientCity_Farmlands",
+			"NewLand_AncientCity2",
 		},
 		numoptionaltasks = 0,
 		optionaltasks = {},
@@ -554,7 +560,7 @@ local MoonCity = {
 	-- Must match one of the tags registered in AddMapTag above ("City1", "City2", …).
 	CITY_TAG = "City1",
 	-- Tag used to identify farm/cultivated nodes (optional – set to nil if unused).
-	FARM_TAG = "Cultivated1",
+	FARM_TAG = nil,
 	PARKS = {
 		COMMON = {
 			"map/static_layouts/mooncity/city_park_1",
@@ -585,7 +591,8 @@ local MoonCity = {
 			"map/static_layouts/mooncity/farm_fill_3", 
 		},
 	},
-	-- Setpieces that are always placed first, in order, before any random parks.
+	-- Required setpieces: each entry is placed once, in order, after roads are built.
+	-- Use {path = "...", num = N} to place the same layout multiple times.
 	MUST_SETPIECES = {
 		"map/static_layouts/mooncity/pig_cityhall_1",
 		"map/static_layouts/mooncity/pig_playerhouse_1",
@@ -604,19 +611,46 @@ local MoonCity = {
 	-- Tiles the city road/block builder is allowed to place onto.
 	VALID_TILES = {
 		CITY = {WORLD_TILES.ANCIENTCITY_SUBURB, WORLD_TILES.ANCIENTCITY_TILES},
-		FARM = {WORLD_TILES.ANCIENTCITY_FARMLAND},
+		FARM = {WORLD_TILES.ANCIENTCITY_FARM},
 	},
 	ROAD   = WORLD_TILES.ANCIENTCITY_ROAD,
 	TILE   = WORLD_TILES.ANCIENTCITY_TILES,
 	SUBURB = WORLD_TILES.ANCIENTCITY_SUBURB,
+	FARM = WORLD_TILES.ANCIENTCITY_FARM,
 	-- Prefabs that clearground() will never remove (e.g. quest markers, special spawns).
 	REQUIRED_PREFABS = {},
+	-- Dock configuration for coastal cities (set to nil to disable).
+	-- Docks only generate when the city borders open water (not narrow straits).
+	DOCKS = {
+		DEPTH = 5,              -- tiles extending into ocean per pier
+		COUNT = 3,              -- max number of dock piers to generate
+		MIN_OCEAN_DEPTH = 10,   -- min continuous ocean tiles to confirm open water
+		POST_CHANCE = 0.4,      -- chance of dock_woodposts on each dock edge
+		SPACING = 8,            -- min tile distance between piers
+		BOAT_PREFABS = {        -- prefabs to spawn at pier endpoints (chance out of 1.0)
+			boat_item = 0.35,
+		},
+	},
 }
+
+local function shallowcopy(orig)
+	local copy = {}
+	for k, v in pairs(orig) do
+		copy[k] = v
+	end
+	return copy
+end
+
+local AbandonedCity = shallowcopy(MoonCity)
+AbandonedCity.CITY_TAG = "City2"
+AbandonedCity.FARM_TAG = nil
+AbandonedCity.DOCKS = nil  -- no docks for this city
 
 -- List of all city configs to build. Add more tables here to create additional cities.
 -- Each entry must have a unique CITY_TAG matching a tag registered with AddMapTag.
 local ANCIENT_CITY_CONFIGS = {
 	MoonCity,
+	AbandonedCity
 	-- SecondCity,  -- example: add more cities by inserting additional config tables
 }
 

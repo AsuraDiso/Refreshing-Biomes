@@ -60,7 +60,6 @@ local prefabs = {
     "wall_stone_repaired",
     "pig_shop_spawner",
     "lawnornament_4",
-    "city_lamp",
     "fast_farmplot_planted",
 }
 

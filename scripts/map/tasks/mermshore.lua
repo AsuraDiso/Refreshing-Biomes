@@ -8,7 +8,7 @@ AddTask("NewLand_MermShore", {
         ["MermShoreReeds"] = function() return math.random(2, 3) end,
         ["MermShoreShallow"] = 1,
     },
-
+    room_tags = {},
     background_room = "MermShoreMud",
     room_bg = WORLD_TILES.SWAMP,
     colour={r=0.2,g=0.55,b=0.45,a=1},
