@@ -44,6 +44,12 @@ PrefabFiles = {
 
 	--BUNNYCLUB
 
+	--SAVANNAH
+	"rock_flippable",
+	"wildpighouse",
+	"wildpigman",
+	"kittyman",
+
 	--MISC
 	"newland",
 	"newland_network",

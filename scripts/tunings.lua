@@ -13,6 +13,11 @@ local night_time = seg_time * night_segs
 GLOBAL.CORDYCEPS_DISTANCE = 2.5
 
 local REFRESH_TUNING = {
+	FLIPPABLE_ROCK_REPOPULATE_TIME = total_day_time*8,
+	FLIPPABLE_ROCK_REPOPULATE_INCREASE = total_day_time*.5, -- Not used.
+	FLIPPABLE_ROCK_REPOPULATE_VARIANCE = total_day_time*2,
+	FLIPPABLE_ROCK_CYCLES = 3, -- Not used.
+	
 	MOSQUITOSWARM = {
 		SMALL = {
 			HEALTH = 50,

@@ -5,6 +5,7 @@ AddTask("NewLand_Savannah", {
 
     room_choices = {
         ["SavannahCenter"] = 1,
+        ["WildPigKingdom"] = 1,
         ["SavannahBeefalo"] = function() return math.random(3, 5) end,
         ["SavannahRabbits"] = 1,
         ["SavannahClearing"] = function() return math.random(2, 3) end,
