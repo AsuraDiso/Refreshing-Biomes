@@ -339,6 +339,18 @@ local function OnRemoveEntity(inst)
     end
 end
 
+local function CreateShadeMap(proxy)
+    local inst = CreateEntity()
+    inst.entity:AddTransform()
+    inst.entity:AddMiniMapEntity()
+
+    inst.MiniMapEntity:SetIcon("greatswamptreeshade.tex")
+
+    inst.entity:SetParent(proxy.entity)
+
+    return inst
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -370,7 +382,9 @@ local function fn()
         inst.components.distancefade:Setup(15,25)
 
         inst:AddComponent("canopyshadows")
-        inst.components.canopyshadows.range = math.floor(TUNING.SHADE_CANOPY_RANGE/4)
+        inst.components.canopyshadows.range = math.floor(SHADE_RANGE/4)
+
+        CreateShadeMap(inst)
     end
 
     inst.entity:SetPristine()
@@ -386,7 +400,7 @@ local function fn()
     inst._cocoons_to_regrow = 0
 
     inst:AddComponent("canopylightrays")
-    inst.components.canopylightrays.range = math.floor(TUNING.SHADE_CANOPY_RANGE/4)
+    inst.components.canopylightrays.range = math.floor(SHADE_RANGE/4)
 
     inst:AddComponent("playerprox")
     inst.components.playerprox:SetTargetMode(inst.components.playerprox.TargetModes.AllPlayers)
@@ -405,7 +419,7 @@ local function fn()
     end
     --------------------
     inst:AddComponent("lightningblocker")
-    inst.components.lightningblocker:SetBlockRange(TUNING.SHADE_CANOPY_RANGE)
+    inst.components.lightningblocker:SetBlockRange(SHADE_RANGE)
     --inst.components.lightningblocker:SetOnLightningStrike(OnLightningStrike)
 
     inst:AddComponent("combat")

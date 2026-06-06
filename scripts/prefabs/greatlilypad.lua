@@ -204,6 +204,7 @@ function MakeLilyPad(name, radius, bank, build, anim, data)
 		inst:AddTag("boat")
 		inst:AddTag("wood")
 		inst:AddTag("lilypad")
+		inst:AddTag("floating")
 
 		local phys = inst.entity:AddPhysics()
 		phys:SetMass(TUNING.BOAT.MASS)

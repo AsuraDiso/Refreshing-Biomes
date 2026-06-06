@@ -1,7 +1,7 @@
 local SEARCH_RADIUS = 32
 local POLL_PERIOD = 0.5
 
-local EXCLUDE_TAGS = { "INLIMBO", "FX", "NOCLICK", "DECOR", "flying", "ghost", "playerghost", "notarget" }
+local EXCLUDE_TAGS = { "INLIMBO", "FX", "NOCLICK", "DECOR", "flying", "ghost", "floating", "playerghost", "notarget" }
 local INCLUDE_TAGS = nil
 
 return Class(function(self, inst)

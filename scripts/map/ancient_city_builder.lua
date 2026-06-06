@@ -57,8 +57,11 @@ end
 
 local magicnumber = 43
 local function worldToScreen(worldX, worldY)
-    return (worldX + WIDTH) / TILE_SCALE - magicnumber,
-           (worldY + HEIGHT) / TILE_SCALE - magicnumber
+    local x = (worldX + WIDTH) / TILE_SCALE - magicnumber
+    local y = (worldY + HEIGHT) / TILE_SCALE - magicnumber
+    x = math.floor(x) + 0.5
+    y = math.floor(y) + 0.5
+    return x, y
 end
 
 local function screenToWorld(screenX, screenY)
@@ -78,7 +81,12 @@ local function setEntity(prop, x, z, cityID, extra)
     for _, exist in ipairs(entities[prop]) do
         if math.abs(exist.x - save_data.x) < 0.5 and math.abs(exist.z - save_data.z) < 0.5 then
             if not exist.scenario and save_data.scenario then exist.scenario = save_data.scenario end
-            for k, v in pairs(save_data.data) do exist.data[k] = v end
+            for k, v in pairs(save_data.data) do 
+                if not exist.data then
+                    exist.data = {}
+                end
+                exist.data[k] = v 
+            end
             return entities
         end
     end
@@ -613,6 +621,7 @@ local function createcity(city, cfg, claimed_regions)
         return nil
     end
     city.city_start = start
+
     print("[AncientCityBuilder] City start open-area score: " .. start_score .. " @ " .. start.x .. ", " .. start.z)
 
     local wx, wz, _ = screenToWorld(start.x, start.z)
@@ -871,7 +880,6 @@ local function placefarm(nodes, city, cfg, total, set, reserved, claimed_regions
         local farm_placed = false
 
         for _, cand in ipairs(candidates) do
-            print("--- PLACING FARM: " .. choice .. " @ " .. cand.pt.x .. ", " .. cand.pt.z .. " (score " .. cand.score .. ")")
             if spawnSetPiece(choice, cand.pt, city, cand.reverse, cand.flip) then
                 table.insert(reserved, cand.pt)
                 placed = placed + 1
