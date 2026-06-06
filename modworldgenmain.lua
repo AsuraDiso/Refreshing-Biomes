@@ -623,10 +623,10 @@ local MoonCity = {
 	-- Docks only generate when the city borders open water (not narrow straits).
 	DOCKS = {
 		DEPTH = 5,              -- tiles extending into ocean per pier
-		COUNT = 3,              -- max number of dock piers to generate
+		COUNT = 10,             -- max number of dock piers to generate
 		MIN_OCEAN_DEPTH = 10,   -- min continuous ocean tiles to confirm open water
 		POST_CHANCE = 0.4,      -- chance of dock_woodposts on each dock edge
-		SPACING = 8,            -- min tile distance between piers
+		SPACING = 6,            -- min tile distance between piers
 		BOAT_PREFABS = {        -- prefabs to spawn at pier endpoints (chance out of 1.0)
 			boat_item = 0.35,
 		},

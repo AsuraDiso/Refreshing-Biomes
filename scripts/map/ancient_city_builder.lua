@@ -268,12 +268,9 @@ local function validateSetpieceFootprint(setpiece, pt, reverse, flip, cfg, mode)
         end
 
         if mode == "city_built" or mode == "city_park" then
-            if t == cfg.ROAD then
-                return false
-            end
             if isSetpieceCityGround(t, cfg) then
                 ground_count = ground_count + 1
-            else
+            elseif not isParkValidTile(t, cfg) then
                 return false
             end
         elseif mode == "farm" then
@@ -288,13 +285,9 @@ local function validateSetpieceFootprint(setpiece, pt, reverse, flip, cfg, mode)
     end
 
     if mode == "city_built" or mode == "city_park" then
-        local center = WorldSim:GetTile(math.floor(pt.x), math.floor(pt.z))
-        if not isSetpieceCityGround(center, cfg) then
-            return false
-        end
         for _, layout_pt in ipairs(iterSetpieceLayout(setpiece, pt, reverse, flip)) do
             local layout_tile = WorldSim:GetTile(math.floor(layout_pt.x), math.floor(layout_pt.z))
-            if not layout_tile or layout_tile <= 1 or layout_tile == cfg.ROAD then
+            if not layout_tile or layout_tile <= 1 then
                 return false
             end
         end
@@ -302,7 +295,7 @@ local function validateSetpieceFootprint(setpiece, pt, reverse, flip, cfg, mode)
         if not isNearCityRoad(pt, cfg, half + 2) then
             return false
         end
-        return ground_count >= math.floor(#tiles * 0.5)
+        return true
     end
 
     return true
@@ -813,7 +806,6 @@ local function placeMustSetpieces(city, cfg, claimed_regions)
 
         for _, cand in ipairs(candidates) do
             clearShopSpawnersNearPark(cand.pt, half + 2)
-            print("--- PLACING MUST-SETPIECE: " .. choice .. " @ " .. cand.pt.x .. ", " .. cand.pt.z .. " (score " .. cand.score .. ")")
             if spawnSetPiece(choice, cand.pt, city, cand.reverse, cand.flip) then
                 table.insert(reserved, cand.pt)
                 removeOverlappingParkSlots(city, cand.pt, half * 1.5)
@@ -860,7 +852,6 @@ local function makeParks(city, cfg, unique, uniqueCount)
             local setpiece = StaticLayout.Get(choice)
             local reverse, flip = findSetpieceOrientation(setpiece, park, city.cfg, "city_park")
             if reverse ~= nil then
-                print("--- PLACING PARK: " .. choice .. " @ " .. park.x .. ", " .. park.z)
                 if spawnSetPiece(choice, { x=park.x, y=park.y, z=park.z }, city, reverse, flip) then
                     if unique_sel then
                         table.remove(unique_park_pool, unique_sel)
@@ -975,7 +966,6 @@ local function paintCityRemaining(city, cfg)
     for node_i, node in ipairs(city.citynodes) do
         local bx = node.cent[1]
         local bz = node.cent[2]
-        --print("--- PAINTING CITY REMAINING: node " .. node_i .. " @ " .. bx .. ", " .. bz)
         local radius_world = 160
         for dx = -radius_world, radius_world, TILE_SCALE do
             for dz = -radius_world, radius_world, TILE_SCALE do
@@ -998,11 +988,6 @@ local function paintCityRemaining(city, cfg)
     end
 end
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Dock generation for coastal cities
--- ─────────────────────────────────────────────────────────────────────────────
-
--- Directions for dock probing (dx, dz pairs for the 4 cardinal directions)
 local DOCK_DIRS = {
     {dx = 1,  dz = 0},
     {dx = -1, dz = 0},
@@ -1010,8 +995,6 @@ local DOCK_DIRS = {
     {dx = 0,  dz = -1},
 }
 
---- Check whether a tile coordinate is ocean (tile id <= 1 counts as ocean/void
---- in the worldgen context; we also accept proper OCEAN tiles via IsOceanTile).
 local function isOceanAtCoord(tx, tz)
     local tile = WorldSim:GetTile(tx, tz)
     if not tile or tile <= 1 then return true end
@@ -1020,21 +1003,10 @@ local function isOceanAtCoord(tx, tz)
     return false
 end
 
---- Check that a tile is a city tile belonging to this city config.
 local function isCityTileAtCoord(tx, tz, cfg)
-    local tile = WorldSim:GetTile(tx, tz)
-    if not tile then return false end
-    if tile == cfg.ROAD or tile == cfg.TILE or tile == cfg.SUBURB then
-        return true
-    end
-    if cfg.FARM and tile == cfg.FARM then
-        return true
-    end
-    return false
+    return not isOceanAtCoord(tx, tz)
 end
 
---- Cast a ray in a direction and count continuous ocean tiles.
---- Returns the count (stops at max_depth or on hitting land).
 local function countOceanDepth(sx, sz, dx, dz, max_depth)
     local count = 0
     for i = 1, max_depth do
@@ -1048,14 +1020,12 @@ local function countOceanDepth(sx, sz, dx, dz, max_depth)
     return count
 end
 
---- Validate that a dock tile won't create a land bridge by checking
---- surrounding non-dock, non-ocean tiles.
 local function validateDockPlacement(tx, tz, ctx, ctz)
     for dx = -1, 1 do
         for dz = -1, 1 do
             if dx ~= 0 or dz ~= 0 then
                 local nx, nz = tx + dx, tz + dz
-                if not (nx == ctx and nz == ctz) then
+                if math.abs(nx - ctx) > 1 or math.abs(nz - ctz) > 1 then
                     local tile = WorldSim:GetTile(nx, nz)
                     if tile and tile > 1 and tile ~= WORLD_TILES.MONKEY_DOCK then
                         local is_ocean = false
@@ -1073,7 +1043,6 @@ local function validateDockPlacement(tx, tz, ctx, ctz)
     return true
 end
 
---- Place a single dock tile and register it with the entity system.
 local function placeDockTile(tx, tz, cityID)
     WorldSim:SetTile(tx, tz, WORLD_TILES.MONKEY_DOCK)
 
@@ -1089,7 +1058,6 @@ local function placeDockTile(tx, tz, cityID)
     })
 end
 
---- Place dock_woodposts on the edges of a dock tile that face ocean.
 local function placeDockPosts(tx, tz, post_chance)
     local mid_x, mid_z = screenToWorld(tx, tz)
 
@@ -1112,7 +1080,6 @@ local function placeDockPosts(tx, tz, post_chance)
     end
 end
 
---- Place a boat at a dock endpoint.
 local function placeBoatAtEndpoint(tx, tz, boat_prefabs)
     if not boat_prefabs then return end
 
@@ -1147,8 +1114,26 @@ local function placeBoatAtEndpoint(tx, tz, boat_prefabs)
     end
 end
 
---- Generate docks for a city. Scans the city perimeter for coastal tiles,
---- validates open water depth, and places dock piers extending into the ocean.
+local function isPointInCityPoly(tx, tz, city)
+    local wx, wz = screenToWorld(tx, tz)
+    for _, node in ipairs(city.citynodes) do
+        local poly_x = node.poly.x
+        local poly_y = node.poly.y
+        local inside = false
+        local n = #poly_x
+        local j = n
+        for i = 1, n do
+            if ((poly_y[i] > wz) ~= (poly_y[j] > wz)) and
+               (wx < (poly_x[j] - poly_x[i]) * (wz - poly_y[i]) / (poly_y[j] - poly_y[i]) + poly_x[i]) then
+                inside = not inside
+            end
+            j = i
+        end
+        if inside then return true end
+    end
+    return false
+end
+
 local function generateCityDocks(city, cfg)
     local dock_cfg = cfg.DOCKS
     if not dock_cfg then return end
@@ -1178,7 +1163,7 @@ local function generateCityDocks(city, cfg)
                 local tz = math.floor(sy)
                 local key = tx .. ":" .. tz
 
-                if not seen[key] and isCityTileAtCoord(tx, tz, cfg) then
+                if not seen[key] and isCityTileAtCoord(tx, tz, cfg) and isPointInCityPoly(tx, tz, city) then
                     seen[key] = true
 
                     -- Check each cardinal direction for ocean adjacency
@@ -1335,8 +1320,8 @@ local function MakeAncientCity(world_entities, topology_save, map_width, map_hei
             if table.contains(node.tags, city_tag) then
                 local poly_x, poly_y = {}, {}
                 for i = 1, #node.poly do
-                    poly_x[i] = node.poly[i][1] / TILE_SCALE + map_width  / 2
-                    poly_y[i] = node.poly[i][2] / TILE_SCALE + map_height / 2
+                    poly_x[i] = node.poly[i][1]
+                    poly_y[i] = node.poly[i][2]
                 end
                 table.insert(city.citynodes, {
                     cent = { node.cent[1], node.cent[2] },
@@ -1346,8 +1331,8 @@ local function MakeAncientCity(world_entities, topology_save, map_width, map_hei
             if farm_tag and table.contains(node.tags, farm_tag) then
                 local poly_x, poly_y = {}, {}
                 for i = 1, #node.poly do
-                    poly_x[i] = node.poly[i][1] / TILE_SCALE + map_width  / 2
-                    poly_y[i] = node.poly[i][2] / TILE_SCALE + map_height / 2
+                    poly_x[i] = node.poly[i][1]
+                    poly_y[i] = node.poly[i][2]
                 end
                 table.insert(city.farmnodes, {
                     cent = { node.cent[1], node.cent[2] },
