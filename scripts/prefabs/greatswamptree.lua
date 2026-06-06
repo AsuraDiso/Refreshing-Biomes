@@ -1,5 +1,5 @@
 local CANOPY_SHADOW_DATA = require("prefabs/canopyshadows")
-local SHADE_RANGE         = TUNING.SHADE_CANOPY_RANGE * 2.5
+local SHADE_RANGE         = TUNING.GREATE_TREE_SHADE_CANOPY_RANGE
 
 local assets =
 {
@@ -22,33 +22,6 @@ local prefabs =
 local MIN = SHADE_RANGE
 local MAX = MIN + TUNING.WATERTREE_PILLAR_CANOPY_BUFFER
 
-local function removecanopyshadow(inst)
-    if inst.canopy_data ~= nil then
-        for _, shadetile_key in ipairs(inst.canopy_data.shadetile_keys) do
-            if TheWorld.shadetiles[shadetile_key] ~= nil then
-                TheWorld.shadetiles[shadetile_key] = TheWorld.shadetiles[shadetile_key] - 1
-                if TheWorld.shadetiles[shadetile_key] <= 0 then
-                    if TheWorld.shadetile_key_to_leaf_canopy_id[shadetile_key] ~= nil then
-                        DespawnLeafCanopy(TheWorld.shadetile_key_to_leaf_canopy_id[shadetile_key])
-                        TheWorld.shadetile_key_to_leaf_canopy_id[shadetile_key] = nil
-                    end
-                end
-            end
-        end
-        for _, ray in ipairs(inst.canopy_data.lightrays) do
-            ray:Remove()
-        end
-    end
-end
-
-local function removecanopy(inst)
-    for player in pairs(inst.players) do
-        if player:IsValid() and player.canopytrees then
-            player.canopytrees = player.canopytrees - 1
-        end
-    end
-    inst._hascanopy:set(false)
-end
 
 local function OnFar(inst, player)
     if player.canopytrees then
@@ -207,12 +180,41 @@ end
 local function ApplyLeechesToSubmergedPlayers(inst)
     -- TODO: implement leech debuff when submerged component is finalized
 end
+local RAM_ALERT_COCOONS_RADIUS = 25
+local COCOON_TAGS = {"webbed"}
+local function alert_nearby_cocoons(inst, picker, loot)
+    local px, py, pz = inst.Transform:GetWorldPosition()
+    local nearby_cocoons = TheSim:FindEntities(px, py, pz, RAM_ALERT_COCOONS_RADIUS, COCOON_TAGS)
+    for _, cocoon in ipairs(nearby_cocoons) do
+        cocoon:PushEvent("activated", {target = picker})
+    end
+end
+
+local MIN_RESPAWN_DIST = 5
+local RESPAWN_DISC_WIDTH = RAM_ALERT_COCOONS_RADIUS - MIN_RESPAWN_DIST
+local function cocoon_regrow_check(inst)
+    local px, _, pz = inst.Transform:GetWorldPosition()
+
+    local new_cocoon = SpawnPrefab("mossybeehive")
+    local angle = TWOPI*math.random()
+    local radius = (RESPAWN_DISC_WIDTH * math.sqrt(math.random())) + MIN_RESPAWN_DIST
+
+    new_cocoon.Transform:SetPosition(px + radius * math.cos(angle), 0, pz + radius * math.sin(angle))
+    new_cocoon.AnimState:PlayAnimation("appear")
+    new_cocoon.AnimState:PushAnimation("idle", true)
+
+    inst._cocoons_to_regrow = inst._cocoons_to_regrow - 1
+    if inst._cocoons_to_regrow > 0 then
+        inst.components.timer:StartTimer("cocoon_regrow_check", TUNING.OCEANVINE_COCOON_REGEN_BASE + TUNING.OCEANVINE_COCOON_REGEN_RAND*math.random())
+    end
+end
 
 local function OnTimerDone(inst, data)
     if data == nil then return end
     local stage = GetStage(inst)
-
-    if data.name == "root_cd" then
+    if data.name == "cocoon_regrow_check" then
+        cocoon_regrow_check(inst)
+    elseif data.name == "root_cd" then
         if stage >= 1 and not inst.components.health:IsDead() then
             SpawnRootsForAllPlayers(inst)
             -- Restart at stage-appropriate speed
@@ -317,8 +319,24 @@ local function OnLoad(inst, data)
     end
 end
 
-local function OnRemove(inst)
-    removecanopy(inst)
+
+local function OnNearbyCocoonDestroyed(inst, data)
+    inst._cocoons_to_regrow = inst._cocoons_to_regrow + 1
+
+    if not inst.components.timer:TimerExists("cocoon_regrow_check") then
+        inst.components.timer:StartTimer("cocoon_regrow_check", TUNING.OCEANVINE_COCOON_REGEN_BASE + TUNING.OCEANVINE_COCOON_REGEN_RAND*math.random())
+    end
+end
+
+local function OnRemoveEntity(inst)
+    for player in pairs(inst.players) do
+        if player:IsValid() then
+            if player.canopytrees then
+                player.canopytrees = player.canopytrees - 1
+                player:PushEvent("onchangecanopyzone", player.canopytrees > 0)
+            end
+        end
+    end
 end
 
 local function fn()
@@ -347,21 +365,12 @@ local function fn()
     inst.AnimState:SetBuild("stalker_forest_build")
     inst.AnimState:PlayAnimation("idle", true)
 
-    inst._hascanopy = net_bool(inst.GUID, "greatswamptree._hascanopy", "hascanopydirty")
-    inst._hascanopy:set(true)
-    inst:ListenForEvent("hascanopydirty", function()
-        if not inst._hascanopy:value() then
-            removecanopyshadow(inst)
-        end
-    end)
-
-    inst:DoTaskInTime(0, function()
-        inst.canopy_data = CANOPY_SHADOW_DATA.spawnshadow(inst, math.floor(SHADE_RANGE / 4))
-    end)
-
     if not TheNet:IsDedicated() then
         inst:AddComponent("distancefade")
-        inst.components.distancefade:Setup(15, 25)
+        inst.components.distancefade:Setup(15,25)
+
+        inst:AddComponent("canopyshadows")
+        inst.components.canopyshadows.range = math.floor(TUNING.SHADE_CANOPY_RANGE/4)
     end
 
     inst.entity:SetPristine()
@@ -374,6 +383,10 @@ local function fn()
     inst.boss_active  = false
     inst.boss_stage   = 0
     inst._last_attacked_time = nil
+    inst._cocoons_to_regrow = 0
+
+    inst:AddComponent("canopylightrays")
+    inst.components.canopylightrays.range = math.floor(TUNING.SHADE_CANOPY_RANGE/4)
 
     inst:AddComponent("playerprox")
     inst.components.playerprox:SetTargetMode(inst.components.playerprox.TargetModes.AllPlayers)
@@ -390,6 +403,10 @@ local function fn()
     inst.components.health.ondelta = function(health, amount, overtime, cause, ignore_invincible, afflicter)
         OnHealthChange(inst, { amount = amount })
     end
+    --------------------
+    inst:AddComponent("lightningblocker")
+    inst.components.lightningblocker:SetBlockRange(TUNING.SHADE_CANOPY_RANGE)
+    --inst.components.lightningblocker:SetOnLightningStrike(OnLightningStrike)
 
     inst:AddComponent("combat")
     inst.components.combat:SetDefaultDamage(TUNING.GIANTTREE_DAMAGE)
@@ -413,8 +430,9 @@ local function fn()
     inst:ListenForEvent("timerdone",        OnTimerDone)
     inst:ListenForEvent("attacked",         OnAttacked)
     inst:ListenForEvent("death",            OnDeath)
-    inst:ListenForEvent("onremove",         OnRemove)
+
     inst:ListenForEvent("boss_stage_changed", OnStageChanged)
+    inst:ListenForEvent("cocoon_destroyed", OnNearbyCocoonDestroyed)
 
     inst.ActivateBoss   = ActivateBoss
     inst.GetStage       = GetStage
@@ -423,6 +441,7 @@ local function fn()
 
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
+    inst.OnRemoveEntity = OnRemoveEntity
 
     return inst
 end

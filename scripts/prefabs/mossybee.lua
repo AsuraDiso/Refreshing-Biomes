@@ -2,6 +2,7 @@ local beecommon = require "brains/beecommon"
 
 local assets =
 {
+    --Asset("ANIM", "anim/bee_guard_puffy_build.zip"),
 }
 
 local prefabs =
@@ -134,7 +135,7 @@ local function fn()
     MakeFlyingCharacterPhysics(inst, 1.5, .75)
 
     inst.AnimState:SetBank("bee_guard")
-    inst.AnimState:SetBuild("bee_guard_build")
+    inst.AnimState:SetBuild("bee_guard_puffy_build")
     inst.AnimState:PlayAnimation("idle", true)
 
     inst:AddTag("worker")
@@ -205,6 +206,7 @@ local function fn()
     inst.components.sleeper.watchlight = true
 
     inst:AddComponent("knownlocations")
+    inst:AddComponent("timer")
 
     inst:AddComponent("inspectable")
 
