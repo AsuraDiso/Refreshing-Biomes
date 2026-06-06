@@ -1,6 +1,6 @@
 local assets =
 {
-	Asset("ANIM", "anim/reeds.zip"),
+	Asset("ANIM", "anim/reed_tall.zip"),
 }
 
 local prefabs =
@@ -98,7 +98,7 @@ local function fn()
     inst.entity:AddNetwork()
 
 	inst.AnimState:SetBank("grass_tall")	
-	inst.AnimState:SetBuild("reeds")
+	inst.AnimState:SetBuild("reed_tall")
     inst.AnimState:PlayAnimation("idle",true)
 
 	inst.AnimState:SetMultColour(.8+(math.random()*0.2), .8+(math.random()*0.2), .1+(math.random()*0.2), 1)    

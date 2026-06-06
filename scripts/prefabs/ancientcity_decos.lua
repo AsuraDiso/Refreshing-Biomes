@@ -58,7 +58,6 @@ local prefabs = {
     "lawnornament_3",
     "lawnornament_7",
     "wall_stone_repaired",
-    "pig_shop_spawner",
     "lawnornament_4",
     "fast_farmplot_planted",
 }

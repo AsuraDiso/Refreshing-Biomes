@@ -110,7 +110,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 256,
           y = 65,
@@ -121,7 +121,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 256,
           y = 257,
@@ -132,7 +132,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 256,
           y = 161,

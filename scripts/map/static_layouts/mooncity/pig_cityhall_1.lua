@@ -77,7 +77,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 74,
           y = 75,
@@ -88,7 +88,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 160,
           y = 75,
@@ -99,7 +99,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 241,
           y = 75,
@@ -110,7 +110,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 243,
           y = 163,
@@ -121,7 +121,7 @@ return {
         },
         {
           name = "",
-          type = "pig_shop_spawner",
+          type = "pighouse_shop",
           shape = "rectangle",
           x = 242,
           y = 241,

@@ -2,6 +2,7 @@ require "prefabutil"
 require "maputil"
 
 local StaticLayout = require("map/static_layout")
+local Defs         = require("prefabs/ancientcity_defs")
 
 local DIR_STEP = {
     {x=1, z=0},
@@ -413,8 +414,16 @@ local function spawnSetPiece(setpiece_string, pt, city, forced_reverse, forced_f
     return true
 end
 
-local function setShop(pt, dir, i, offset, city)
-    local spawn  = "pig_shop_spawner"
+-- Returns the default "shop slot" prefab name for a city's culture.
+-- This acts as the staging placeholder that setbuildings() later replaces
+-- with quota-specific prefabs (e.g. moonhouse_shop, moonhouse_mine …).
+local function getCultureShopSlot(cfg)
+    local culture = Defs.GetCulture(cfg.CULTURE)
+    local default_house = culture and culture.default_house
+    return default_house or "pighouse_shop"
+end
+
+local function setShop(pt, dir, i, offset, city, spawn)
     local OFFSET = 6/4
     local newpt  = {
         x = pt.x + DIR_STEP[dir].x * i * OFFSET + OFFSET * DIR_STEP[getdir(dir,offset)].x,
@@ -428,9 +437,10 @@ local function setShop(pt, dir, i, offset, city)
 end
 
 local function addPigShops(pt, dir, city)
+    local spawn = getCultureShopSlot(city.cfg)
     for i = 1, 3 do
-        setShop(pt, dir, i,  1, city)
-        setShop(pt, dir, i, -1, city)
+        setShop(pt, dir, i,  1, city, spawn)
+        setShop(pt, dir, i, -1, city, spawn)
     end
 end
 
@@ -669,8 +679,9 @@ local function normalizeMustSetpieces(must_setpieces)
     return queue
 end
 
-local function clearShopSpawnersNearPark(park, range)
-    local nearby = FindTempEnts(spawners, park.x, park.z, range or 3, { "pig_shop_spawner" })
+local function clearShopSpawnersNearPark(park, range, shop_slot)
+    if not shop_slot then return end   -- caller must always pass the resolved slot
+    local nearby = FindTempEnts(spawners, park.x, park.z, range or 3, { shop_slot })
     for _, spawner in ipairs(nearby) do
         for s = #spawners, 1, -1 do
             if spawner == spawners[s] then table.remove(spawners, s) end
@@ -799,13 +810,14 @@ local function placeMustSetpieces(city, cfg, claimed_regions)
     end
 
     local reserved = {}
+    local shop_slot = getCultureShopSlot(cfg)
 
     for idx, choice in ipairs(queue) do
         local placed = false
         local candidates, half = getMustSetpieceCandidates(city, cfg, choice, reserved, claimed_regions)
 
         for _, cand in ipairs(candidates) do
-            clearShopSpawnersNearPark(cand.pt, half + 2)
+            clearShopSpawnersNearPark(cand.pt, half + 2, shop_slot)
             if spawnSetPiece(choice, cand.pt, city, cand.reverse, cand.flip) then
                 table.insert(reserved, cand.pt)
                 removeOverlappingParkSlots(city, cand.pt, half * 1.5)
@@ -827,6 +839,7 @@ local function makeParks(city, cfg, unique, uniqueCount)
     for _, v in ipairs(cfg.PARKS.UNIQUE) do table.insert(unique_park_pool, v) end
 
     local total = unique and (uniqueCount or 2) or #city.citynodes
+    local shop_slot = getCultureShopSlot(cfg)
 
     for i = 1, total do
         if #city.parks == 0 then break end
@@ -834,7 +847,7 @@ local function makeParks(city, cfg, unique, uniqueCount)
         local index = math.random(1, #city.parks)
         local park  = city.parks[index]
 
-        clearShopSpawnersNearPark(park)
+        clearShopSpawnersNearPark(park, nil, shop_slot)
 
         local choice = nil
         local unique_sel = nil
@@ -897,6 +910,13 @@ local function makeFarms(nodes, city, cfg, claimed_regions)
     local placed = placefarm(nodes, city, cfg, common_count, cfg.FARMS.COMMON, reserved, claimed_regions)
     placefarm(nodes, city, cfg, math.max(0, #nodes - placed), cfg.FARMS.UNIQUE, reserved, claimed_regions)
 
+    -- Pick the culture-specific guard tower prefab, falling back to the
+    -- generic pig_guard_tower only when the culture has no dedicated one.
+    local culture       = Defs.GetCulture(cfg.CULTURE)
+    local tower_prefab  = (cfg.GUARD_TOWER_PREFAB)
+                       or (culture and culture.guard_tower_prefab)
+                       or "pig_guard_tower"
+
     for _, node in ipairs(nodes) do
         local bx, _, bz = getdivtile(node.cent[1], 0, node.cent[2], 6)
         local found = false
@@ -905,7 +925,7 @@ local function makeFarms(nodes, city, cfg, claimed_regions)
                 local sx, sy = worldToScreen(bx + nx * 6, bz + nz * 6)
                 if testTile({ x = sx, z = sy }, cfg.VALID_TILES.FARM) then
                     if #FindTempEnts(spawners, sx, sy, 8) == 0 then
-                        AddTempEnts(spawners, sx, sy, "pig_guard_tower", city.cityID)
+                        AddTempEnts(spawners, sx, sy, tower_prefab, city.cityID)
                         found = true
                         break
                     end
@@ -917,9 +937,10 @@ local function makeFarms(nodes, city, cfg, claimed_regions)
 end
 
 local function setbuildings(city, cfg)
+    local shop_slot = getCultureShopSlot(cfg)
     local eligible = {}
     for i, spawn in ipairs(spawners) do
-        if spawn.prefab == "pig_shop_spawner" and spawn.city == city.cityID then
+        if spawn.prefab == shop_slot and spawn.city == city.cityID then
             table.insert(eligible, i)
         end
     end
@@ -934,19 +955,21 @@ local function setbuildings(city, cfg)
             end
         end
     end
-    for i = #spawners, 1, -1 do
-        if spawners[i].prefab == "pig_shop_spawner" and spawners[i].city == city.cityID then
-            table.remove(spawners, i)
+    -- Any remaining slot placeholders are converted to the culture's default
+    -- city house so every building slot stays culture-appropriate.
+    local culture      = Defs.GetCulture(cfg.CULTURE)
+    local default_city = culture and culture.default_house or shop_slot
+    for i = 1, #spawners do
+        if spawners[i].prefab == shop_slot and spawners[i].city == city.cityID then
+            spawners[i].prefab = default_city
         end
     end
 end
 
 local function removeShopSpawners()
-    for i = #spawners, 1, -1 do
-        if spawners[i].prefab == "pig_shop_spawner" then
-            table.remove(spawners, i)
-        end
-    end
+    -- No-op: all slot placeholders are now resolved to culture prefabs by
+    -- setbuildings(). This function is kept for compatibility with the call
+    -- site but no further cleanup is needed.
 end
 
 local function exportSpawnersToEntities()
@@ -1266,7 +1289,9 @@ end
 -- city_configs  – an array of city config tables. Each table must have:
 --
 --   CITY_TAG          string   tag used in topology nodes  ("City1", "City2" …)
---   FARM_TAG          string   (optional) farm tag          ("Cultivated1" …)
+--   CULTURE           string   culture name from Defs.Cultures ("moon", "abandoned",
+--                              "shadow" …). Controls which house/tower prefabs are
+--                              placed. Defaults to Defs.DEFAULT_CULTURE when absent.
 --   PARKS.COMMON      table    list of common park layout paths
 --   PARKS.UNIQUE      table    list of unique park layout paths
 --   FARMS.COMMON      table    list of farm layout paths
@@ -1274,6 +1299,11 @@ end
 --   MUST_SETPIECES    table    ordered must-have layouts (each placed once):
 --                              string path, or {path=…, num=…} for multiples
 --   BUILDING_QUOTAS   table    { {prefab=…, num=…}, … }
+--                              prefabs here are culture-specific house names
+--                              (e.g. "moonhouse_shop", "moonhouse_mine").
+--                              Remaining road-side slots become default_house.
+--   GUARD_TOWER_PREFAB string  (optional) override the tower placed at farm nodes;
+--                              defaults to culture.guard_tower_prefab from Defs.
 --   VALID_TILES.CITY  table    tiles a city road/block may be placed on
 --   VALID_TILES.FARM  table    tiles a farm may be placed on
 --   ROAD              tile     tile id for roads
@@ -1308,13 +1338,11 @@ local function MakeAncientCity(world_entities, topology_save, map_width, map_hei
             cityID     = cityIndex,
             cfg        = cfg,
             citynodes  = {},
-            farmnodes  = {},
             parks      = {},
             must_queue = normalizeMustSetpieces(cfg.MUST_SETPIECES),
         }
 
         local city_tag = cfg.CITY_TAG
-        local farm_tag = cfg.FARM_TAG  -- may be nil
 
         for _, node in pairs(topology_save.nodes) do
             if table.contains(node.tags, city_tag) then
@@ -1324,17 +1352,6 @@ local function MakeAncientCity(world_entities, topology_save, map_width, map_hei
                     poly_y[i] = node.poly[i][2]
                 end
                 table.insert(city.citynodes, {
-                    cent = { node.cent[1], node.cent[2] },
-                    poly = { x=poly_x, y=poly_y },
-                })
-            end
-            if farm_tag and table.contains(node.tags, farm_tag) then
-                local poly_x, poly_y = {}, {}
-                for i = 1, #node.poly do
-                    poly_x[i] = node.poly[i][1]
-                    poly_y[i] = node.poly[i][2]
-                end
-                table.insert(city.farmnodes, {
                     cent = { node.cent[1], node.cent[2] },
                     poly = { x=poly_x, y=poly_y },
                 })

@@ -552,106 +552,51 @@ end
 
 local MakeCordycepsSites = require("map/cordyceps_spawner")
 local MakeAncientCities = require("map/ancient_city_builder")
+local Defs = require("prefabs/ancientcity_defs")
 local forest_map = require("map/forest_map")
 local _Generate = forest_map.Generate
 
-local MoonCity = {
-	-- Tag used in topology nodes to identify which map nodes belong to this city.
-	-- Must match one of the tags registered in AddMapTag above ("City1", "City2", …).
-	CITY_TAG = "City1",
-	-- Tag used to identify farm/cultivated nodes (optional – set to nil if unused).
-	FARM_TAG = nil,
-	PARKS = {
-		COMMON = {
-			"map/static_layouts/mooncity/city_park_1",
-			"map/static_layouts/mooncity/city_park_2",    
-			"map/static_layouts/mooncity/city_park_3",
-			"map/static_layouts/mooncity/city_park_4",    
-			"map/static_layouts/mooncity/city_park_5",    
-			"map/static_layouts/mooncity/city_park_8",  
-		},
-		UNIQUE = {
-			"map/static_layouts/mooncity/city_park_6",     
-			"map/static_layouts/mooncity/city_park_7",     
-			"map/static_layouts/mooncity/city_park_9",     
-			"map/static_layouts/mooncity/city_park_10",     
-		},
-	},
-	FARMS = {
-		COMMON = {
-			"map/static_layouts/mooncity/farm_1",   
-			"map/static_layouts/mooncity/farm_2", 
-			"map/static_layouts/mooncity/farm_3", 
-			"map/static_layouts/mooncity/farm_4",     
-			"map/static_layouts/mooncity/farm_5",     
-		},
-		UNIQUE = {
-			"map/static_layouts/mooncity/farm_fill_1",   
-			"map/static_layouts/mooncity/farm_fill_2", 
-			"map/static_layouts/mooncity/farm_fill_3", 
-		},
-	},
-	-- Required setpieces: each entry is placed once, in order, after roads are built.
-	-- Use {path = "...", num = N} to place the same layout multiple times.
-	MUST_SETPIECES = {
-		"map/static_layouts/mooncity/pig_cityhall_1",
-		"map/static_layouts/mooncity/pig_playerhouse_1",
-	},
-	BUILDING_QUOTAS = {
-		{prefab="pig_shop_deli",num=1},
-		{prefab="pig_shop_academy",num=1},
-		{prefab="pig_shop_florist",num=1},
-		{prefab="pig_shop_general",num=1},
-		{prefab="pig_shop_hoofspa",num=1},
-		{prefab="pig_shop_produce",num=1},
-		{prefab="pig_shop_bank",num=1},    
-		{prefab="pig_guard_tower",num=15},
-		{prefab="pighouse_city",num=50}
-	},
-	-- Tiles the city road/block builder is allowed to place onto.
-	VALID_TILES = {
-		CITY = {WORLD_TILES.ANCIENTCITY_SUBURB, WORLD_TILES.ANCIENTCITY_TILES},
-		FARM = {WORLD_TILES.ANCIENTCITY_FARM},
-	},
-	ROAD   = WORLD_TILES.ANCIENTCITY_ROAD,
-	TILE   = WORLD_TILES.ANCIENTCITY_TILES,
-	SUBURB = WORLD_TILES.ANCIENTCITY_SUBURB,
-	FARM = WORLD_TILES.ANCIENTCITY_FARM,
-	-- Prefabs that clearground() will never remove (e.g. quest markers, special spawns).
-	REQUIRED_PREFABS = {},
-	-- Dock configuration for coastal cities (set to nil to disable).
-	-- Docks only generate when the city borders open water (not narrow straits).
-	DOCKS = {
-		DEPTH = 5,              -- tiles extending into ocean per pier
-		COUNT = 10,             -- max number of dock piers to generate
-		MIN_OCEAN_DEPTH = 10,   -- min continuous ocean tiles to confirm open water
-		POST_CHANCE = 0.4,      -- chance of dock_woodposts on each dock edge
-		SPACING = 6,            -- min tile distance between piers
-		BOAT_PREFABS = {        -- prefabs to spawn at pier endpoints (chance out of 1.0)
-			boat_item = 0.35,
-		},
-	},
+-- Tile data shared by all cities on this map. Cultures supply everything else
+-- (PARKS, FARMS, MUST_SETPIECES, BUILDING_QUOTAS, guard_tower_prefab) via
+-- their city_config block in ancientcity_defs.lua.
+local SHARED_TILES = {
+    VALID_TILES = {
+        CITY = { WORLD_TILES.ANCIENTCITY_SUBURB, WORLD_TILES.ANCIENTCITY_TILES },
+        FARM = { WORLD_TILES.ANCIENTCITY_FARM },
+    },
+    ROAD   = WORLD_TILES.ANCIENTCITY_ROAD,
+    TILE   = WORLD_TILES.ANCIENTCITY_TILES,
+    SUBURB = WORLD_TILES.ANCIENTCITY_SUBURB,
+    FARM   = WORLD_TILES.ANCIENTCITY_FARM,
 }
 
-local function shallowcopy(orig)
-	local copy = {}
-	for k, v in pairs(orig) do
-		copy[k] = v
-	end
-	return copy
-end
+local MoonCity = Defs.MakeCityConfig("moon", {
+    CITY_TAG    = "City1",
+    VALID_TILES = SHARED_TILES.VALID_TILES,
+    ROAD        = SHARED_TILES.ROAD,
+    TILE        = SHARED_TILES.TILE,
+    SUBURB      = SHARED_TILES.SUBURB,
+    FARM        = SHARED_TILES.FARM,
+})
 
-local AbandonedCity = shallowcopy(MoonCity)
-AbandonedCity.CITY_TAG = "City2"
-AbandonedCity.FARM_TAG = nil
-AbandonedCity.DOCKS = nil  -- no docks for this city
+local AbandonedCity = Defs.MakeCityConfig("abandoned", {
+    CITY_TAG    = "City2",
+    VALID_TILES = {
+        CITY = { WORLD_TILES.QUAGMIRE_GATEWAY, WORLD_TILES.QUAGMIRE_CITYSTONE },
+        FARM = { WORLD_TILES.QUAGMIRE_PEATFOREST },
+    },
+    ROAD        = WORLD_TILES.ROAD,
+    TILE        = WORLD_TILES.QUAGMIRE_CITYSTONE,
+    SUBURB      = WORLD_TILES.QUAGMIRE_GATEWAY,
+    FARM        = WORLD_TILES.QUAGMIRE_PEATFOREST,
+})
 
 -- List of all city configs to build. Add more tables here to create additional cities.
 -- Each entry must have a unique CITY_TAG matching a tag registered with AddMapTag.
 local ANCIENT_CITY_CONFIGS = {
-	MoonCity,
-	AbandonedCity
-	-- SecondCity,  -- example: add more cities by inserting additional config tables
+    MoonCity,
+    AbandonedCity,
+    -- Defs.MakeCityConfig("shadow", { CITY_TAG = "City3", ... }),
 }
 
 forest_map.Generate = function(prefab, map_width, map_height, tasks, level, level_type, ...)

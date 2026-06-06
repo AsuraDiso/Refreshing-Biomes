@@ -17,11 +17,11 @@ AddTask("NewLand_AncientCity2", {
     keys_given = {},
 
     room_choices = {
-        ["ancient_city_base"] = 5,
+        ["ancient_city2_base"] = 5,
     },
 
     room_tags = { "City2" },
-    background_room = "ancient_city_base",
-    room_bg = WORLD_TILES.ANCIENTCITY_SUBURB,
+    background_room = "ancient_city2_base",
+    room_bg = WORLD_TILES.QUAGMIRE_GATEWAY,
     colour={r=0.18,g=0.18,b=0.22,a=1},
 })

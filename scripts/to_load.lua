@@ -62,6 +62,8 @@ PrefabFiles = {
 
 
 	--"newland_veggies",
+
+	"quagmire", -- temp for deps
 }
 
 Assets = {

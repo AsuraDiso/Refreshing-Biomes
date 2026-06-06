@@ -13,3 +13,19 @@ AddRoom("ancient_city_base", {
         },
     }
 })
+
+AddRoom("ancient_city2_base", {
+    colour={r=0.1,g=0.1,b=0.1,a=0.3},
+    value = WORLD_TILES.QUAGMIRE_GATEWAY,
+    tags = { "ExitPiece", "City2" },
+    contents =  {
+        distributepercent = 0.1,
+        distributeprefabs=
+        {
+            rocks = 1,	
+            grass = 1,	
+            spoiled_food = 1,	
+            twigs = 1,
+        },
+    }
+})

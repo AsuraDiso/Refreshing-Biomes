@@ -66,7 +66,7 @@ return {
       objects = {
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 264,
           y = 57,
@@ -77,7 +77,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 56,
           y = 216,
@@ -88,7 +88,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 56,
           y = 248,
@@ -99,7 +99,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 56,
           y = 57,
@@ -110,7 +110,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 56,
           y = 104,
@@ -121,7 +121,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 56,
           y = 72,
@@ -132,7 +132,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 73,
           y = 57,
@@ -143,7 +143,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 88,
           y = 58,
@@ -165,7 +165,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 215,
           y = 56,
@@ -176,7 +176,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 105,
           y = 57,
@@ -187,7 +187,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 232,
           y = 57,
@@ -198,7 +198,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 248,
           y = 56,
@@ -209,7 +209,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 87,
           y = 265,
@@ -220,7 +220,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 214,
           y = 263,
@@ -231,7 +231,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 72,
           y = 264,
@@ -242,7 +242,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 104,
           y = 264,
@@ -253,7 +253,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 55,
           y = 264,
@@ -264,7 +264,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 231,
           y = 264,
@@ -275,7 +275,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 263,
           y = 264,
@@ -286,7 +286,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 247,
           y = 263,
@@ -297,7 +297,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 56,
           y = 88,
@@ -308,7 +308,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 56,
           y = 232,
@@ -319,7 +319,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 264,
           y = 104,
@@ -330,7 +330,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 264,
           y = 88,
@@ -341,7 +341,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 264,
           y = 72,
@@ -352,7 +352,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 264,
           y = 248,
@@ -363,7 +363,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 264,
           y = 232,
@@ -374,7 +374,7 @@ return {
         },
         {
           name = "",
-          type = "cactus",
+          type = "quagmire_altar_ivy",
           shape = "rectangle",
           x = 264,
           y = 216,
